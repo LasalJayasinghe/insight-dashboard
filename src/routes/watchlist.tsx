@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { WatchlistTable } from "@/components/dashboard/watchlist-table";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/watchlist")({
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && !localStorage.getItem("token")) {
+      throw redirect({ to: "/login" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Watchlist — Velox Trading" },
