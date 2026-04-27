@@ -37,12 +37,41 @@ function LoginPage() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     if (!validate()) return;
+
     setStatus("loading");
-    // TODO: POST /api/auth/login → store JWT (httpOnly cookie or memory)
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("success");
-    setTimeout(() => navigate({ to: "/dashboard" }), 400);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text(); // or res.json() if backend returns JSON
+        setErrors({  password: errorText || "Invalid username or password" });
+        setStatus("error");
+        return;
+      }
+
+      const data = await res.json();
+
+      localStorage.setItem("token", data.token);
+
+      setStatus("success");
+
+      setTimeout(() => navigate({ to: "/dashboard" }), 400);
+    } catch (err) {
+      console.error(err);
+      setStatus("error");
+    }
   };
 
   return (
@@ -58,7 +87,9 @@ function LoginPage() {
           </div>
           <div className="leading-tight">
             <div className="font-semibold tracking-tight">Velox</div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Trading Platform</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Trading Platform
+            </div>
           </div>
         </div>
 
@@ -73,11 +104,17 @@ function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="trader@velox.io"
-              className={cn("h-11", errors.username && "border-destructive focus-visible:ring-destructive")}
+              className={cn(
+                "h-11",
+                errors.username && "border-destructive focus-visible:ring-destructive",
+              )}
               autoComplete="username"
             />
             {errors.username && (
-              <p className="text-xs text-destructive flex items-center gap-1"><AlertCircle className="size-3" />{errors.username}</p>
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="size-3" />
+                {errors.username}
+              </p>
             )}
           </div>
 
@@ -90,7 +127,10 @@ function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className={cn("h-11 pr-10", errors.password && "border-destructive focus-visible:ring-destructive")}
+                className={cn(
+                  "h-11 pr-10",
+                  errors.password && "border-destructive focus-visible:ring-destructive",
+                )}
                 autoComplete="current-password"
               />
               <button
@@ -103,7 +143,10 @@ function LoginPage() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-xs text-destructive flex items-center gap-1"><AlertCircle className="size-3" />{errors.password}</p>
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="size-3" />
+                {errors.password}
+              </p>
             )}
           </div>
 
@@ -112,7 +155,9 @@ function LoginPage() {
               <Checkbox checked={remember} onCheckedChange={(v) => setRemember(!!v)} />
               Remember me
             </label>
-            <a href="#" className="text-sm text-primary hover:underline">Forgot password?</a>
+            <a href="#" className="text-sm text-primary hover:underline">
+              Forgot password?
+            </a>
           </div>
 
           <Button
@@ -127,7 +172,9 @@ function LoginPage() {
 
           <p className="text-xs text-center text-muted-foreground pt-2">
             New to Velox?{" "}
-            <Link to="/login" className="text-primary hover:underline">Request access</Link>
+            <Link to="/login" className="text-primary hover:underline">
+              Request access
+            </Link>
           </p>
         </form>
       </Card>
