@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PortfolioChart } from "@/components/dashboard/portfolio-chart";
@@ -7,6 +7,11 @@ import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { Wallet, TrendingUp, Briefcase, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && !localStorage.getItem("token")) {
+      throw redirect({ to: "/login" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Dashboard — Velox Trading" },
