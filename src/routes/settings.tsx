@@ -12,7 +12,7 @@ export const Route = createFileRoute("/settings")({
   },
   head: () => ({
     meta: [
-      { title: "Settings — Velox Trading" },
+      { title: "Settings — AlertMe Trading" },
       { name: "description", content: "Configure your trading dashboard preferences." },
     ],
   }),

@@ -20,11 +20,11 @@ export function Sidebar({ open }: { open: boolean }) {
     >
       <div className="h-16 flex items-center gap-2 px-5 border-b border-sidebar-border">
         <div className="size-9 rounded-lg gradient-primary flex items-center justify-center shadow-glow shrink-0">
-          <TrendingUp className="size-5 text-primary-foreground" />
+          <img src="/public/logo/logo.png" alt="Logo" className="size-5" />
         </div>
         {open && (
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold tracking-tight">Velox</span>
+            <span className="text-sm font-semibold tracking-tight">AlertMe</span>
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Trading</span>
           </div>
         )}

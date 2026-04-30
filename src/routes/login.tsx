@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,12 +7,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isAuthenticated } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
+  beforeLoad: () => {
+    if (isAuthenticated()) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   head: () => ({
     meta: [
-      { title: "Sign in — Velox Trading" },
-      { name: "description", content: "Sign in to your Velox trading dashboard." },
+      { title: "Sign in — AlertMe Trading" },
+      { name: "description", content: "Sign in to your AlertMe trading dashboard." },
     ],
   }),
   component: LoginPage,
@@ -56,7 +62,7 @@ function LoginPage() {
 
       if (!res.ok) {
         const errorText = await res.text(); // or res.json() if backend returns JSON
-        setErrors({  password: errorText || "Invalid username or password" });
+        setErrors({ password: errorText || "Invalid username or password" });
         setStatus("error");
         return;
       }
@@ -86,7 +92,7 @@ function LoginPage() {
             <TrendingUp className="size-5 text-primary-foreground" />
           </div>
           <div className="leading-tight">
-            <div className="font-semibold tracking-tight">Velox</div>
+            <div className="font-semibold tracking-tight">AlertMe</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
               Trading Platform
             </div>
@@ -103,7 +109,7 @@ function LoginPage() {
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="trader@velox.io"
+              placeholder="trader@AlertMe.io"
               className={cn(
                 "h-11",
                 errors.username && "border-destructive focus-visible:ring-destructive",
@@ -171,7 +177,7 @@ function LoginPage() {
           </Button>
 
           <p className="text-xs text-center text-muted-foreground pt-2">
-            New to Velox?{" "}
+            New to AlertMe?{" "}
             <Link to="/login" className="text-primary hover:underline">
               Request access
             </Link>

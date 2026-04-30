@@ -14,7 +14,7 @@ export const Route = createFileRoute("/watchlist")({
   },
   head: () => ({
     meta: [
-      { title: "Watchlist — Velox Trading" },
+      { title: "Watchlist — AlertMe Trading" },
       { name: "description", content: "Track and manage the symbols you care about." },
     ],
   }),
