@@ -27,8 +27,12 @@ export const Route = createFileRoute("/profile")({
 export function ProfilePage() {
   const [savedProfile, setSavedProfile] = useState(false);
   const [savedPwd, setSavedPwd] = useState(false);
+  const [savedTg, setSavedTg] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loadingPwd, setLoadingPwd] = useState(false);
+  const [loadingTg, setLoadingTg] = useState(false);
+  const [tgError, setTgError] = useState<string | null>(null);
+  const [telegramChatId, setTelegramChatId] = useState("");
   const [pwdError, setPwdError] = useState<string | null>(null);
   const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
   const [profile, setProfile] = useState({
