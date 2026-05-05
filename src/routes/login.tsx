@@ -53,9 +53,13 @@ function LoginPage() {
     try {
       const data = await login(username, password);
 
-      // 🔥 central token handling
-      tokenService.set(data.token);
-
+      if (!data.ok) {
+        const errorText = await data.text(); // or res.json() if backend returns JSON
+        setErrors({ password: errorText || "Invalid username or password" });
+        setStatus("error");
+        return;
+      }
+      
       setStatus("success");
 
       setTimeout(() => navigate({ to: "/dashboard" }), 400);

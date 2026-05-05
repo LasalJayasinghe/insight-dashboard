@@ -14,7 +14,10 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AlgorithmsIndexRouteImport } from './routes/algorithms.index'
+import { Route as AlgorithmsAlgoIdRouteImport } from './routes/algorithms.$algoId'
 
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
@@ -41,65 +44,107 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlgorithmsIndexRoute = AlgorithmsIndexRouteImport.update({
+  id: '/algorithms/',
+  path: '/algorithms/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlgorithmsAlgoIdRoute = AlgorithmsAlgoIdRouteImport.update({
+  id: '/algorithms/$algoId',
+  path: '/algorithms/$algoId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/watchlist': typeof WatchlistRoute
+  '/algorithms/$algoId': typeof AlgorithmsAlgoIdRoute
+  '/algorithms/': typeof AlgorithmsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/watchlist': typeof WatchlistRoute
+  '/algorithms/$algoId': typeof AlgorithmsAlgoIdRoute
+  '/algorithms': typeof AlgorithmsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/watchlist': typeof WatchlistRoute
+  '/algorithms/$algoId': typeof AlgorithmsAlgoIdRoute
+  '/algorithms/': typeof AlgorithmsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/alerts'
     | '/dashboard'
     | '/login'
     | '/profile'
     | '/settings'
     | '/watchlist'
+    | '/algorithms/$algoId'
+    | '/algorithms/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/profile' | '/settings' | '/watchlist'
+  to:
+    | '/'
+    | '/alerts'
+    | '/dashboard'
+    | '/login'
+    | '/profile'
+    | '/settings'
+    | '/watchlist'
+    | '/algorithms/$algoId'
+    | '/algorithms'
   id:
     | '__root__'
     | '/'
+    | '/alerts'
     | '/dashboard'
     | '/login'
     | '/profile'
     | '/settings'
     | '/watchlist'
+    | '/algorithms/$algoId'
+    | '/algorithms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlertsRoute: typeof AlertsRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
   WatchlistRoute: typeof WatchlistRoute
+  AlgorithmsAlgoIdRoute: typeof AlgorithmsAlgoIdRoute
+  AlgorithmsIndexRoute: typeof AlgorithmsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -139,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -146,16 +198,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/algorithms/': {
+      id: '/algorithms/'
+      path: '/algorithms'
+      fullPath: '/algorithms/'
+      preLoaderRoute: typeof AlgorithmsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/algorithms/$algoId': {
+      id: '/algorithms/$algoId'
+      path: '/algorithms/$algoId'
+      fullPath: '/algorithms/$algoId'
+      preLoaderRoute: typeof AlgorithmsAlgoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlertsRoute: AlertsRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
   WatchlistRoute: WatchlistRoute,
+  AlgorithmsAlgoIdRoute: AlgorithmsAlgoIdRoute,
+  AlgorithmsIndexRoute: AlgorithmsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -48,7 +48,7 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
                     JT
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden md:inline text-sm font-medium">Jamie Tan</span>
+                <span className="hidden md:inline text-sm font-medium">{localStorage.getItem("firstName")} {localStorage.getItem("lastName")}</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">

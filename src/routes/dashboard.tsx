@@ -29,7 +29,7 @@ function DashboardPage() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-              Good morning, Jamie
+              Good morning, {localStorage.getItem("firstName")} 
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               Here's how your portfolio is performing today.

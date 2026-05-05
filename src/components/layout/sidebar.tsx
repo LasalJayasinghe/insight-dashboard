@@ -1,10 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, User, LineChart, Settings, TrendingUp, LogOut } from "lucide-react";
+import { LayoutDashboard, User, LineChart, Settings, Bell, LogOut, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/algorithms", label: "Algorithms", icon: Cpu },
   { to: "/watchlist", label: "Watchlist", icon: LineChart },
+  { to: "/alerts", label: "Alerts", icon: Bell },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
