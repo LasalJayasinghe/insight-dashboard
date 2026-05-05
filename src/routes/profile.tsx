@@ -223,6 +223,50 @@ export function ProfilePage() {
           </CardContent>
         </Card>
 
+        {/* Telegram */}
+        <Card className="gradient-card border-border shadow-card">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Send className="size-4 text-primary" />
+              Telegram notifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={saveTelegram} className="space-y-4 max-w-md">
+              <div className="space-y-1.5">
+                <Label htmlFor="telegramChatId">Telegram Chat ID</Label>
+                <Input
+                  id="telegramChatId"
+                  inputMode="numeric"
+                  placeholder="e.g. 123456789"
+                  value={telegramChatId}
+                  onChange={(e) => setTelegramChatId(e.target.value)}
+                  className="h-11"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Open <span className="font-medium">@userinfobot</span> on Telegram to find your Chat ID. Used to deliver real-time alerts.
+                </p>
+              </div>
+
+              {tgError && (
+                <p className={cn("text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md")}>{tgError}</p>
+              )}
+
+              <div className="flex items-center justify-end gap-3">
+                {savedTg && (
+                  <span className="text-sm text-success flex items-center gap-1.5">
+                    <CheckCircle2 className="size-4" /> Saved
+                  </span>
+                )}
+                <Button type="submit" disabled={loadingTg} className="gradient-primary text-primary-foreground shadow-elegant">
+                  {loadingTg && <Loader2 className="size-4 animate-spin" />}
+                  Save Chat ID
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
         {/* Password */}
         <Card className="gradient-card border-border shadow-card">
           <CardHeader>
