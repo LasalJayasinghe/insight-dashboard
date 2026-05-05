@@ -64,7 +64,7 @@ export function ProfilePage() {
         });
         setTelegramChatId(data.telegramChatId || "");
       } catch (err) {
-        // Optionally handle error
+        console.error(err);
       } finally {
         setProfileLoading(false);
       }
@@ -77,7 +77,7 @@ export function ProfilePage() {
     setLoadingProfile(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/profile", {
+      const res = await fetch("http://localhost:5000/api/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +103,7 @@ export function ProfilePage() {
     setLoadingPwd(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/profile/password", {
+      const res = await fetch("http://localhost:5000/api/profile/password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -138,7 +138,7 @@ export function ProfilePage() {
     setLoadingTg(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/profile/telegram", {
+      const res = await fetch("http://localhost:5000/api/profile/telegram", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
