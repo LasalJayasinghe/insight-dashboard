@@ -129,6 +129,37 @@ export function ProfilePage() {
     }
   };
 
+  const saveTelegram = async (e: FormEvent) => {
+    e.preventDefault();
+    setTgError(null);
+    if (telegramChatId && !/^-?\d{4,}$/.test(telegramChatId.trim())) {
+      return setTgError("Chat ID must be a numeric value (e.g. 123456789)");
+    }
+    setLoadingTg(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/profile/telegram", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ telegramChatId: telegramChatId.trim() }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setTgError(errData.message || "Failed to save Telegram Chat ID");
+        return;
+      }
+      setSavedTg(true);
+      setTimeout(() => setSavedTg(false), 2000);
+    } catch (err) {
+      setTgError("Failed to save Telegram Chat ID");
+    } finally {
+      setLoadingTg(false);
+    }
+  };
+
   return (
     <AppShell>
       <div className="max-w-4xl mx-auto space-y-6">
