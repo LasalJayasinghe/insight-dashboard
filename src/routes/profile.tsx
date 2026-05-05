@@ -62,6 +62,7 @@ export function ProfilePage() {
           lastName: data.lastName || "",
           avatar: data.avatar || "",
         });
+        setTelegramChatId(data.telegramChatId || "");
       } catch (err) {
         // Optionally handle error
       } finally {
