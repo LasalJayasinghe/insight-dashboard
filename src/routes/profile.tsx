@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, Loader2, CheckCircle2 } from "lucide-react";
+import { Camera, Loader2, CheckCircle2, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/profile")({
@@ -27,8 +27,12 @@ export const Route = createFileRoute("/profile")({
 export function ProfilePage() {
   const [savedProfile, setSavedProfile] = useState(false);
   const [savedPwd, setSavedPwd] = useState(false);
+  const [savedTg, setSavedTg] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loadingPwd, setLoadingPwd] = useState(false);
+  const [loadingTg, setLoadingTg] = useState(false);
+  const [tgError, setTgError] = useState<string | null>(null);
+  const [telegramChatId, setTelegramChatId] = useState("");
   const [pwdError, setPwdError] = useState<string | null>(null);
   const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
   const [profile, setProfile] = useState({
@@ -58,6 +62,7 @@ export function ProfilePage() {
           lastName: data.lastName || "",
           avatar: data.avatar || "",
         });
+        setTelegramChatId(data.telegramChatId || "");
       } catch (err) {
         // Optionally handle error
       } finally {
@@ -124,6 +129,37 @@ export function ProfilePage() {
     }
   };
 
+  const saveTelegram = async (e: FormEvent) => {
+    e.preventDefault();
+    setTgError(null);
+    if (telegramChatId && !/^-?\d{4,}$/.test(telegramChatId.trim())) {
+      return setTgError("Chat ID must be a numeric value (e.g. 123456789)");
+    }
+    setLoadingTg(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/profile/telegram", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ telegramChatId: telegramChatId.trim() }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setTgError(errData.message || "Failed to save Telegram Chat ID");
+        return;
+      }
+      setSavedTg(true);
+      setTimeout(() => setSavedTg(false), 2000);
+    } catch (err) {
+      setTgError("Failed to save Telegram Chat ID");
+    } finally {
+      setLoadingTg(false);
+    }
+  };
+
   return (
     <AppShell>
       <div className="max-w-4xl mx-auto space-y-6">
@@ -184,6 +220,50 @@ export function ProfilePage() {
                 </div>
               </form>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Telegram */}
+        <Card className="gradient-card border-border shadow-card">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Send className="size-4 text-primary" />
+              Telegram notifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={saveTelegram} className="space-y-4 max-w-md">
+              <div className="space-y-1.5">
+                <Label htmlFor="telegramChatId">Telegram Chat ID</Label>
+                <Input
+                  id="telegramChatId"
+                  inputMode="numeric"
+                  placeholder="e.g. 123456789"
+                  value={telegramChatId}
+                  onChange={(e) => setTelegramChatId(e.target.value)}
+                  className="h-11"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Open <span className="font-medium">@userinfobot</span> on Telegram to find your Chat ID. Used to deliver real-time alerts.
+                </p>
+              </div>
+
+              {tgError && (
+                <p className={cn("text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md")}>{tgError}</p>
+              )}
+
+              <div className="flex items-center justify-end gap-3">
+                {savedTg && (
+                  <span className="text-sm text-success flex items-center gap-1.5">
+                    <CheckCircle2 className="size-4" /> Saved
+                  </span>
+                )}
+                <Button type="submit" disabled={loadingTg} className="gradient-primary text-primary-foreground shadow-elegant">
+                  {loadingTg && <Loader2 className="size-4 animate-spin" />}
+                  Save Chat ID
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
 
