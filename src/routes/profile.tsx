@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Camera, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getProfile } from "@/services/profileService";
 
 export const Route = createFileRoute("/profile")({
   beforeLoad: () => {
@@ -40,17 +41,13 @@ export function ProfilePage() {
   });
   const [profileLoading, setProfileLoading] = useState(true);
 
-  // Fetch profile data on mount
   useEffect(() => {
     const fetchProfile = async () => {
       setProfileLoading(true);
+
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch("/api/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const data = await res.json();
+        const data = await getProfile();
+
         setProfile({
           username: data.username || "",
           email: data.email || "",
@@ -59,11 +56,12 @@ export function ProfilePage() {
           avatar: data.avatar || "",
         });
       } catch (err) {
-        // Optionally handle error
+        console.error("Failed to fetch profile", err);
       } finally {
         setProfileLoading(false);
       }
     };
+
     fetchProfile();
   }, []);
 
@@ -129,7 +127,9 @@ export function ProfilePage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Account</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage your personal information and security.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your personal information and security.
+          </p>
         </div>
 
         {/* Profile */}
@@ -139,14 +139,17 @@ export function ProfilePage() {
           </CardHeader>
           <CardContent>
             {profileLoading ? (
-              <div className="py-8 flex justify-center"><Loader2 className="size-6 animate-spin" /></div>
+              <div className="py-8 flex justify-center">
+                <Loader2 className="size-6 animate-spin" />
+              </div>
             ) : (
               <form onSubmit={saveProfile} className="space-y-6">
                 <div className="flex items-center gap-5">
                   <div className="relative">
                     <Avatar className="size-20 border-2 border-border shadow-card">
                       <AvatarFallback className="bg-primary text-primary-foreground text-xl font-semibold">
-                        {profile.firstName?.[0] || "U"}{profile.lastName?.[0] || "S"}
+                        {profile.firstName?.[0] || "U"}
+                        {profile.lastName?.[0] || "S"}
                       </AvatarFallback>
                     </Avatar>
                     <button
@@ -158,16 +161,39 @@ export function ProfilePage() {
                     </button>
                   </div>
                   <div>
-                    <p className="font-semibold">{profile.firstName} {profile.lastName}</p>
+                    <p className="font-semibold">
+                      {profile.firstName} {profile.lastName}
+                    </p>
                     <p className="text-sm text-muted-foreground">PNG, JPG up to 2MB</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field id="username" label="Username" value={profile.username} onChange={(v) => setProfile(p => ({ ...p, username: v }))} />
-                  <Field id="email" label="Email" type="email" value={profile.email} onChange={(v) => setProfile(p => ({ ...p, email: v }))} />
-                  <Field id="firstName" label="First name" value={profile.firstName} onChange={(v) => setProfile(p => ({ ...p, firstName: v }))} />
-                  <Field id="lastName" label="Last name" value={profile.lastName} onChange={(v) => setProfile(p => ({ ...p, lastName: v }))} />
+                  <Field
+                    id="username"
+                    label="Username"
+                    value={profile.username}
+                    onChange={(v) => setProfile((p) => ({ ...p, username: v }))}
+                  />
+                  <Field
+                    id="email"
+                    label="Email"
+                    type="email"
+                    value={profile.email}
+                    onChange={(v) => setProfile((p) => ({ ...p, email: v }))}
+                  />
+                  <Field
+                    id="firstName"
+                    label="First name"
+                    value={profile.firstName}
+                    onChange={(v) => setProfile((p) => ({ ...p, firstName: v }))}
+                  />
+                  <Field
+                    id="lastName"
+                    label="Last name"
+                    value={profile.lastName}
+                    onChange={(v) => setProfile((p) => ({ ...p, lastName: v }))}
+                  />
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-2">
@@ -176,8 +202,14 @@ export function ProfilePage() {
                       <CheckCircle2 className="size-4" /> Saved
                     </span>
                   )}
-                  <Button variant="ghost" type="button" onClick={() => window.location.reload()}>Cancel</Button>
-                  <Button type="submit" disabled={loadingProfile} className="gradient-primary text-primary-foreground shadow-elegant">
+                  <Button variant="ghost" type="button" onClick={() => window.location.reload()}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loadingProfile}
+                    className="gradient-primary text-primary-foreground shadow-elegant"
+                  >
                     {loadingProfile && <Loader2 className="size-4 animate-spin" />}
                     Save changes
                   </Button>
@@ -194,12 +226,34 @@ export function ProfilePage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={changePwd} className="space-y-4 max-w-md">
-              <Field id="current" label="Current password" type="password" value={pwd.current} onChange={(v) => setPwd({ ...pwd, current: v })} />
-              <Field id="next" label="New password" type="password" value={pwd.next} onChange={(v) => setPwd({ ...pwd, next: v })} />
-              <Field id="confirm" label="Confirm new password" type="password" value={pwd.confirm} onChange={(v) => setPwd({ ...pwd, confirm: v })} />
+              <Field
+                id="current"
+                label="Current password"
+                type="password"
+                value={pwd.current}
+                onChange={(v) => setPwd({ ...pwd, current: v })}
+              />
+              <Field
+                id="next"
+                label="New password"
+                type="password"
+                value={pwd.next}
+                onChange={(v) => setPwd({ ...pwd, next: v })}
+              />
+              <Field
+                id="confirm"
+                label="Confirm new password"
+                type="password"
+                value={pwd.confirm}
+                onChange={(v) => setPwd({ ...pwd, confirm: v })}
+              />
 
               {pwdError && (
-                <p className={cn("text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md")}>{pwdError}</p>
+                <p
+                  className={cn("text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md")}
+                >
+                  {pwdError}
+                </p>
               )}
 
               <div className="flex items-center justify-end gap-3">
@@ -208,7 +262,11 @@ export function ProfilePage() {
                     <CheckCircle2 className="size-4" /> Updated
                   </span>
                 )}
-                <Button type="submit" disabled={loadingPwd} className="gradient-primary text-primary-foreground shadow-elegant">
+                <Button
+                  type="submit"
+                  disabled={loadingPwd}
+                  className="gradient-primary text-primary-foreground shadow-elegant"
+                >
                   {loadingPwd && <Loader2 className="size-4 animate-spin" />}
                   Update password
                 </Button>

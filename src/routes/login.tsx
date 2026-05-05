@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { TrendingUp, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isAuthenticated } from "@/lib/auth";
+import { tokenService } from "@/services/tokenService";
+import { login } from "@/services/authService";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: () => {
@@ -49,33 +51,19 @@ function LoginPage() {
     setStatus("loading");
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
+      const data = await login(username, password);
 
-      if (!res.ok) {
-        const errorText = await res.text(); // or res.json() if backend returns JSON
-        setErrors({ password: errorText || "Invalid username or password" });
-        setStatus("error");
-        return;
-      }
-
-      const data = await res.json();
-
-      localStorage.setItem("token", data.token);
+      // 🔥 central token handling
+      tokenService.set(data.token);
 
       setStatus("success");
 
       setTimeout(() => navigate({ to: "/dashboard" }), 400);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setErrors({
+        password: err?.response?.data?.message || "Invalid credentials",
+      });
       setStatus("error");
     }
   };
