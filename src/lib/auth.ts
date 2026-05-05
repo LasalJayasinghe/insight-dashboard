@@ -1,6 +1,8 @@
 export function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
-  return !!localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+  if (token === null) return false;
+  return !!token;
 }
 
 export function logout() {

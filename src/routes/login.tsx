@@ -68,8 +68,10 @@ function LoginPage() {
       }
 
       const data = await res.json();
-
       localStorage.setItem("token", data.token);
+      localStorage.setItem("firstName", data.firstName);
+      localStorage.setItem("lastName", data.lastName);
+      localStorage.setItem("refreshToken", data.refreshToken);
 
       setStatus("success");
 
