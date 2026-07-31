@@ -1,11 +1,13 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
-import { StatCard } from "@/components/dashboard/stat-card";
 import { PortfolioChart } from "@/components/dashboard/portfolio-chart";
 import { WatchlistTable } from "@/components/dashboard/watchlist-table";
-import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { Wallet, TrendingUp, Briefcase, Activity } from "lucide-react";
+import { IntradayStocks } from "@/components/dashboard/intraday-stocks";
+import { Clock3 } from "lucide-react";
 import { isAuthenticated } from "@/lib/auth";
+import { stocksService, type IntradayPoint, type MarketStatus } from "@/services/stocks-service";
+import { watchlistService, type WatchlistStock } from "@/services/watchlist-service";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
@@ -23,6 +25,49 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
+  const [intraday, setIntraday] = useState<IntradayPoint[]>([]);
+  const [watchlistStocks, setWatchlistStocks] = useState<WatchlistStock[]>([]);
+  const [watchlistLoading, setWatchlistLoading] = useState(true);
+  const [marketStatus, setMarketStatus] = useState<MarketStatus | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      const [intradayResult, watchlistResult, marketStatusResult] = await Promise.all([
+        stocksService.getIntraday().catch(() => []),
+        watchlistService.list().catch(() => []),
+        stocksService.getMarketStatus(),
+      ]);
+
+      if (cancelled) return;
+
+      setIntraday(intradayResult);
+      setWatchlistStocks(watchlistResult);
+      setMarketStatus(marketStatusResult);
+      setWatchlistLoading(false);
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const chartData = useMemo(() => {
+    if (intraday.length === 0) return undefined;
+    return intraday.slice(0, 30).map((p, idx) => ({ day: idx + 1, value: Number(p.price) }));
+  }, [intraday]);
+
+  const marketStatusLabel = useMemo(() => {
+    if (!marketStatus) return "Market status unavailable";
+    if (!marketStatus.isTradingDay) return "Market closed (non-trading day)";
+    return marketStatus.isOpen ? "Market open" : "Market closed";
+  }, [marketStatus]);
+
+  const marketStatusTone = marketStatus?.isOpen ? "bg-success" : "bg-destructive";
+
   return (
     <AppShell>
       <div className="space-y-6">
@@ -32,57 +77,22 @@ function DashboardPage() {
               Good morning, {localStorage.getItem("firstName")} 
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Here's how your portfolio is performing today.
+              Live stock market snapshot and your tracked symbols.
             </p>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="size-2 rounded-full bg-success animate-pulse" />
-            Markets open · NYSE
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock3 className="size-4" />
+            <span className={`size-2 rounded-full ${marketStatusTone} ${marketStatus?.isOpen ? "animate-pulse" : ""}`} />
+            {marketStatusLabel}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label="Portfolio Value"
-            value="$148,392.40"
-            delta={2.18}
-            hint="vs yesterday"
-            icon={Wallet}
-            accent="primary"
-          />
-          <StatCard
-            label="Today's P/L"
-            value="+$3,162.50"
-            delta={2.18}
-            hint="profit today"
-            icon={TrendingUp}
-            accent="success"
-          />
-          <StatCard
-            label="Active Positions"
-            value="12"
-            hint="across 4 sectors"
-            icon={Briefcase}
-            accent="primary"
-          />
-          <StatCard
-            label="Buying Power"
-            value="$24,800.00"
-            delta={-0.42}
-            hint="settled cash"
-            icon={Activity}
-            accent="destructive"
-          />
-        </div>
+        <PortfolioChart data={chartData} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <PortfolioChart />
-          </div>
-          <RecentActivity />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <IntradayStocks items={intraday} loading={watchlistLoading} />
+          <WatchlistTable stocks={watchlistStocks} loading={watchlistLoading} />
         </div>
-
-        <WatchlistTable />
       </div>
     </AppShell>
   );

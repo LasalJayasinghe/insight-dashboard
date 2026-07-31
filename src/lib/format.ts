@@ -4,6 +4,12 @@ export const formatUsd = (n: number, fractionDigits = 2) =>
     maximumFractionDigits: fractionDigits,
   })}`;
 
+export const formatRs = (n: number, fractionDigits = 2) =>
+  `${n < 0 ? "-" : ""}Rs. ${Math.abs(n).toLocaleString(undefined, {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })}`;
+
 export const formatPct = (n: number, fractionDigits = 2) =>
   `${n >= 0 ? "+" : ""}${n.toFixed(fractionDigits)}%`;
 

@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { formatRs } from "@/lib/format";
 import type { StockAlert } from "@/lib/types";
 
 interface Props {
@@ -14,8 +15,7 @@ interface Props {
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
-const formatPrice = (n: number) =>
-  n.toLocaleString(undefined, { style: "currency", currency: "USD" });
+const formatPrice = (n: number) => formatRs(n);
 
 export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
   return (

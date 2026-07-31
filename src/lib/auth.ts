@@ -8,6 +8,9 @@ export function isAuthenticated(): boolean {
 export function logout() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("firstName");
+    localStorage.removeItem("lastName");
   }
 }
 

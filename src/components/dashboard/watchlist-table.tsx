@@ -1,34 +1,51 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { mockStocks, type Stock } from "@/lib/mock-data";
+import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-function fmtVol(v: number) {
-  if (v >= 1e9) return (v / 1e9).toFixed(2) + "B";
-  if (v >= 1e6) return (v / 1e6).toFixed(2) + "M";
-  if (v >= 1e3) return (v / 1e3).toFixed(1) + "K";
-  return v.toString();
-}
+export function WatchlistTable({ stocks = mockStocks, loading = false }: { stocks?: Stock[]; loading?: boolean }) {
+  if (loading) {
+    return (
+      <Card className="gradient-card border-border shadow-card h-105">
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Loading watchlist...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
-export function WatchlistTable({ stocks = mockStocks }: { stocks?: Stock[] }) {
+  if (stocks.length === 0) {
+    return (
+      <Card className="gradient-card border-border shadow-card h-105">
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">No stocks in your watchlist.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="gradient-card border-border shadow-card">
+    <Card className="gradient-card border-border shadow-card h-105">
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
-        <Button size="sm" variant="ghost" className="text-xs text-muted-foreground hover:text-foreground">
-          View all
-        </Button>
       </CardHeader>
-      <CardContent className="px-0 pb-2">
+      <CardContent className="p-0">
+        <ScrollArea className="h-85">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
               <TableHead className="text-xs uppercase tracking-wider">Symbol</TableHead>
               <TableHead className="text-xs uppercase tracking-wider text-right">Price</TableHead>
               <TableHead className="text-xs uppercase tracking-wider text-right">Change</TableHead>
-              <TableHead className="text-xs uppercase tracking-wider text-right hidden md:table-cell">Volume</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -47,7 +64,7 @@ export function WatchlistTable({ stocks = mockStocks }: { stocks?: Stock[] }) {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right tabular font-medium">${s.price.toFixed(2)}</TableCell>
+                  <TableCell className="text-right tabular font-medium">{formatRs(s.price)}</TableCell>
                   <TableCell className="text-right">
                     <span
                       className={cn(
@@ -59,14 +76,12 @@ export function WatchlistTable({ stocks = mockStocks }: { stocks?: Stock[] }) {
                       {Math.abs(s.changePct).toFixed(2)}%
                     </span>
                   </TableCell>
-                  <TableCell className="text-right tabular text-muted-foreground hidden md:table-cell">
-                    {fmtVol(s.volume)}
-                  </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

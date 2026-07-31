@@ -7,14 +7,10 @@ export const login = async (Username: string, Password: string) => {
     Password,
   });
 
-  if (!data.ok) {
-    return { ok: false, error: data.error || "Login failed" };
-  }
-
   tokenService.set(data.token);
   localStorage.setItem("firstName", data.firstName);
   localStorage.setItem("lastName", data.lastName);
   localStorage.setItem("refreshToken", data.refreshToken);
 
-  return data;
+  return { ok: true, ...data };
 };

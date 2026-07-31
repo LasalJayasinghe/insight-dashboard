@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,8 @@ import { useAlerts } from "@/hooks/use-alerts";
 import { isAuthenticated } from "@/lib/auth";
 import { Bell, Plus, Search, AlertTriangle } from "lucide-react";
 import type { StockAlert } from "@/lib/types";
+import { watchlistService, type StockOption } from "@/services/watchlist-service";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/alerts")({
   beforeLoad: () => {
@@ -43,6 +45,32 @@ function AlertsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<StockAlert | null>(null);
   const [pendingDelete, setPendingDelete] = useState<StockAlert | null>(null);
+  const [stockOptions, setStockOptions] = useState<StockOption[]>([]);
+  const [stockOptionsLoading, setStockOptionsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!modalOpen || stockOptions.length > 0) return;
+
+    let cancelled = false;
+
+    const loadStockOptions = async () => {
+      setStockOptionsLoading(true);
+      try {
+        const data = await watchlistService.listStockOptions();
+        if (!cancelled) setStockOptions(data);
+      } catch {
+        if (!cancelled) toast.error("Failed to load stock names");
+      } finally {
+        if (!cancelled) setStockOptionsLoading(false);
+      }
+    };
+
+    void loadStockOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [modalOpen, stockOptions.length]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toUpperCase();
@@ -164,6 +192,8 @@ function AlertsPage() {
         onOpenChange={setModalOpen}
         initial={editing}
         onSubmit={handleSubmit}
+        stockOptions={stockOptions}
+        stockOptionsLoading={stockOptionsLoading}
       />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>

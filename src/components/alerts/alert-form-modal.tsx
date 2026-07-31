@@ -20,6 +20,18 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import type { StockOption } from "@/services/watchlist-service";
 import type { AlertInput, AlertType, StockAlert } from "@/lib/types";
 
 interface Props {
@@ -27,6 +39,8 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   initial?: StockAlert | null;
   onSubmit: (input: AlertInput) => Promise<unknown>;
+  stockOptions: StockOption[];
+  stockOptionsLoading: boolean;
 }
 
 interface FormState {
@@ -38,11 +52,19 @@ interface FormState {
 
 const empty: FormState = { symbol: "", type: "ABOVE", targetPrice: "", active: true };
 
-export function AlertFormModal({ open, onOpenChange, initial, onSubmit }: Props) {
+export function AlertFormModal({
+  open,
+  onOpenChange,
+  initial,
+  onSubmit,
+  stockOptions,
+  stockOptionsLoading,
+}: Props) {
   const isEdit = Boolean(initial);
   const [form, setForm] = useState<FormState>(empty);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [symbolPickerOpen, setSymbolPickerOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -63,7 +85,6 @@ export function AlertFormModal({ open, onOpenChange, initial, onSubmit }: Props)
   const validate = (): boolean => {
     const next: typeof errors = {};
     if (!form.symbol.trim()) next.symbol = "Symbol is required";
-    else if (form.symbol.trim().length > 10) next.symbol = "Max 10 characters";
     const price = Number(form.targetPrice);
     if (!form.targetPrice.trim()) next.targetPrice = "Target price is required";
     else if (Number.isNaN(price) || price <= 0) next.targetPrice = "Enter a valid positive number";
@@ -103,14 +124,58 @@ export function AlertFormModal({ open, onOpenChange, initial, onSubmit }: Props)
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="symbol">Stock symbol</Label>
-            <Input
-              id="symbol"
-              placeholder="e.g. AAPL"
-              value={form.symbol}
-              onChange={(e) => setForm((f) => ({ ...f, symbol: e.target.value.toUpperCase() }))}
-              maxLength={10}
-              autoFocus
-            />
+            <Popover open={symbolPickerOpen} onOpenChange={setSymbolPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  id="symbol"
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={symbolPickerOpen}
+                  className="w-full justify-between"
+                  disabled={isEdit}
+                >
+                  {form.symbol ? form.symbol : stockOptionsLoading ? "Loading stocks..." : "Select symbol"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search stock name..." />
+                  <CommandList>
+                    <CommandEmpty>
+                      {stockOptionsLoading ? "Loading stocks..." : "No stock found."}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {stockOptions.map((option) => (
+                        <CommandItem
+                          key={option.symbol}
+                          value={`${option.symbol} ${option.name}`}
+                          onSelect={() => {
+                            setForm((f) => ({ ...f, symbol: option.symbol }));
+                            setSymbolPickerOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              form.symbol === option.symbol ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          <div className="flex flex-col">
+                            <span>{option.symbol}</span>
+                            <span className="text-xs text-muted-foreground">{option.name}</span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {isEdit && (
+              <p className="text-xs text-muted-foreground">Symbol cannot be changed for an existing alert.</p>
+            )}
             {errors.symbol && <p className="text-xs text-destructive">{errors.symbol}</p>}
           </div>
 

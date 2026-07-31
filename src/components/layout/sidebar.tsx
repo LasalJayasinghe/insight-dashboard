@@ -1,6 +1,7 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { LayoutDashboard, User, LineChart, Settings, Bell, LogOut, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { logout } from "@/lib/auth";
 
 const items = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -13,6 +14,13 @@ const items = [
 
 export function Sidebar({ open }: { open: boolean }) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    logout();
+    await navigate({ to: "/login" });
+  };
+
   return (
     <aside
       className={cn(
@@ -55,13 +63,14 @@ export function Sidebar({ open }: { open: boolean }) {
       </nav>
 
       <div className="p-3 border-t border-sidebar-border">
-        <Link
-          to="/login"
+        <button
+          type="button"
+          onClick={handleSignOut}
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:text-destructive hover:bg-sidebar-accent/60 transition-colors"
         >
           <LogOut className="size-5 shrink-0" />
           {open && <span className="font-medium">Sign out</span>}
-        </Link>
+        </button>
       </div>
     </aside>
   );

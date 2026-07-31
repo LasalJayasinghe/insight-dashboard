@@ -10,10 +10,11 @@ import { Camera, Loader2, CheckCircle2, Send, User2, ShieldCheck, AlertCircle } 
 import { cn } from "@/lib/utils";
 import { getProfile , updateProfile, changePassword, updateTelegramId } from "@/services/profileService";
 import { toast } from "sonner";
+import { isAuthenticated } from "@/lib/auth";
 
 export const Route = createFileRoute("/profile")({
   beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("token")) {
+    if (!isAuthenticated()) {
       throw redirect({ to: "/login" });
     }
   },
@@ -105,9 +106,7 @@ function ProfilePage() {
     }
     setSavingProfile(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await updateProfile(profile);
-      if (!res.ok) throw new Error("Failed to update profile");
+      await updateProfile(profile);
       setSavedProfile(true);
       toast.success("Profile updated");
       setTimeout(() => setSavedProfile(false), 2500);
@@ -157,12 +156,7 @@ function ProfilePage() {
     }
     setSavingTg(true);
     try {
-      const res = await updateTelegramId(trimmed);
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        setTgError(errData.message || "Failed to save Telegram Chat ID.");
-        return;
-      }
+      await updateTelegramId(trimmed);
       setSavedTg(true);
       toast.success("Telegram settings saved");
       setTimeout(() => setSavedTg(false), 2500);

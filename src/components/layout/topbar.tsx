@@ -10,11 +10,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useTheme } from "@/hooks/use-theme";
+import { logout } from "@/lib/auth";
 
 export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const { theme, toggle } = useTheme();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    logout();
+    await navigate({ to: "/login" });
+  };
+
   return (
     <header className="h-16 border-b border-border bg-card/40 backdrop-blur-xl sticky top-0 z-30">
       <div className="h-full px-4 md:px-6 flex items-center gap-3">
@@ -57,8 +65,8 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
               <DropdownMenuItem asChild><Link to="/profile">Profile</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link to="/settings">Settings</Link></DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild className="text-destructive">
-                <Link to="/login">Sign out</Link>
+              <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
+                Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

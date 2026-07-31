@@ -5,13 +5,18 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 
 const ranges = ["1D", "1W", "1M", "3M", "1Y", "ALL"] as const;
 
-export function PortfolioChart() {
+type ChartPoint = {
+  day: number | string;
+  value: number;
+};
+
+export function PortfolioChart({ data = mockChart }: { data?: ChartPoint[] }) {
   return (
     <Card className="gradient-card border-border shadow-card">
       <CardHeader className="flex-row items-start justify-between space-y-0 pb-2">
         <div>
           <CardTitle className="text-base font-semibold">Portfolio performance</CardTitle>
-          <p className="text-xs text-muted-foreground mt-1">Real-time placeholder — wire to /api/portfolio/history</p>
+          <p className="text-xs text-muted-foreground mt-1">Live data from stock endpoints</p>
         </div>
         <div className="flex gap-1 rounded-lg bg-muted/50 p-1">
           {ranges.map((r, i) => (
@@ -29,7 +34,7 @@ export function PortfolioChart() {
       <CardContent>
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={mockChart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.45} />

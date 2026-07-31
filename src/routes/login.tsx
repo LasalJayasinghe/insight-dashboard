@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { TrendingUp, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isAuthenticated } from "@/lib/auth";
-import { tokenService } from "@/services/tokenService";
 import { login } from "@/services/authService";
 
 export const Route = createFileRoute("/login")({
@@ -54,8 +53,7 @@ function LoginPage() {
       const data = await login(username, password);
 
       if (!data.ok) {
-        const errorText = await data.text(); // or res.json() if backend returns JSON
-        setErrors({ password: errorText || "Invalid username or password" });
+        setErrors({ password: "Invalid username or password" });
         setStatus("error");
         return;
       }

@@ -1,12 +1,16 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/hooks/use-theme";
+import { isAuthenticated } from "@/lib/auth";
+import { settingsService, type UserSettings } from "@/services/settings-service";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("token")) {
+    if (!isAuthenticated()) {
       throw redirect({ to: "/login" });
     }
   },
@@ -21,11 +25,35 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   const { theme, toggle } = useTheme();
-  const rows = [
-    { label: "Email notifications", desc: "Daily portfolio summary at market close.", enabled: true },
-    { label: "Price alerts", desc: "Get notified on watchlist movements >5%.", enabled: true },
-    { label: "Two-factor authentication", desc: "Add an extra layer of security.", enabled: false },
-  ];
+  const [settings, setSettings] = useState<UserSettings | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const data = await settingsService.get();
+        if (!cancelled) setSettings(data);
+      } catch {
+        if (!cancelled) toast.error("Failed to load settings");
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const update = async (next: UserSettings) => {
+    setSettings(next);
+    try {
+      await settingsService.update(next);
+    } catch {
+      toast.error("Failed to save settings");
+    }
+  };
 
   return (
     <AppShell>
@@ -51,15 +79,45 @@ function SettingsPage() {
         <Card className="gradient-card border-border shadow-card">
           <CardHeader><CardTitle className="text-base font-semibold">Notifications & security</CardTitle></CardHeader>
           <CardContent className="divide-y divide-border">
-            {rows.map((r) => (
-              <div key={r.label} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                <div>
-                  <p className="font-medium text-sm">{r.label}</p>
-                  <p className="text-sm text-muted-foreground">{r.desc}</p>
-                </div>
-                <Switch defaultChecked={r.enabled} />
+            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+              <div>
+                <p className="font-medium text-sm">Email notifications</p>
+                <p className="text-sm text-muted-foreground">Daily portfolio summary at market close.</p>
               </div>
-            ))}
+              <Switch
+                checked={settings?.emailNotifications ?? false}
+                onCheckedChange={(v) => {
+                  if (!settings) return;
+                  void update({ ...settings, emailNotifications: v });
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+              <div>
+                <p className="font-medium text-sm">Price alerts</p>
+                <p className="text-sm text-muted-foreground">Get notified on watchlist movements &gt;5%.</p>
+              </div>
+              <Switch
+                checked={settings?.priceAlerts ?? false}
+                onCheckedChange={(v) => {
+                  if (!settings) return;
+                  void update({ ...settings, priceAlerts: v });
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+              <div>
+                <p className="font-medium text-sm">Two-factor authentication</p>
+                <p className="text-sm text-muted-foreground">Add an extra layer of security.</p>
+              </div>
+              <Switch
+                checked={settings?.twoFactorAuthentication ?? false}
+                onCheckedChange={(v) => {
+                  if (!settings) return;
+                  void update({ ...settings, twoFactorAuthentication: v });
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
