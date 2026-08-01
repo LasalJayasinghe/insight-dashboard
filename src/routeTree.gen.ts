@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as CryptoRouteImport } from './routes/crypto'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as StocksRouteImport } from './routes/stocks'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as AlgorithmsIndexRouteImport } from './routes/algorithms.index'
 import { Route as AlgorithmsAlgoIdRouteImport } from './routes/algorithms.$algoId'
@@ -27,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 const AlertsRoute = AlertsRouteImport.update({
   id: '/alerts',
   path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CryptoRoute = CryptoRouteImport.update({
+  id: '/crypto',
+  path: '/crypto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -49,6 +56,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StocksRoute = StocksRouteImport.update({
+  id: '/stocks',
+  path: '/stocks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
@@ -68,10 +80,12 @@ const AlgorithmsAlgoIdRoute = AlgorithmsAlgoIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
+  '/stocks': typeof StocksRoute
   '/watchlist': typeof WatchlistRoute
   '/algorithms/$algoId': typeof AlgorithmsAlgoIdRoute
   '/algorithms/': typeof AlgorithmsIndexRoute
@@ -79,10 +93,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
+  '/stocks': typeof StocksRoute
   '/watchlist': typeof WatchlistRoute
   '/algorithms/$algoId': typeof AlgorithmsAlgoIdRoute
   '/algorithms': typeof AlgorithmsIndexRoute
@@ -91,10 +107,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
+  '/stocks': typeof StocksRoute
   '/watchlist': typeof WatchlistRoute
   '/algorithms/$algoId': typeof AlgorithmsAlgoIdRoute
   '/algorithms/': typeof AlgorithmsIndexRoute
@@ -104,10 +122,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/alerts'
+    | '/crypto'
     | '/dashboard'
     | '/login'
     | '/profile'
     | '/settings'
+    | '/stocks'
     | '/watchlist'
     | '/algorithms/$algoId'
     | '/algorithms/'
@@ -115,10 +135,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/alerts'
+    | '/crypto'
     | '/dashboard'
     | '/login'
     | '/profile'
     | '/settings'
+    | '/stocks'
     | '/watchlist'
     | '/algorithms/$algoId'
     | '/algorithms'
@@ -126,10 +148,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/alerts'
+    | '/crypto'
     | '/dashboard'
     | '/login'
     | '/profile'
     | '/settings'
+    | '/stocks'
     | '/watchlist'
     | '/algorithms/$algoId'
     | '/algorithms/'
@@ -138,10 +162,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
+  CryptoRoute: typeof CryptoRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
+  StocksRoute: typeof StocksRoute
   WatchlistRoute: typeof WatchlistRoute
   AlgorithmsAlgoIdRoute: typeof AlgorithmsAlgoIdRoute
   AlgorithmsIndexRoute: typeof AlgorithmsIndexRoute
@@ -161,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/alerts'
       fullPath: '/alerts'
       preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crypto': {
+      id: '/crypto'
+      path: '/crypto'
+      fullPath: '/crypto'
+      preLoaderRoute: typeof CryptoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -191,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stocks': {
+      id: '/stocks'
+      path: '/stocks'
+      fullPath: '/stocks'
+      preLoaderRoute: typeof StocksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watchlist': {
       id: '/watchlist'
       path: '/watchlist'
@@ -218,10 +258,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
+  CryptoRoute: CryptoRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
+  StocksRoute: StocksRoute,
   WatchlistRoute: WatchlistRoute,
   AlgorithmsAlgoIdRoute: AlgorithmsAlgoIdRoute,
   AlgorithmsIndexRoute: AlgorithmsIndexRoute,
