@@ -11,9 +11,9 @@ interface AiSummaryPanelProps {
 
 export function AiSummaryPanel({ data, loading, symbol, onSymbolChange }: AiSummaryPanelProps) {
   return (
-    <div className="rounded-xl border border-white/7 bg-[#0d1117] flex flex-col">
+    <div className="rounded-xl border border-border bg-card shadow-card flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/7">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             🧠 AI Market Summary
@@ -25,7 +25,7 @@ export function AiSummaryPanel({ data, loading, symbol, onSymbolChange }: AiSumm
         <select
           value={symbol}
           onChange={e => onSymbolChange(e.target.value)}
-          className="bg-[#161b27] border border-white/10 rounded-md px-2 py-1 text-xs font-mono text-foreground outline-none cursor-pointer"
+          className="bg-muted/50 border border-border rounded-md px-2 py-1 text-xs font-mono text-foreground outline-none cursor-pointer"
         >
           {TRACKED_SYMBOLS.map(s => <option key={s} value={s}>{s.replace("USDT", "")}/USDT</option>)}
         </select>
@@ -42,7 +42,7 @@ export function AiSummaryPanel({ data, loading, symbol, onSymbolChange }: AiSumm
             <p className="text-sm text-muted-foreground leading-[1.75] whitespace-pre-line">
               {data.summary}
             </p>
-            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-white/7">
+            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border">
               {[
                 { label: "EMA 9",  value: data.indicators.ema9.toFixed(2),  color: "text-[#ffd740]" },
                 { label: "EMA 21", value: data.indicators.ema21.toFixed(2), color: "text-[#40c4ff]" },

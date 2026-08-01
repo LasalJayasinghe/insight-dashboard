@@ -5,9 +5,10 @@ import { StockCards } from "@/components/stocks/stock-cards";
 import { MarketOverviewPanel } from "@/components/stocks/market-overview-panel";
 import { StockMoversPanel } from "@/components/stocks/stock-movers";
 import { AiStockSummaryPanel } from "@/components/stocks/ai-stock-summary";
+import { StockDetailView } from "@/components/stocks/stock-detail-view";
 import { useStocks } from "@/hooks/useStocks";
 import { isAuthenticated } from "@/lib/auth";
-import { LineChart, RefreshCw } from "lucide-react";
+import { LineChart, RefreshCw, BarChart2 } from "lucide-react";
 
 export const Route = createFileRoute("/stocks")({
   beforeLoad: () => {
@@ -35,10 +36,15 @@ function StocksPage() {
   } = useStocks();
 
   const [selectedSymbol, setSelectedSymbol] = useState<string>("");
+  const [viewMode, setViewMode] = useState<"overview" | "detail">("overview");
 
-  // Select the first ticker by default if none is selected
   const activeSymbol = selectedSymbol || (tickers.length > 0 ? tickers[0].symbol : "");
   const activeTicker = tickers.find(t => t.symbol === activeSymbol) || null;
+
+  const handleSelectStock = (symbol: string) => {
+    setSelectedSymbol(symbol);
+    setViewMode("detail");
+  };
 
   return (
     <AppShell>
@@ -50,45 +56,67 @@ function StocksPage() {
             <LineChart className="size-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Stocks Dashboard</h1>
-            <p className="text-xs text-muted-foreground">CSE Market Data · Top Movers · AI Summary</p>
+            <h1 className="text-xl font-bold tracking-tight">
+              {viewMode === "detail" && activeTicker ? `${activeTicker.symbol} Stock View` : "Stocks Dashboard"}
+            </h1>
+            <p className="text-xs text-muted-foreground">CSE Market Data · Interactive Charts · AI Summary</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            {viewMode === "detail" ? (
+              <button
+                onClick={() => setViewMode("overview")}
+                className="flex items-center gap-1.5 text-xs font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors px-3 py-1.5 rounded-md"
+              >
+                <BarChart2 className="size-3.5" /> All Stocks Overview
+              </button>
+            ) : null}
             <button
               onClick={refresh}
-              className="flex items-center gap-1.5 text-xs font-bold bg-[#161b27] border border-white/10 hover:bg-white/5 transition-colors px-3 py-1.5 rounded-md"
+              className="flex items-center gap-1.5 text-xs font-bold bg-card border border-border hover:bg-muted/80 text-foreground shadow-sm transition-colors px-3 py-1.5 rounded-md"
             >
               <RefreshCw className="size-3" /> Refresh
             </button>
           </div>
         </div>
 
-        {/* Top Tickers */}
-        <StockCards
-          tickers={tickers}
-          selectedSymbol={activeSymbol}
-          onSelect={setSelectedSymbol}
-          loading={loadingTickers}
-        />
-
-        {/* Market Overview */}
-        <MarketOverviewPanel
-          indices={indices}
-          status={status}
-          loading={loadingIndices}
-        />
-
-        {/* Split Panels: AI Summary + Top Movers */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-4">
-          <AiStockSummaryPanel
-            selectedStock={activeTicker}
-            loading={loadingTickers}
+        {/* View Switcher: Stock Detail View vs Overview Dashboard */}
+        {viewMode === "detail" && activeTicker ? (
+          <StockDetailView
+            stock={activeTicker}
+            allStocks={tickers}
+            onBack={() => setViewMode("overview")}
+            onSelectStock={setSelectedSymbol}
           />
-          <StockMoversPanel
-            movers={movers}
-            loading={loadingMovers}
-          />
-        </div>
+        ) : (
+          <>
+            {/* Top Tickers */}
+            <StockCards
+              tickers={tickers}
+              selectedSymbol={activeSymbol}
+              onSelect={handleSelectStock}
+              loading={loadingTickers}
+            />
+
+            {/* Market Overview */}
+            <MarketOverviewPanel
+              indices={indices}
+              status={status}
+              loading={loadingIndices}
+            />
+
+            {/* Split Panels: AI Summary + Top Movers */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-4">
+              <AiStockSummaryPanel
+                selectedStock={activeTicker}
+                loading={loadingTickers}
+              />
+              <StockMoversPanel
+                movers={movers}
+                loading={loadingMovers}
+              />
+            </div>
+          </>
+        )}
 
       </div>
     </AppShell>

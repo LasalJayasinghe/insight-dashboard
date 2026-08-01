@@ -9,16 +9,19 @@ interface StockMoversPanelProps {
 }
 
 export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
+  const gainers = movers?.gainers ?? [];
+  const losers = movers?.losers ?? [];
+
   return (
-    <div className="rounded-xl border border-white/7 bg-[#0d1117] flex flex-col min-h-[400px]">
-      <div className="flex items-center px-4 py-3 border-b border-white/7 gap-2">
+    <div className="rounded-xl border border-border bg-card shadow-card flex flex-col min-h-[400px]">
+      <div className="flex items-center px-4 py-3 border-b border-border gap-2">
         <Flame className="size-4 text-orange-500" />
         <span className="text-sm font-bold uppercase tracking-widest text-foreground">
           Top Movers
         </span>
       </div>
 
-      <div className="flex-1 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-white/7">
+      <div className="flex-1 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border">
         
         {/* Gainers */}
         <div className="flex-1 p-4">
@@ -28,14 +31,14 @@ export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-10 bg-white/5 animate-pulse rounded" />
+                <div key={i} className="h-10 bg-muted animate-pulse rounded" />
               ))}
             </div>
-          ) : !movers || movers.gainers.length === 0 ? (
+          ) : gainers.length === 0 ? (
             <div className="text-sm text-muted-foreground text-center py-10">No gainers found</div>
           ) : (
             <div className="space-y-1">
-              {movers.gainers.map((g, i) => (
+              {gainers.map((g, i) => (
                 <MoverRow key={g.symbol} mover={g} rank={i + 1} type="gain" />
               ))}
             </div>
@@ -50,14 +53,14 @@ export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-10 bg-white/5 animate-pulse rounded" />
+                <div key={i} className="h-10 bg-muted animate-pulse rounded" />
               ))}
             </div>
-          ) : !movers || movers.losers.length === 0 ? (
+          ) : losers.length === 0 ? (
             <div className="text-sm text-muted-foreground text-center py-10">No losers found</div>
           ) : (
             <div className="space-y-1">
-              {movers.losers.map((l, i) => (
+              {losers.map((l, i) => (
                 <MoverRow key={l.symbol} mover={l} rank={i + 1} type="loss" />
               ))}
             </div>
@@ -72,7 +75,7 @@ export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
 function MoverRow({ mover, rank, type }: { mover: TopMover, rank: number, type: "gain" | "loss" }) {
   const isGain = type === "gain";
   return (
-    <div className={cn("flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors border border-transparent",
+    <div className={cn("flex items-center justify-between p-2 rounded-lg hover:bg-muted/40 transition-colors border border-transparent",
       isGain ? "hover:border-emerald-500/20" : "hover:border-red-500/20"
     )}>
       <div className="flex items-center gap-3">

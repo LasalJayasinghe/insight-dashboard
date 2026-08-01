@@ -228,13 +228,13 @@ function CryptoPage() {
         />
 
         {/* ── Chart ──────────────────────────────────────────────────────────── */}
-        <div className="rounded-xl border border-white/7 bg-[#0d1117] overflow-hidden">
+        <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
           {/* Chart toolbar */}
-          <div className="flex items-center flex-wrap gap-3 px-4 py-2.5 border-b border-white/7">
+          <div className="flex items-center flex-wrap gap-3 px-4 py-2.5 border-b border-border">
             <select
               value={chartSymbol}
               onChange={e => setChartSymbol(e.target.value)}
-              className="bg-[#161b27] border border-white/10 rounded-md px-2 py-1 text-xs font-mono font-semibold text-foreground outline-none cursor-pointer"
+              className="bg-muted/50 border border-border rounded-md px-2 py-1 text-xs font-mono font-semibold text-foreground outline-none cursor-pointer"
             >
               {TRACKED_SYMBOLS.map(s => <option key={s} value={s}>{s.replace("USDT","")}/USDT</option>)}
             </select>
@@ -249,7 +249,7 @@ function CryptoPage() {
                     "px-2.5 py-1 rounded text-xs font-semibold font-mono transition-all",
                     chartInterval === iv
                       ? "bg-primary/15 text-primary border border-primary/40"
-                      : "bg-[#161b27] border border-white/10 text-muted-foreground hover:text-foreground",
+                      : "bg-muted/40 border border-border text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {iv}
@@ -275,7 +275,7 @@ function CryptoPage() {
           {/* Chart body */}
           <div className="relative p-3">
             {candlesLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#0d1117]/70 z-10 rounded-b-xl">
+              <div className="absolute inset-0 flex items-center justify-center bg-card/70 backdrop-blur-sm z-10 rounded-b-xl">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" /> Loading chart…
                 </div>

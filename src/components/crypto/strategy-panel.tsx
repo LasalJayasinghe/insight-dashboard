@@ -5,13 +5,13 @@ import { TRACKED_SYMBOLS, fmtPrice } from "./market-cards";
 const SIGNAL_STYLES = {
   BUY:  "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25",
   SELL: "bg-red-500/10 text-red-400 border border-red-500/25",
-  WAIT: "bg-white/5 text-muted-foreground border border-white/10",
+  WAIT: "bg-muted/50 text-muted-foreground border border-border",
 };
 
 const CONDITION_STYLES = {
   Bullish: "bg-emerald-500/8 text-emerald-400 border border-emerald-500/20",
   Bearish: "bg-red-500/8 text-red-400 border border-red-500/20",
-  Neutral: "bg-white/5 text-muted-foreground border border-white/10",
+  Neutral: "bg-muted/50 text-muted-foreground border border-border",
 };
 
 const BAR_COLORS = {
@@ -29,9 +29,9 @@ interface StrategyPanelProps {
 
 export function StrategyPanel({ snapshot, loading, symbol, onSymbolChange }: StrategyPanelProps) {
   return (
-    <div className="rounded-xl border border-white/7 bg-[#0d1117] flex flex-col">
+    <div className="rounded-xl border border-border bg-card shadow-card flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/7">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             🤖 Strategy Dashboard
@@ -41,7 +41,7 @@ export function StrategyPanel({ snapshot, loading, symbol, onSymbolChange }: Str
           <select
             value={symbol}
             onChange={e => onSymbolChange(e.target.value)}
-            className="bg-[#161b27] border border-white/10 rounded-md px-2 py-1 text-xs font-mono text-foreground outline-none cursor-pointer"
+            className="bg-muted/50 border border-border rounded-md px-2 py-1 text-xs font-mono text-foreground outline-none cursor-pointer"
           >
             {TRACKED_SYMBOLS.map(s => <option key={s} value={s}>{s.replace("USDT", "")}/USDT</option>)}
           </select>
@@ -56,7 +56,7 @@ export function StrategyPanel({ snapshot, loading, symbol, onSymbolChange }: Str
       <div className="p-4 flex flex-col gap-4">
         {/* Strategy label */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold">EMA RSI Strategy</span>
+          <span className="text-sm font-semibold text-foreground">EMA RSI Strategy</span>
           <span className="text-[10px] font-mono text-muted-foreground">EMA 9 / EMA 21 / RSI 14</span>
         </div>
 
@@ -67,10 +67,10 @@ export function StrategyPanel({ snapshot, loading, symbol, onSymbolChange }: Str
             { label: "EMA 21", value: snapshot?.ema21?.toFixed(2) ?? "--", color: "text-[#40c4ff]" },
             { label: "RSI 14", value: snapshot?.rsi?.toFixed(2)   ?? "--", color: "text-[#ea80fc]" },
           ].map(({ label, value, color }) => (
-            <div key={label} className="flex flex-col items-center bg-[#111827] border border-white/7 rounded-lg py-2.5 px-2">
+            <div key={label} className="flex flex-col items-center bg-muted/40 border border-border rounded-lg py-2.5 px-2">
               <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-1">{label}</span>
               <span className={cn("text-base font-bold font-mono", color)}>
-                {loading ? <span className="inline-block h-4 w-12 rounded animate-pulse bg-white/5" /> : value}
+                {loading ? <span className="inline-block h-4 w-12 rounded animate-pulse bg-muted" /> : value}
               </span>
             </div>
           ))}
@@ -91,14 +91,14 @@ export function StrategyPanel({ snapshot, loading, symbol, onSymbolChange }: Str
 
         {/* Reason */}
         <p className="text-xs text-muted-foreground italic leading-relaxed">
-          {loading ? <span className="inline-block h-4 w-full rounded animate-pulse bg-white/5" /> : (snapshot?.reason ?? "Loading analysis…")}
+          {loading ? <span className="inline-block h-4 w-full rounded animate-pulse bg-muted" /> : (snapshot?.reason ?? "Loading analysis…")}
         </p>
 
         {/* Confidence bar */}
         <div>
           <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5 block">Confidence</span>
           <div className="flex items-center gap-2">
-            <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+            <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
               <div
                 className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-700", BAR_COLORS[snapshot?.signal ?? "WAIT"])}
                 style={{ width: `${snapshot?.confidence ?? 0}%` }}

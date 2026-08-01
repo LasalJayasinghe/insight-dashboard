@@ -10,8 +10,8 @@ interface AiStockSummaryProps {
 
 export function AiStockSummaryPanel({ selectedStock, loading }: AiStockSummaryProps) {
   return (
-    <div className="rounded-xl border border-white/7 bg-[#0d1117] flex flex-col min-h-[300px]">
-      <div className="flex items-center px-4 py-3 border-b border-white/7 gap-2">
+    <div className="rounded-xl border border-border bg-card shadow-card flex flex-col min-h-[300px]">
+      <div className="flex items-center px-4 py-3 border-b border-border gap-2">
         <Sparkles className="size-4 text-purple-400" />
         <span className="text-sm font-bold uppercase tracking-widest text-foreground">
           AI Market Summary
@@ -50,11 +50,11 @@ export function AiStockSummaryPanel({ selectedStock, loading }: AiStockSummaryPr
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#161b27] border border-white/10 rounded-lg p-3">
+              <div className="bg-muted/30 border border-border rounded-lg p-3">
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Today's High</span>
                 <span className="font-mono font-bold text-foreground">{fmtPrice(selectedStock.high)}</span>
               </div>
-              <div className="bg-[#161b27] border border-white/10 rounded-lg p-3">
+              <div className="bg-muted/30 border border-border rounded-lg p-3">
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Today's Low</span>
                 <span className="font-mono font-bold text-foreground">{fmtPrice(selectedStock.low)}</span>
               </div>

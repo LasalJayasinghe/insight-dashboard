@@ -20,8 +20,8 @@ interface WhaleActivityProps {
 
 export function WhaleActivity({ trades, loading, symbol, onSymbolChange, onRefresh }: WhaleActivityProps) {
   return (
-    <div className="rounded-xl border border-white/7 bg-[#0d1117] flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/7">
+    <div className="rounded-xl border border-border bg-card shadow-card flex flex-col">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           🐋 Whale Activity
         </span>
@@ -29,14 +29,14 @@ export function WhaleActivity({ trades, loading, symbol, onSymbolChange, onRefre
           <select
             value={symbol}
             onChange={e => onSymbolChange(e.target.value)}
-            className="bg-[#161b27] border border-white/10 rounded-md px-2 py-1 text-xs font-mono text-foreground outline-none cursor-pointer"
+            className="bg-muted/50 border border-border rounded-md px-2 py-1 text-xs font-mono text-foreground outline-none cursor-pointer"
           >
             {TRACKED_SYMBOLS.slice(0, 5).map(s => <option key={s} value={s}>{s.replace("USDT","")}/USDT</option>)}
           </select>
           <button
             type="button"
             onClick={onRefresh}
-            className="flex items-center gap-1 border border-white/10 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            className="flex items-center gap-1 border border-border bg-muted/30 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
           >
             <RefreshCw className="size-3" />
           </button>
@@ -64,10 +64,10 @@ export function WhaleActivity({ trades, loading, symbol, onSymbolChange, onRefre
                 <div
                   key={i}
                   className={cn(
-                    "flex items-center gap-2 rounded-lg border bg-[#111827] px-3 py-2 text-xs transition-all",
+                    "flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-xs transition-all",
                     isBuy
-                      ? "border-l-2 border-l-emerald-500 border-white/5"
-                      : "border-l-2 border-l-red-500 border-white/5",
+                      ? "border-l-2 border-l-emerald-500 border-border"
+                      : "border-l-2 border-l-red-500 border-border",
                   )}
                 >
                   <span className={cn("font-extrabold font-mono text-[10px] px-1.5 py-0.5 rounded min-w-[34px] text-center",

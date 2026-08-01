@@ -6,13 +6,13 @@ import { RefreshCw, Loader2 } from "lucide-react";
 const SIG = {
   BUY:  { pill: "bg-emerald-500/10 text-emerald-400", bar: "bg-emerald-400" },
   SELL: { pill: "bg-red-500/10 text-red-400",         bar: "bg-red-400"     },
-  WAIT: { pill: "bg-white/5 text-muted-foreground",   bar: "bg-muted"       },
+  WAIT: { pill: "bg-muted text-muted-foreground",     bar: "bg-muted"       },
 };
 
 const COND = {
   Bullish: "bg-emerald-500/8 text-emerald-400",
   Bearish: "bg-red-500/8 text-red-400",
-  Neutral: "bg-white/5 text-muted-foreground",
+  Neutral: "bg-muted text-muted-foreground",
 };
 
 interface MarketScannerProps {
@@ -23,15 +23,15 @@ interface MarketScannerProps {
 
 export function MarketScanner({ results, loading, onRefresh }: MarketScannerProps) {
   return (
-    <div className="rounded-xl border border-white/7 bg-[#0d1117] flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/7">
+    <div className="rounded-xl border border-border bg-card shadow-card flex flex-col">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           📡 Market Scanner
         </span>
         <button
           type="button"
           onClick={onRefresh}
-          className="flex items-center gap-1 border border-white/10 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+          className="flex items-center gap-1 border border-border bg-muted/30 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
         >
           <RefreshCw className="size-3" />
         </button>
@@ -47,7 +47,7 @@ export function MarketScanner({ results, loading, onRefresh }: MarketScannerProp
             <thead>
               <tr>
                 {["Symbol", "Signal", "Confidence", "Condition", "Price"].map(h => (
-                  <th key={h} className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b border-white/5">
+                  <th key={h} className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b border-border">
                     {h}
                   </th>
                 ))}
@@ -59,7 +59,7 @@ export function MarketScanner({ results, loading, onRefresh }: MarketScannerProp
                 const sig  = SIG[r.signal];
                 const cond = COND[r.marketCondition];
                 return (
-                  <tr key={r.symbol} className="hover:bg-white/2 transition-colors border-b border-white/[0.03] last:border-none">
+                  <tr key={r.symbol} className="hover:bg-muted/40 transition-colors border-b border-border/50 last:border-none">
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1.5">
                         <span
@@ -68,7 +68,7 @@ export function MarketScanner({ results, loading, onRefresh }: MarketScannerProp
                         >
                           {meta.base[0]}
                         </span>
-                        <span className="text-xs font-semibold font-mono">{meta.base}/USDT</span>
+                        <span className="text-xs font-semibold font-mono text-foreground">{meta.base}/USDT</span>
                       </div>
                     </td>
                     <td className="px-3 py-2.5">
@@ -78,7 +78,7 @@ export function MarketScanner({ results, loading, onRefresh }: MarketScannerProp
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-16 h-1 rounded-full bg-white/5 overflow-hidden">
+                        <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
                           <div className={cn("h-full rounded-full", sig.bar)} style={{ width: `${r.confidence}%` }} />
                         </div>
                         <span className="text-[10px] font-mono text-muted-foreground">{r.confidence}%</span>

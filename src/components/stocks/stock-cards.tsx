@@ -23,7 +23,7 @@ export function StockCards({ tickers, selectedSymbol, onSelect, loading }: Stock
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="h-[72px] rounded-xl border border-white/7 bg-[#0d1117] animate-pulse" />
+          <div key={i} className="h-[72px] rounded-xl border border-border bg-card shadow-sm animate-pulse" />
         ))}
       </div>
     );
@@ -44,10 +44,10 @@ export function StockCards({ tickers, selectedSymbol, onSelect, loading }: Stock
             type="button"
             onClick={() => onSelect(t.symbol)}
             className={cn(
-              "flex flex-col text-left rounded-xl border p-2.5 transition-all outline-none",
+              "flex flex-col text-left rounded-xl border p-2.5 transition-all outline-none shadow-sm",
               isSelected
-                ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(34,53,197,0.2)]"
-                : "bg-[#0d1117] border-white/7 hover:border-white/20 hover:bg-[#161b27]",
+                ? "bg-primary/10 border-primary/60 shadow-elegant"
+                : "bg-card border-border hover:border-primary/40 hover:bg-muted/50",
             )}
           >
             <div className="flex items-center justify-between w-full">

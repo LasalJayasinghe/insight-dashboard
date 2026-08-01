@@ -39,6 +39,16 @@ function calcRSI(closes: number[], period = 14): (number | null)[] {
   return out;
 }
 
+function getThemeColors() {
+  const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
+  return {
+    background: isLight ? "transparent" : "transparent",
+    grid: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)",
+    text: isLight ? "#475569" : "#94a3b8",
+    border: isLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.07)",
+  };
+}
+
 interface CryptoChartProps {
   candles: CandleBar[];
   newCandle?: (CandleBar & { symbol: string }) | null;
@@ -60,11 +70,13 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
   useEffect(() => {
     if (!mainRef.current || !rsiRef.current) return;
 
+    const themeColors = getThemeColors();
+
     const common = {
-      layout: { background: { type: ColorType.Solid, color: COLORS.background }, textColor: COLORS.text },
-      grid: { vertLines: { color: COLORS.grid }, horzLines: { color: COLORS.grid } },
-      rightPriceScale: { borderColor: COLORS.border },
-      timeScale: { borderColor: COLORS.border, timeVisible: true, secondsVisible: false },
+      layout: { background: { type: ColorType.Solid, color: themeColors.background }, textColor: themeColors.text },
+      grid: { vertLines: { color: themeColors.grid }, horzLines: { color: themeColors.grid } },
+      rightPriceScale: { borderColor: themeColors.border },
+      timeScale: { borderColor: themeColors.border, timeVisible: true, secondsVisible: false },
       crosshair: { mode: CrosshairMode.Normal },
     };
 
@@ -91,6 +103,22 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
 
     rsiSeriesRef.current = rsiChart.addLineSeries({ color: COLORS.rsi, lineWidth: 1, priceLineVisible: false, title: "RSI 14" });
 
+    // Dynamic theme update listener
+    const updateThemeOptions = () => {
+      const tc = getThemeColors();
+      const options = {
+        layout: { background: { type: ColorType.Solid, color: tc.background }, textColor: tc.text },
+        grid: { vertLines: { color: tc.grid }, horzLines: { color: tc.grid } },
+        rightPriceScale: { borderColor: tc.border },
+        timeScale: { borderColor: tc.border },
+      };
+      main.applyOptions(options);
+      rsiChart.applyOptions(options);
+    };
+
+    const observer = new MutationObserver(updateThemeOptions);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
     // Responsive resize
     const ro = new ResizeObserver(() => {
       main.applyOptions({ width: mainRef.current?.clientWidth ?? 600 });
@@ -100,6 +128,7 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
     if (rsiRef.current)  ro.observe(rsiRef.current);
 
     return () => {
+      observer.disconnect();
       ro.disconnect();
       main.remove();
       rsiChart.remove();

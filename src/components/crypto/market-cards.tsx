@@ -63,11 +63,11 @@ export function MarketCard({ symbol, ticker, selected, onClick }: MarketCardProp
       type="button"
       onClick={onClick}
       className={cn(
-        "relative flex flex-col gap-1 rounded-xl border p-3.5 text-left transition-all duration-200",
+        "relative flex flex-col gap-1 rounded-xl border p-3.5 text-left transition-all duration-200 shadow-card",
         "hover:-translate-y-0.5 hover:shadow-lg cursor-pointer",
         selected
-          ? "border-primary/60 bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary)/0.3)]"
-          : "border-white/7 bg-[#0d1117] hover:border-primary/30",
+          ? "border-primary/60 bg-primary/10 shadow-elegant"
+          : "border-border bg-card hover:border-primary/40 hover:bg-muted/40",
       )}
     >
       {/* Top stripe on hover */}
@@ -75,7 +75,7 @@ export function MarketCard({ symbol, ticker, selected, onClick }: MarketCardProp
 
       <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
         <span
-          className="inline-flex items-center justify-center rounded-full text-white text-[9px] font-bold shrink-0"
+          className="inline-flex items-center justify-center rounded-full text-white text-[9px] font-bold shrink-0 shadow-sm"
           style={{ background: meta.color, width: 18, height: 18 }}
         >
           {meta.base[0]}
@@ -85,8 +85,8 @@ export function MarketCard({ symbol, ticker, selected, onClick }: MarketCardProp
 
       {!ticker ? (
         <>
-          <div className="h-5 w-24 rounded animate-pulse bg-white/5" />
-          <div className="h-3.5 w-14 rounded animate-pulse bg-white/5" />
+          <div className="h-5 w-24 rounded animate-pulse bg-muted" />
+          <div className="h-3.5 w-14 rounded animate-pulse bg-muted" />
         </>
       ) : (
         <>
