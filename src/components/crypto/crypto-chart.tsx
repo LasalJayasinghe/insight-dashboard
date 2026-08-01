@@ -80,8 +80,8 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
       wickUpColor: COLORS.up, wickDownColor: COLORS.down,
     });
 
-    ema9SeriesRef.current  = main.addLineSeries({ color: COLORS.ema9,  lineWidth: 1.5, priceLineVisible: false, title: "EMA 9" });
-    ema21SeriesRef.current = main.addLineSeries({ color: COLORS.ema21, lineWidth: 1.5, priceLineVisible: false, title: "EMA 21" });
+    ema9SeriesRef.current  = main.addLineSeries({ color: COLORS.ema9,  lineWidth: 1, priceLineVisible: false, title: "EMA 9" });
+    ema21SeriesRef.current = main.addLineSeries({ color: COLORS.ema21, lineWidth: 1, priceLineVisible: false, title: "EMA 21" });
 
     volSeriesRef.current = main.addHistogramSeries({
       color: COLORS.volume,
@@ -89,7 +89,7 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
     });
     main.priceScale("volume").applyOptions({ scaleMargins: { top: 0.85, bottom: 0 } });
 
-    rsiSeriesRef.current = rsiChart.addLineSeries({ color: COLORS.rsi, lineWidth: 1.5, priceLineVisible: false, title: "RSI 14" });
+    rsiSeriesRef.current = rsiChart.addLineSeries({ color: COLORS.rsi, lineWidth: 1, priceLineVisible: false, title: "RSI 14" });
 
     // Responsive resize
     const ro = new ResizeObserver(() => {

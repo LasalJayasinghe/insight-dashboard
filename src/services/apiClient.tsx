@@ -36,6 +36,31 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
+async function executeRefresh(): Promise<string | null> {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) return null;
+
+  try {
+    const refreshResponse = await axios.post(REFRESH_ENDPOINT, { refreshToken });
+    const nextToken = refreshResponse.data?.token ?? refreshResponse.data?.accessToken;
+    const nextRefreshToken = refreshResponse.data?.refreshToken;
+
+    if (nextToken) {
+      tokenService.set(nextToken);
+      if (nextRefreshToken) {
+        localStorage.setItem("refreshToken", nextRefreshToken);
+      }
+      return nextToken;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * RESPONSE INTERCEPTOR
  * - Handle global errors
@@ -59,31 +84,19 @@ apiClient.interceptors.response.use(
           if (originalRequest && !originalRequest._retry && !String(originalRequest.url ?? "").includes("/auth/refresh")) {
             originalRequest._retry = true;
 
-            const refreshToken = localStorage.getItem("refreshToken");
+            if (!isRefreshing) {
+              isRefreshing = true;
+              refreshPromise = executeRefresh().finally(() => {
+                isRefreshing = false;
+                refreshPromise = null;
+              });
+            }
 
-            if (refreshToken) {
-              try {
-                const refreshResponse = await axios.post(REFRESH_ENDPOINT, {
-                  refreshToken,
-                });
-
-                const nextToken = refreshResponse.data?.token ?? refreshResponse.data?.accessToken;
-                const nextRefreshToken = refreshResponse.data?.refreshToken;
-
-                if (nextToken) {
-                  tokenService.set(nextToken);
-                  if (nextRefreshToken) {
-                    localStorage.setItem("refreshToken", nextRefreshToken);
-                  }
-
-                  originalRequest.headers = originalRequest.headers ?? {};
-                  originalRequest.headers.Authorization = `Bearer ${nextToken}`;
-
-                  return apiClient(originalRequest);
-                }
-              } catch {
-                // Fall through to logout/redirect.
-              }
+            const nextToken = await refreshPromise;
+            if (nextToken) {
+              originalRequest.headers = originalRequest.headers ?? {};
+              originalRequest.headers.Authorization = `Bearer ${nextToken}`;
+              return apiClient(originalRequest);
             }
           }
 

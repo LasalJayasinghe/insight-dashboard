@@ -51,7 +51,7 @@ function normalizeStock(data: StockApiResponse): LiveStock {
 export const stocksService = {
   async getBySymbol(symbol: string): Promise<LiveStock> {
     const clean = symbol.trim().toUpperCase();
-    const res = await apiClient.get(`/stocks/${clean}`);
+    const res = await apiClient.get(`/stocks/details/${clean}`);
     return normalizeStock(res.data as StockApiResponse);
   },
 

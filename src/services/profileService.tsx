@@ -26,7 +26,6 @@ export async function changePassword(pwd: { current: string; next: string }): Pr
     ["token", "firstName", "lastName", "refreshToken"].forEach(key => localStorage.removeItem(key));
     return { success: true };
   } catch (error: any) {
-    ["token", "firstName", "lastName", "refreshToken"].forEach(key => localStorage.removeItem(key));
     const message = error?.response?.data?.message || "Failed to change password.";
     return { success: false, message };
   }
