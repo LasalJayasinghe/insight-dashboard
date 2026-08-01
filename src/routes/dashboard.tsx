@@ -11,7 +11,7 @@ import { watchlistService, type WatchlistStock } from "@/services/watchlist-serv
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
-    if (!isAuthenticated()) {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
       throw redirect({ to: "/login" });
     }
   },

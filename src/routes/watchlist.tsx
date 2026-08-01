@@ -32,7 +32,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const Route = createFileRoute("/watchlist")({
   beforeLoad: () => {
-    if (!isAuthenticated()) {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
       throw redirect({ to: "/login" });
     }
   },

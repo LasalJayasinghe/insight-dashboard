@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import { login } from "@/services/authService";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: () => {
-    if (isAuthenticated()) {
+    if (typeof window !== "undefined" && isAuthenticated()) {
       throw redirect({ to: "/dashboard" });
     }
   },
@@ -33,6 +33,12 @@ function LoginPage() {
   const [remember, setRemember] = useState(true);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && isAuthenticated()) {
+      void navigate({ to: "/dashboard", replace: true });
+    }
+  }, [navigate]);
 
   const validate = () => {
     const e: typeof errors = {};

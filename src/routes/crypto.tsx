@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/crypto")({
   beforeLoad: () => {
-    if (!isAuthenticated()) throw redirect({ to: "/login" });
+    if (typeof window !== "undefined" && !isAuthenticated()) throw redirect({ to: "/login" });
   },
   head: () => ({
     meta: [

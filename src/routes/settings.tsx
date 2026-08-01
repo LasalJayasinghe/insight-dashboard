@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: () => {
-    if (!isAuthenticated()) {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
       throw redirect({ to: "/login" });
     }
   },

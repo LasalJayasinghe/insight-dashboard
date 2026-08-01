@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/algorithms/$algoId")({
   beforeLoad: () => {
-    if (!isAuthenticated()) {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
       throw redirect({ to: "/login" });
     }
   },

@@ -11,7 +11,7 @@ import { LineChart, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/stocks")({
   beforeLoad: () => {
-    if (!isAuthenticated()) throw redirect({ to: "/login" });
+    if (typeof window !== "undefined" && !isAuthenticated()) throw redirect({ to: "/login" });
   },
   head: () => ({
     meta: [
