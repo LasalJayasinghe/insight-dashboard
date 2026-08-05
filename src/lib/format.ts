@@ -10,11 +10,29 @@ export const formatRs = (n: number, fractionDigits = 2) =>
     maximumFractionDigits: fractionDigits,
   })}`;
 
+export const formatChange = (n: number, fractionDigits = 2) =>
+  `${n >= 0 ? "+" : ""}${formatRs(n, fractionDigits)}`;
+
 export const formatPct = (n: number, fractionDigits = 2) =>
   `${n >= 0 ? "+" : ""}${n.toFixed(fractionDigits)}%`;
 
+export const formatUtcToLocalTime = (iso: string | undefined | null) => {
+  if (!iso) return "";
+  const utcIso = iso.endsWith("Z") || iso.includes("+") ? iso : `${iso}Z`;
+  const date = new Date(utcIso);
+  if (isNaN(date.getTime())) return iso;
+
+  return date.toLocaleTimeString("en-US", {
+    timeZone: "Asia/Colombo",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export const formatRelative = (iso: string) => {
-  const diff = Date.now() - new Date(iso).getTime();
+  if (!iso) return "";
+  const utcIso = iso.endsWith("Z") || iso.includes("+") ? iso : `${iso}Z`;
+  const diff = Date.now() - new Date(utcIso).getTime();
   const m = Math.round(diff / 60000);
   if (m < 1) return "just now";
   if (m < 60) return `${m}m ago`;

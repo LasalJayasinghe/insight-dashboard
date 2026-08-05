@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { PortfolioChart } from "@/components/dashboard/portfolio-chart";
+import { IntradayStocks } from "@/components/dashboard/intraday-stocks";
 import { stocksService, type IntradayPoint } from "@/services/stocks-service";
 import { isAuthenticated } from "@/lib/auth";
 

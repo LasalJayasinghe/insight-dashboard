@@ -11,8 +11,13 @@ export interface LiveStock {
 
 export interface IntradayPoint {
   symbol: string;
+  name?: string;
   price: number;
+  high?: number;
+  low?: number;
+  change?: number;
   percentage: number;
+  volatility?: number;
 }
 
 export interface MarketStatus {

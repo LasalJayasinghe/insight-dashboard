@@ -6,9 +6,10 @@ import { fmtPrice, fmtChange } from "./stock-cards";
 interface StockMoversPanelProps {
   movers: StockMovers | null;
   loading: boolean;
+  onSelectStock?: (symbol: string) => void;
 }
 
-export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
+export function StockMoversPanel({ movers, loading, onSelectStock }: StockMoversPanelProps) {
   const gainers = movers?.gainers ?? [];
   const losers = movers?.losers ?? [];
 
@@ -39,7 +40,7 @@ export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
           ) : (
             <div className="space-y-1">
               {gainers.map((g, i) => (
-                <MoverRow key={g.symbol} mover={g} rank={i + 1} type="gain" />
+                <MoverRow key={g.symbol} mover={g} rank={i + 1} type="gain" onSelectStock={onSelectStock} />
               ))}
             </div>
           )}
@@ -61,7 +62,7 @@ export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
           ) : (
             <div className="space-y-1">
               {losers.map((l, i) => (
-                <MoverRow key={l.symbol} mover={l} rank={i + 1} type="loss" />
+                <MoverRow key={l.symbol} mover={l} rank={i + 1} type="loss" onSelectStock={onSelectStock} />
               ))}
             </div>
           )}
@@ -72,15 +73,20 @@ export function StockMoversPanel({ movers, loading }: StockMoversPanelProps) {
   );
 }
 
-function MoverRow({ mover, rank, type }: { mover: TopMover, rank: number, type: "gain" | "loss" }) {
+function MoverRow({ mover, rank, type, onSelectStock }: { mover: TopMover; rank: number; type: "gain" | "loss"; onSelectStock?: (symbol: string) => void }) {
   const isGain = type === "gain";
   return (
-    <div className={cn("flex items-center justify-between p-2 rounded-lg hover:bg-muted/40 transition-colors border border-transparent",
-      isGain ? "hover:border-emerald-500/20" : "hover:border-red-500/20"
-    )}>
+    <div
+      onClick={() => onSelectStock?.(mover.symbol)}
+      className={cn(
+        "flex items-center justify-between p-2 rounded-lg hover:bg-muted/40 transition-colors border border-transparent group",
+        onSelectStock && "cursor-pointer",
+        isGain ? "hover:border-emerald-500/20" : "hover:border-red-500/20",
+      )}
+    >
       <div className="flex items-center gap-3">
         <span className="text-xs font-bold text-muted-foreground w-4 text-center">{rank}</span>
-        <span className="text-sm font-bold font-mono text-foreground">{mover.symbol}</span>
+        <span className="text-sm font-bold font-mono text-foreground group-hover:text-primary transition-colors">{mover.symbol}</span>
       </div>
       <div className="flex flex-col items-end">
         <span className="text-sm font-bold font-mono text-foreground">{fmtPrice(mover.price)}</span>

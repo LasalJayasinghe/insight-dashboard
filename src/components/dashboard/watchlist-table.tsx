@@ -6,11 +6,17 @@ import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export function WatchlistTable({ stocks = mockStocks, loading = false }: { stocks?: Stock[]; loading?: boolean }) {
+interface WatchlistTableProps {
+  stocks?: Stock[];
+  loading?: boolean;
+  onSelectStock?: (symbol: string) => void;
+}
+
+export function WatchlistTable({ stocks = mockStocks, loading = false, onSelectStock }: WatchlistTableProps) {
   if (loading) {
     return (
       <Card className="gradient-card border-border shadow-card h-105">
-        <CardHeader className="flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
         </CardHeader>
         <CardContent>
@@ -23,7 +29,7 @@ export function WatchlistTable({ stocks = mockStocks, loading = false }: { stock
   if (stocks.length === 0) {
     return (
       <Card className="gradient-card border-border shadow-card h-105">
-        <CardHeader className="flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
         </CardHeader>
         <CardContent>
@@ -34,53 +40,68 @@ export function WatchlistTable({ stocks = mockStocks, loading = false }: { stock
   }
 
   return (
-    <Card className="gradient-card border-border shadow-card h-105">
-      <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
+    <Card className="gradient-card border-border shadow-card h-105 flex flex-col">
+      <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+        <div>
+          <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">Your saved & tracked stocks</p>
+        </div>
+        <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted/80 text-muted-foreground font-medium border border-border/40">
+          {stocks.length} Saved
+        </span>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 flex-1 min-h-0">
         <ScrollArea className="h-85">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-xs uppercase tracking-wider">Symbol</TableHead>
-              <TableHead className="text-xs uppercase tracking-wider text-right">Price</TableHead>
-              <TableHead className="text-xs uppercase tracking-wider text-right">Change</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {stocks.map((s) => {
-              const up = s.changePct >= 0;
-              return (
-                <TableRow key={s.symbol} className="border-border/60 hover:bg-muted/30 transition-colors">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="size-9 rounded-lg bg-muted/60 flex items-center justify-center text-xs font-bold tracking-tight">
-                        {s.symbol.slice(0, 2)}
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="text-xs uppercase tracking-wider">Symbol</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right">Price</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right">Change</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {stocks.map((s) => {
+                const up = s.changePct >= 0;
+                return (
+                  <TableRow
+                    key={s.symbol}
+                    onClick={() => onSelectStock?.(s.symbol)}
+                    className={cn(
+                      "border-border/60 hover:bg-muted/40 transition-colors group",
+                      onSelectStock && "cursor-pointer",
+                    )}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold tracking-tight shrink-0 font-mono">
+                          {s.symbol.slice(0, 2)}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-xs font-mono group-hover:text-primary transition-colors flex items-center gap-1">
+                            {s.symbol}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground truncate max-w-[140px]">{s.name}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-semibold text-sm">{s.symbol}</div>
-                        <div className="text-xs text-muted-foreground">{s.name}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right tabular font-medium">{formatRs(s.price)}</TableCell>
-                  <TableCell className="text-right">
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-semibold tabular",
-                        up ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive",
-                      )}
-                    >
-                      {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
-                      {Math.abs(s.changePct).toFixed(2)}%
-                    </span>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell className="text-right tabular font-mono font-bold text-xs">{formatRs(s.price)}</TableCell>
+                    <TableCell className="text-right">
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-bold font-mono tabular",
+                          up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
+                        )}
+                      >
+                        {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+                        {s.changePct >= 0 ? "+" : ""}{s.changePct.toFixed(2)}%
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </ScrollArea>
       </CardContent>
     </Card>

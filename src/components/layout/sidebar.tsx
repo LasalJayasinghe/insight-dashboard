@@ -1,17 +1,32 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, User, LineChart, Settings, Bell, LogOut, Cpu, Bitcoin, BarChart3 } from "lucide-react";
+import { LayoutDashboard, User, LineChart, Settings, Bell, LogOut, Cpu, Bitcoin, BarChart3, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
 
-const items = [
-  { to: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
-  { to: "/algorithms", label: "Algorithms", icon: Cpu },
-  { to: "/watchlist",  label: "Watchlist",  icon: LineChart },
-  { to: "/alerts",     label: "Alerts",     icon: Bell },
-  { to: "/crypto",     label: "Crypto",     icon: Bitcoin },
-  { to: "/stocks",     label: "Stocks",     icon: BarChart3 },
-  { to: "/profile",    label: "Profile",    icon: User },
-  { to: "/settings",   label: "Settings",   icon: Settings },
+const navGroups = [
+  {
+    group: "MARKETS & TRADING",
+    items: [
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/stocks", label: "Stocks Market", icon: BarChart3 },
+      { to: "/watchlist", label: "Watchlist", icon: LineChart },
+      { to: "/alerts", label: "Price Alerts", icon: Bell },
+    ],
+  },
+  {
+    group: "ALGORITHMS & CRYPTO",
+    items: [
+      { to: "/algorithms", label: "AI Strategies", icon: Cpu },
+      { to: "/crypto", label: "Crypto Market", icon: Bitcoin },
+    ],
+  },
+  {
+    group: "SETTINGS & PROFILE",
+    items: [
+      { to: "/profile", label: "User Profile", icon: User },
+      { to: "/settings", label: "Preferences", icon: Settings },
+    ],
+  },
 ] as const;
 
 interface SidebarProps {
@@ -30,55 +45,70 @@ export function Sidebar({ open, mobileOpen = false, onCloseMobile }: SidebarProp
   };
 
   const navContent = (
-    <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
+    <div className="flex flex-col h-full bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border/60 transition-colors">
       {/* Logo Header */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border shrink-0">
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="size-9 rounded-lg gradient-primary flex items-center justify-center shadow-glow shrink-0">
-            <img src="/public/logo/logo.png" alt="Logo" className="size-5" />
+      <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border/60 shrink-0">
+        <Link to="/dashboard" className="flex items-center gap-3 overflow-hidden group">
+          <div className="size-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow shrink-0 group-hover:scale-105 transition-transform">
+            <TrendingUp className="size-5 text-primary-foreground" />
           </div>
           {open && (
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold tracking-tight">AlertMe</span>
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Trading</span>
+              <span className="text-base font-extrabold font-mono tracking-tight text-sidebar-foreground">
+                AlertMe
+              </span>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-primary/80">
+                Trading Platform
+              </span>
             </div>
           )}
-        </div>
+        </Link>
       </div>
 
-      {/* Nav Links (Independently Scrollable) */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-thin">
-        {items.map(({ to, label, icon: Icon }) => {
-          const active = location.pathname === to || (to === "/dashboard" && location.pathname === "/");
-          return (
-            <Link
-              key={to}
-              to={to}
-              onClick={onCloseMobile}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all group",
-                active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-card"
-                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60",
-              )}
-            >
-              <Icon className={cn("size-5 shrink-0", active && "text-primary")} />
-              {open && <span className="font-medium">{label}</span>}
-              {open && active && <span className="ml-auto size-1.5 rounded-full bg-primary" />}
-            </Link>
-          );
-        })}
+      {/* Nav Links Grouped by Category */}
+      <nav className="flex-1 p-3 space-y-5 overflow-y-auto scrollbar-thin">
+        {navGroups.map((group) => (
+          <div key={group.group} className="space-y-1">
+            {open && (
+              <div className="px-3 pb-1 text-[10px] font-extrabold font-mono uppercase tracking-widest text-muted-foreground/60 select-none">
+                {group.group}
+              </div>
+            )}
+            {group.items.map(({ to, label, icon: Icon }) => {
+              const active = location.pathname === to || (to === "/dashboard" && location.pathname === "/");
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={onCloseMobile}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-200 group relative",
+                    active
+                      ? "bg-primary/10 text-primary font-bold shadow-xs border border-primary/20"
+                      : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60",
+                  )}
+                >
+                  <Icon className={cn("size-4.5 shrink-0 transition-transform group-hover:scale-110", active ? "text-primary" : "text-muted-foreground")} />
+                  {open && <span className="truncate">{label}</span>}
+                  {open && active && (
+                    <span className="ml-auto size-1.5 rounded-full bg-primary animate-pulse" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Sign Out Footer */}
-      <div className="p-3 border-t border-sidebar-border shrink-0">
+      <div className="p-3 border-t border-sidebar-border/60 shrink-0">
         <button
           type="button"
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:text-destructive hover:bg-sidebar-accent/60 transition-colors"
+          className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
         >
-          <LogOut className="size-5 shrink-0" />
-          {open && <span className="font-medium">Sign out</span>}
+          <LogOut className="size-4.5 shrink-0 text-muted-foreground hover:text-destructive" />
+          {open && <span>Sign out</span>}
         </button>
       </div>
     </div>
@@ -100,7 +130,7 @@ export function Sidebar({ open, mobileOpen = false, onCloseMobile }: SidebarProp
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onCloseMobile} />
-          <div className="relative w-64 h-full z-10">
+          <div className="relative w-64 h-full z-10 animate-in slide-in-from-left duration-200">
             {navContent}
           </div>
         </div>

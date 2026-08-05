@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { StockTicker } from "@/services/stock-service";
 import { StockChart } from "./stock-chart";
 import { fmtPrice, fmtChange } from "./stock-cards";
-import { ArrowLeft, TrendingUp, TrendingDown, Bell, Star, Sparkles, Activity, Landmark, ShieldCheck } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Star, Sparkles, Activity, Info, Zap, Target, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { watchlistService } from "@/services/watchlist-service";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StockDetailViewProps {
   stock: StockTicker;
@@ -34,6 +35,9 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
     ? Math.min(100, Math.max(0, ((stock.price - stock.low) / (stock.high - stock.low)) * 100))
     : 50;
 
+  const range = stock.high - stock.low;
+  const confidence = Math.min(95, Math.max(68, Math.abs(stock.percentageChange) * 8 + 72)).toFixed(0);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Navigation & Header */}
@@ -42,7 +46,7 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 text-xs font-bold bg-muted/50 border border-border hover:bg-muted text-foreground px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 text-xs font-bold bg-muted/50 border border-border hover:bg-muted text-foreground px-3 py-2 rounded-lg transition-colors cursor-pointer"
           >
             <ArrowLeft className="size-4" /> Back to Stocks
           </button>
@@ -67,7 +71,7 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
             type="button"
             onClick={handleAddToWatchlist}
             disabled={addingWatchlist}
-            className="flex items-center gap-1.5 text-xs font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 px-3.5 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 text-xs font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 px-3.5 py-2 rounded-lg transition-colors cursor-pointer"
           >
             <Star className="size-3.5 fill-primary/20" />
             {addingWatchlist ? "Adding..." : "Add to Watchlist"}
@@ -103,7 +107,7 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
       {/* Interactive Candlestick Chart */}
       <StockChart stock={stock} />
 
-      {/* Grid: Details & AI Verdict */}
+      {/* Grid: Metrics & Dedicated AI Analysis Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Financial Metrics */}
         <div className="lg:col-span-2 rounded-xl border border-border bg-card shadow-card p-5 space-y-4">
@@ -140,7 +144,28 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           <div className="pt-2">
             <div className="flex justify-between text-xs font-mono text-muted-foreground mb-1">
               <span>Low: {fmtPrice(stock.low)}</span>
-              <span className="font-bold text-foreground">Current Day Range</span>
+              <span className="font-bold text-foreground flex items-center gap-1">
+                Current Day (Intraday) Range
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
+                        aria-label="What is Intraday Range?"
+                      >
+                        <Info className="size-3.5 shrink-0" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs text-xs space-y-1 p-2.5">
+                      <p className="font-semibold">Intraday Range</p>
+                      <p className="leading-relaxed opacity-90">
+                        Shows price fluctuations between the highest and lowest prices reached during today's active trading session.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </span>
               <span>High: {fmtPrice(stock.high)}</span>
             </div>
             <div className="h-2 w-full rounded-full bg-muted overflow-hidden relative">
@@ -152,33 +177,54 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           </div>
         </div>
 
-        {/* AI Analysis Verdict */}
+        {/* Dedicated AI Market & Stock Summary Panel */}
         <div className="rounded-xl border border-border bg-card shadow-card p-5 flex flex-col justify-between space-y-4">
-          <div>
+          <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-border pb-3">
               <Sparkles className="size-4 text-purple-400" />
-              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">AI Signal & Analysis</h3>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">AI Market & Stock Summary</h3>
             </div>
 
-            <div className="mt-4 space-y-3">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Technical Signal</span>
-                <span className={cn("text-xs font-mono font-bold px-2 py-0.5 rounded uppercase",
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Zap className="size-3 text-purple-400" /> Technical Signal
+                </span>
+                <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded uppercase",
                   isUp ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"
                 )}>
-                  {isUp ? "BULLISH" : "BEARISH"}
+                  {isUp ? "BULLISH ACCUMULATION" : "BEARISH CONSOLIDATION"}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Confidence Score</span>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Target className="size-3 text-purple-400" /> AI Confidence Score
+                </span>
                 <span className="text-xs font-mono font-bold text-foreground">
-                  {Math.min(95, Math.max(65, Math.abs(stock.percentageChange) * 10 + 70)).toFixed(0)}%
+                  {confidence}%
                 </span>
               </div>
 
-              <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 text-xs text-muted-foreground leading-relaxed mt-3">
-                {stock.symbol} is currently trading at {fmtPrice(stock.price)}. Based on intraday momentum and volume patterns, key indicators suggest a {isUp ? "bullish accumulation phase" : "short-term consolidation phase"}.
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <BarChart3 className="size-3 text-purple-400" /> Intraday Volatility
+                </span>
+                <span className="text-xs font-mono font-bold text-foreground">
+                  {stock.low > 0 ? (((stock.high - stock.low) / stock.low) * 100).toFixed(2) : "0.00"}%
+                </span>
+              </div>
+
+              {/* Comprehensive AI Summary Narrative */}
+              <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3.5 text-xs text-foreground leading-relaxed mt-2 space-y-2">
+                <p>
+                  <strong>{stock.symbol}</strong> ({stock.name}) is trading at <strong>{fmtPrice(stock.price)}</strong> ({isUp ? "+" : ""}{stock.percentageChange.toFixed(2)}%).
+                </p>
+                <p className="text-muted-foreground">
+                  {isUp
+                    ? `Intraday buying momentum is strong as price trades near today's high of ${fmtPrice(stock.high)}. Key moving averages indicate sustained buyer interest.`
+                    : `Selling pressure dominates today's session as price pulls back towards day low of ${fmtPrice(stock.low)}. Consolidating near support bounds.`}
+                </p>
               </div>
             </div>
           </div>
@@ -186,7 +232,7 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           <button
             type="button"
             onClick={handleAddToWatchlist}
-            className="w-full py-2.5 rounded-lg font-bold text-xs bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+            className="w-full py-2.5 rounded-lg font-bold text-xs bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm cursor-pointer"
           >
             Track {stock.symbol} Performance
           </button>
