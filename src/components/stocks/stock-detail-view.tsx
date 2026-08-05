@@ -50,19 +50,6 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           >
             <ArrowLeft className="size-4" /> Back to Stocks
           </button>
-
-          {/* Quick Stock Selector */}
-          <select
-            value={stock.symbol}
-            onChange={(e) => onSelectStock(e.target.value)}
-            className="bg-card border border-border rounded-lg px-3 py-2 text-xs font-mono font-bold text-foreground outline-none cursor-pointer hover:border-primary/40 shadow-sm"
-          >
-            {allStocks.map(s => (
-              <option key={s.symbol} value={s.symbol}>
-                {s.symbol} — {s.name} ({fmtPrice(s.price)})
-              </option>
-            ))}
-          </select>
         </div>
 
         {/* Quick Actions */}
