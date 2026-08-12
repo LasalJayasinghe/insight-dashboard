@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, User, LineChart, Settings, Bell, LogOut, Cpu, Bitcoin, BarChart3, TrendingUp } from "lucide-react";
+import { LayoutDashboard, User, LineChart, Settings, Bell, LogOut, Cpu, Bitcoin, BarChart3, TrendingUp, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
 
@@ -10,6 +10,7 @@ const navGroups = [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/stocks", label: "Stocks Market", icon: BarChart3 },
       { to: "/watchlist", label: "Watchlist", icon: LineChart },
+      { to: "/portfolios", label: "Portfolios", icon: Briefcase },
       { to: "/alerts", label: "Price Alerts", icon: Bell },
     ],
   },

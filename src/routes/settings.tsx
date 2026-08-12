@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/use-theme";
 import { isAuthenticated } from "@/lib/auth";
 import { settingsService, type UserSettings } from "@/services/settings-service";
@@ -26,6 +29,17 @@ export const Route = createFileRoute("/settings")({
 function SettingsPage() {
   const { theme, toggle } = useTheme();
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [rateDialogOpen, setRateDialogOpen] = useState(false);
+  
+  const [usdtRate, setUsdtRate] = useState("");
+  const [lkrRate, setLkrRate] = useState("");
+
+  useEffect(() => {
+    if (settings) {
+      setUsdtRate(settings.usdtToLkrRate?.toString() || "");
+      setLkrRate(settings.lkrToUsdtRate?.toString() || "");
+    }
+  }, [settings]);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,9 +64,23 @@ function SettingsPage() {
     setSettings(next);
     try {
       await settingsService.update(next);
+      toast.success("Settings saved");
     } catch {
       toast.error("Failed to save settings");
     }
+  };
+
+  const handleSaveRates = async () => {
+    if (!settings) return;
+    const ur = parseFloat(usdtRate);
+    const lr = parseFloat(lkrRate);
+    if (isNaN(ur) || isNaN(lr)) {
+      toast.error("Please enter valid numbers");
+      return;
+    }
+    
+    await update({ ...settings, usdtToLkrRate: ur, lkrToUsdtRate: lr });
+    setRateDialogOpen(false);
   };
 
   return (
@@ -120,7 +148,65 @@ function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <Card className="gradient-card border-border shadow-card">
+          <CardHeader><CardTitle className="text-base font-semibold">Currency & Exchange</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">USDT to LKR Rate</p>
+                <p className="text-sm text-muted-foreground">{settings?.usdtToLkrRate || 0}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">LKR to USDT Rate</p>
+                <p className="text-sm text-muted-foreground">{settings?.lkrToUsdtRate || 0}</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setRateDialogOpen(true)}>
+              Edit Rates
+            </Button>
+          </CardContent>
+        </Card>
       </div>
+
+      <Dialog open={rateDialogOpen} onOpenChange={setRateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Exchange Rates</DialogTitle>
+            <DialogDescription>
+              Set the conversion rates for your portfolio net worth.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">USDT to LKR Rate</label>
+              <Input
+                type="number"
+                step="any"
+                value={usdtRate}
+                onChange={(e) => setUsdtRate(e.target.value)}
+                placeholder="e.g. 300"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">LKR to USDT Rate</label>
+              <Input
+                type="number"
+                step="any"
+                value={lkrRate}
+                onChange={(e) => setLkrRate(e.target.value)}
+                placeholder="e.g. 0.0033"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRateDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => void handleSaveRates()}>Save Rates</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

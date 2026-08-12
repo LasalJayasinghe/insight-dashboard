@@ -4,12 +4,16 @@ export interface UserSettings {
   emailNotifications: boolean;
   priceAlerts: boolean;
   twoFactorAuthentication: boolean;
+  usdtToLkrRate: number;
+  lkrToUsdtRate: number;
 }
 
 type ApiSettings = {
   emailNotifications: boolean;
   priceAlerts: boolean;
   twoFactorAuthentication: boolean;
+  usdtToLkrRate: number;
+  lkrToUsdtRate: number;
 };
 
 export const settingsService = {

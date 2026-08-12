@@ -14,6 +14,7 @@ import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as CryptoRouteImport } from './routes/crypto'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PortfoliosRouteImport } from './routes/portfolios'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StocksRouteImport } from './routes/stocks'
@@ -44,6 +45,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfoliosRoute = PortfoliosRouteImport.update({
+  id: '/portfolios',
+  path: '/portfolios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/portfolios': typeof PortfoliosRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/stocks': typeof StocksRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/portfolios': typeof PortfoliosRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/stocks': typeof StocksRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/portfolios': typeof PortfoliosRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/stocks': typeof StocksRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/crypto'
     | '/dashboard'
     | '/login'
+    | '/portfolios'
     | '/profile'
     | '/settings'
     | '/stocks'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/crypto'
     | '/dashboard'
     | '/login'
+    | '/portfolios'
     | '/profile'
     | '/settings'
     | '/stocks'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/crypto'
     | '/dashboard'
     | '/login'
+    | '/portfolios'
     | '/profile'
     | '/settings'
     | '/stocks'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   CryptoRoute: typeof CryptoRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  PortfoliosRoute: typeof PortfoliosRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
   StocksRoute: typeof StocksRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolios': {
+      id: '/portfolios'
+      path: '/portfolios'
+      fullPath: '/portfolios'
+      preLoaderRoute: typeof PortfoliosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   CryptoRoute: CryptoRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  PortfoliosRoute: PortfoliosRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
   StocksRoute: StocksRoute,
