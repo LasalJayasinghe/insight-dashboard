@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
 import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { IntradayPoint } from "@/services/stocks-service";
+import type { IntradayPoint } from "@/services/stock-service";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 

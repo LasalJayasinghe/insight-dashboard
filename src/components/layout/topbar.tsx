@@ -14,7 +14,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useTheme } from "@/hooks/use-theme";
 import { logout } from "@/lib/auth";
 import { watchlistService, type StockOption } from "@/services/watchlist-service";
-import { stocksService, type IntradayPoint } from "@/services/stocks-service";
+import { stockService, type IntradayPoint } from "@/services/stock-service";
 import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -42,7 +42,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
       try {
         const [options, intradayData] = await Promise.all([
           watchlistService.listStockOptions().catch(() => []),
-          stocksService.getIntraday().catch(() => []),
+          stockService.getIntraday().catch(() => []),
         ]);
 
         if (cancelled) return;

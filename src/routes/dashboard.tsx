@@ -2,8 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { PortfolioChart } from "@/components/dashboard/portfolio-chart";
-import { IntradayStocks } from "@/components/dashboard/intraday-stocks";
-import { stocksService, type IntradayPoint } from "@/services/stocks-service";
+import { stockService, type IntradayPoint } from "@/services/stock-service";
 import { isAuthenticated } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard")({
@@ -28,7 +27,7 @@ function DashboardPage() {
     let cancelled = false;
 
     const load = async () => {
-      const intradayResult = await stocksService.getIntraday().catch(() => []);
+      const intradayResult = await stockService.getIntraday().catch(() => []);
 
       if (cancelled) return;
 

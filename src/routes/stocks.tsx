@@ -11,7 +11,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { LineChart, RefreshCw, BarChart2 } from "lucide-react";
 import { IntradayStocks } from "@/components/dashboard/intraday-stocks";
 import { WatchlistTable } from "@/components/dashboard/watchlist-table";
-import { stocksService, type IntradayPoint } from "@/services/stocks-service";
+import { stockService, type IntradayPoint } from "@/services/stock-service";
 import { watchlistService, type WatchlistStock } from "@/services/watchlist-service";
 
 const stocksSearchSchema = z.object({
@@ -64,7 +64,7 @@ function StocksPage() {
 
     const load = async () => {
       const [intradayResult, watchlistResult] = await Promise.all([
-        stocksService.getIntraday().catch(() => []),
+        stockService.getIntraday().catch(() => []),
         watchlistService.list().catch(() => []),
       ]);
 
