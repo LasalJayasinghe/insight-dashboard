@@ -3,20 +3,21 @@ import type { TickerData } from "@/services/crypto-service";
 import { useEffect, useRef } from "react";
 
 export const COIN_META: Record<string, { name: string; base: string; color: string }> = {
-  BTCUSDT:  { name: "Bitcoin",  base: "BTC",  color: "#f7931a" },
-  ETHUSDT:  { name: "Ethereum", base: "ETH",  color: "#627eea" },
-  BNBUSDT:  { name: "BNB",      base: "BNB",  color: "#f3ba2f" },
-  SOLUSDT:  { name: "Solana",   base: "SOL",  color: "#9945ff" },
-  XRPUSDT:  { name: "XRP",      base: "XRP",  color: "#00aae4" },
-  ADAUSDT:  { name: "Cardano",  base: "ADA",  color: "#0033ad" },
+  BTCUSDT: { name: "Bitcoin", base: "BTC", color: "#f7931a" },
+  ETHUSDT: { name: "Ethereum", base: "ETH", color: "#627eea" },
+  BNBUSDT: { name: "BNB", base: "BNB", color: "#f3ba2f" },
+  SOLUSDT: { name: "Solana", base: "SOL", color: "#9945ff" },
+  XRPUSDT: { name: "XRP", base: "XRP", color: "#00aae4" },
+  ADAUSDT: { name: "Cardano", base: "ADA", color: "#0033ad" },
   DOGEUSDT: { name: "Dogecoin", base: "DOGE", color: "#c2a633" },
 };
 
 export const TRACKED_SYMBOLS = Object.keys(COIN_META);
 
 export function fmtPrice(n: number) {
-  if (n >= 1000) return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  if (n >= 1)    return "$" + n.toFixed(4);
+  if (n >= 1000)
+    return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (n >= 1) return "$" + n.toFixed(4);
   return "$" + n.toFixed(6);
 }
 
@@ -37,9 +38,13 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ symbol, ticker, selected, onClick }: MarketCardProps) {
-  const meta = COIN_META[symbol] ?? { base: symbol.replace("USDT", ""), color: "#888", name: symbol };
+  const meta = COIN_META[symbol] ?? {
+    base: symbol.replace("USDT", ""),
+    color: "#888",
+    name: symbol,
+  };
   const prevPrice = useRef<number | null>(null);
-  const priceRef  = useRef<HTMLSpanElement>(null);
+  const priceRef = useRef<HTMLSpanElement>(null);
 
   // Flash animation on price change
   useEffect(() => {
@@ -55,7 +60,7 @@ export function MarketCard({ symbol, ticker, selected, onClick }: MarketCardProp
     prevPrice.current = ticker.lastPrice;
   }, [ticker?.lastPrice]);
 
-  const pct  = ticker?.priceChangePercent ?? 0;
+  const pct = ticker?.priceChangePercent ?? 0;
   const isUp = pct >= 0;
 
   return (
@@ -96,8 +101,14 @@ export function MarketCard({ symbol, ticker, selected, onClick }: MarketCardProp
           >
             {fmtPrice(ticker.lastPrice)}
           </span>
-          <span className={cn("text-xs font-semibold font-mono", isUp ? "text-emerald-400" : "text-red-400")}>
-            {isUp ? "+" : ""}{pct.toFixed(2)}%
+          <span
+            className={cn(
+              "text-xs font-semibold font-mono",
+              isUp ? "text-emerald-400" : "text-red-400",
+            )}
+          >
+            {isUp ? "+" : ""}
+            {pct.toFixed(2)}%
           </span>
           <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1">
             {[
@@ -128,7 +139,7 @@ interface MarketCardsProps {
 export function MarketCards({ tickers, selectedSymbol, onSelect }: MarketCardsProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-5">
-      {TRACKED_SYMBOLS.map(sym => (
+      {TRACKED_SYMBOLS.map((sym) => (
         <MarketCard
           key={sym}
           symbol={sym}

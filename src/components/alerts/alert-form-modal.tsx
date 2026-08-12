@@ -117,7 +117,9 @@ export function AlertFormModal({
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit alert" : "Create alert"}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update this alert's parameters." : "Get notified when a stock hits your target price."}
+            {isEdit
+              ? "Update this alert's parameters."
+              : "Get notified when a stock hits your target price."}
           </DialogDescription>
         </DialogHeader>
 
@@ -135,7 +137,11 @@ export function AlertFormModal({
                   className="w-full justify-between"
                   disabled={isEdit}
                 >
-                  {form.symbol ? form.symbol : stockOptionsLoading ? "Loading stocks..." : "Select symbol"}
+                  {form.symbol
+                    ? form.symbol
+                    : stockOptionsLoading
+                      ? "Loading stocks..."
+                      : "Select symbol"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -174,7 +180,9 @@ export function AlertFormModal({
               </PopoverContent>
             </Popover>
             {isEdit && (
-              <p className="text-xs text-muted-foreground">Symbol cannot be changed for an existing alert.</p>
+              <p className="text-xs text-muted-foreground">
+                Symbol cannot be changed for an existing alert.
+              </p>
             )}
             {errors.symbol && <p className="text-xs text-destructive">{errors.symbol}</p>}
           </div>
@@ -225,7 +233,12 @@ export function AlertFormModal({
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={submitting}>

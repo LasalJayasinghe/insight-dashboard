@@ -1,13 +1,5 @@
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
-import {
-  Activity,
-  ArrowLeft,
-  BarChart3,
-  Pause,
-  Percent,
-  Play,
-  TrendingUp,
-} from "lucide-react";
+import { Activity, ArrowLeft, BarChart3, Pause, Percent, Play, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/app-shell";
@@ -53,9 +45,7 @@ function AlgorithmDetailPage() {
     setToggling(true);
     try {
       const updated = await toggle();
-      toast.success(
-        `Algorithm ${updated.status === "RUNNING" ? "started" : "stopped"}`,
-      );
+      toast.success(`Algorithm ${updated.status === "RUNNING" ? "started" : "stopped"}`);
     } catch {
       toast.error("Failed to update algorithm");
     } finally {
@@ -105,9 +95,7 @@ function AlgorithmDetailPage() {
                 )}
               </div>
               {data?.description && (
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {data.description}
-                </p>
+                <p className="text-sm text-muted-foreground mt-0.5">{data.description}</p>
               )}
             </div>
           </div>
@@ -188,8 +176,8 @@ function AlgorithmDetailPage() {
                   data.currentSignal === "BUY"
                     ? "success"
                     : data.currentSignal === "SELL"
-                    ? "destructive"
-                    : "warning",
+                      ? "destructive"
+                      : "warning",
               },
             ]}
           />
@@ -212,10 +200,7 @@ function AlgorithmDetailPage() {
               </>
             ) : (
               <>
-                <ChartPanel
-                  pair={data.signals[0]?.pair ?? "BTC/USDT"}
-                  bias={data.currentSignal}
-                />
+                <ChartPanel pair={data.signals[0]?.pair ?? "BTC/USDT"} bias={data.currentSignal} />
                 <TradeDetailsPanel trade={data.trade} />
               </>
             )}

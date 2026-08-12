@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { createChart, ColorType, CrosshairMode, type IChartApi, type ISeriesApi } from "lightweight-charts";
+import {
+  createChart,
+  ColorType,
+  CrosshairMode,
+  type IChartApi,
+  type ISeriesApi,
+} from "lightweight-charts";
 import type { StockTicker } from "@/services/stock-service";
 import { cn } from "@/lib/utils";
 
@@ -17,23 +23,23 @@ const TIMEFRAMES = ["1D", "1W", "1M", "1Y", "ALL"] as const;
 function generateStockHistory(stock: StockTicker, timeframe: string): CandleData[] {
   const points = timeframe === "1D" ? 30 : timeframe === "1W" ? 60 : timeframe === "1M" ? 90 : 180;
   const result: CandleData[] = [];
-  
+
   let currentPrice = stock.previousClose > 0 ? stock.previousClose : stock.price * 0.95;
   const now = new Date();
-  
+
   for (let i = points; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
     const dateStr = d.toISOString().split("T")[0];
-    
+
     const volatility = stock.price * 0.015;
     const change = (Math.random() - 0.48) * volatility;
-    
+
     const open = currentPrice;
     const close = Math.max(0.1, i === 0 ? stock.price : open + change);
     const high = Math.max(open, close) + Math.random() * (volatility * 0.5);
     const low = Math.max(0.1, Math.min(open, close) - Math.random() * (volatility * 0.5));
     const volume = Math.floor(Math.random() * 50000) + 5000;
-    
+
     result.push({
       time: dateStr,
       open: Number(open.toFixed(2)),
@@ -42,10 +48,10 @@ function generateStockHistory(stock: StockTicker, timeframe: string): CandleData
       close: Number(close.toFixed(2)),
       volume,
     });
-    
+
     currentPrice = close;
   }
-  
+
   return result;
 }
 
@@ -63,10 +69,12 @@ function calcEMA(closes: number[], period: number): number[] {
 function calcRSI(closes: number[], period = 14): (number | null)[] {
   const out: (number | null)[] = new Array(period).fill(null);
   for (let i = period; i < closes.length; i++) {
-    let gain = 0, loss = 0;
+    let gain = 0,
+      loss = 0;
     for (let j = i - period + 1; j <= i; j++) {
       const diff = closes[j] - closes[j - 1];
-      if (diff > 0) gain += diff; else loss += Math.abs(diff);
+      if (diff > 0) gain += diff;
+      else loss += Math.abs(diff);
     }
     out.push(loss === 0 ? 100 : Number((100 - 100 / (1 + gain / loss)).toFixed(2)));
   }
@@ -74,7 +82,8 @@ function calcRSI(closes: number[], period = 14): (number | null)[] {
 }
 
 function getThemeColors() {
-  const isLight = typeof document !== "undefined" && document.documentElement.classList.contains("light");
+  const isLight =
+    typeof document !== "undefined" && document.documentElement.classList.contains("light");
   return {
     background: "transparent",
     grid: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)",
@@ -85,13 +94,13 @@ function getThemeColors() {
 
 export function StockChart({ stock }: { stock: StockTicker }) {
   const [timeframe, setTimeframe] = useState<string>("1M");
-  
+
   const mainRef = useRef<HTMLDivElement>(null);
   const rsiRef = useRef<HTMLDivElement>(null);
-  
+
   const chartRef = useRef<IChartApi | null>(null);
   const rsiChartRef = useRef<IChartApi | null>(null);
-  
+
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const ema9SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const ema21SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
@@ -104,7 +113,10 @@ export function StockChart({ stock }: { stock: StockTicker }) {
     const themeColors = getThemeColors();
 
     const common = {
-      layout: { background: { type: ColorType.Solid, color: themeColors.background }, textColor: themeColors.text },
+      layout: {
+        background: { type: ColorType.Solid, color: themeColors.background },
+        textColor: themeColors.text,
+      },
       grid: { vertLines: { color: themeColors.grid }, horzLines: { color: themeColors.grid } },
       rightPriceScale: { borderColor: themeColors.border },
       timeScale: { borderColor: themeColors.border, timeVisible: true, secondsVisible: false },
@@ -116,7 +128,7 @@ export function StockChart({ stock }: { stock: StockTicker }) {
       width: mainRef.current.clientWidth,
       height: mainRef.current.clientHeight,
     });
-    
+
     const rsiChart = createChart(rsiRef.current, {
       ...common,
       width: rsiRef.current.clientWidth,
@@ -136,8 +148,18 @@ export function StockChart({ stock }: { stock: StockTicker }) {
       wickDownColor: "#ff1744",
     });
 
-    ema9SeriesRef.current = main.addLineSeries({ color: "#ffd740", lineWidth: 1, priceLineVisible: false, title: "EMA 9" });
-    ema21SeriesRef.current = main.addLineSeries({ color: "#40c4ff", lineWidth: 1, priceLineVisible: false, title: "EMA 21" });
+    ema9SeriesRef.current = main.addLineSeries({
+      color: "#ffd740",
+      lineWidth: 1,
+      priceLineVisible: false,
+      title: "EMA 9",
+    });
+    ema21SeriesRef.current = main.addLineSeries({
+      color: "#40c4ff",
+      lineWidth: 1,
+      priceLineVisible: false,
+      title: "EMA 21",
+    });
 
     volSeriesRef.current = main.addHistogramSeries({
       color: "rgba(68,138,255,0.28)",
@@ -145,7 +167,12 @@ export function StockChart({ stock }: { stock: StockTicker }) {
     });
     main.priceScale("volume").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
 
-    rsiSeriesRef.current = rsiChart.addLineSeries({ color: "#ea80fc", lineWidth: 1, priceLineVisible: false, title: "RSI 14" });
+    rsiSeriesRef.current = rsiChart.addLineSeries({
+      color: "#ea80fc",
+      lineWidth: 1,
+      priceLineVisible: false,
+      title: "RSI 14",
+    });
 
     // Dynamic theme observer
     const updateThemeOptions = () => {
@@ -191,17 +218,27 @@ export function StockChart({ stock }: { stock: StockTicker }) {
     if (!candleSeriesRef.current) return;
 
     const data = generateStockHistory(stock, timeframe);
-    const closes = data.map(d => d.close);
+    const closes = data.map((d) => d.close);
     const ema9 = calcEMA(closes, 9);
     const ema21 = calcEMA(closes, 21);
     const rsi = calcRSI(closes, 14);
 
-    candleSeriesRef.current.setData(data.map(d => ({ time: d.time as any, open: d.open, high: d.high, low: d.low, close: d.close })));
-    volSeriesRef.current?.setData(data.map(d => ({
-      time: d.time as any,
-      value: d.volume,
-      color: d.close >= d.open ? "rgba(0,230,118,0.3)" : "rgba(255,23,68,0.3)",
-    })));
+    candleSeriesRef.current.setData(
+      data.map((d) => ({
+        time: d.time as any,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+      })),
+    );
+    volSeriesRef.current?.setData(
+      data.map((d) => ({
+        time: d.time as any,
+        value: d.volume,
+        color: d.close >= d.open ? "rgba(0,230,118,0.3)" : "rgba(255,23,68,0.3)",
+      })),
+    );
 
     ema9SeriesRef.current?.setData(data.map((d, i) => ({ time: d.time as any, value: ema9[i] })));
     ema21SeriesRef.current?.setData(data.map((d, i) => ({ time: d.time as any, value: ema21[i] })));
@@ -230,7 +267,7 @@ export function StockChart({ stock }: { stock: StockTicker }) {
 
         {/* Timeframe Selector */}
         <div className="flex items-center gap-1">
-          {TIMEFRAMES.map(tf => (
+          {TIMEFRAMES.map((tf) => (
             <button
               key={tf}
               type="button"
@@ -249,7 +286,12 @@ export function StockChart({ stock }: { stock: StockTicker }) {
 
         {/* Indicator Legend */}
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-mono">
-          {[["EMA 9", "#ffd740"], ["EMA 21", "#40c4ff"], ["RSI 14", "#ea80fc"], ["Volume", "rgba(68,138,255,0.6)"]].map(([label, color]) => (
+          {[
+            ["EMA 9", "#ffd740"],
+            ["EMA 21", "#40c4ff"],
+            ["RSI 14", "#ea80fc"],
+            ["Volume", "rgba(68,138,255,0.6)"],
+          ].map(([label, color]) => (
             <span key={label} className="flex items-center gap-1">
               <span className="inline-block w-3 h-0.5 rounded" style={{ background: color }} />
               {label}

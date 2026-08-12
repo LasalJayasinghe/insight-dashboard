@@ -121,7 +121,10 @@ function AlertsPage() {
                 className="pl-9 h-10 w-full md:w-64"
               />
             </div>
-            <Button onClick={openCreate} className="gradient-primary text-primary-foreground shadow-elegant">
+            <Button
+              onClick={openCreate}
+              className="gradient-primary text-primary-foreground shadow-elegant"
+            >
               <Plus className="size-4" /> New alert
             </Button>
           </div>

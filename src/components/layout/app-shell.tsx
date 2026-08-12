@@ -22,9 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             }
           }}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scrollbar-thin">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scrollbar-thin">{children}</main>
       </div>
     </div>
   );

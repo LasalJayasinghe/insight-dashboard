@@ -41,8 +41,19 @@ export function PortfolioChart({ data = mockChart }: { data?: ChartPoint[] }) {
                   <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="day" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+              <XAxis
+                dataKey="day"
+                stroke="var(--color-muted-foreground)"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="var(--color-muted-foreground)"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+              />
               <Tooltip
                 contentStyle={{
                   background: "var(--color-popover)",

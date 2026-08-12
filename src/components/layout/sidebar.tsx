@@ -1,5 +1,17 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, User, LineChart, Settings, Bell, LogOut, Cpu, Bitcoin, BarChart3, TrendingUp, Briefcase } from "lucide-react";
+import {
+  LayoutDashboard,
+  User,
+  LineChart,
+  Settings,
+  Bell,
+  LogOut,
+  Cpu,
+  Bitcoin,
+  BarChart3,
+  TrendingUp,
+  Briefcase,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
 
@@ -10,7 +22,6 @@ const navGroups = [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/stocks", label: "Stocks Market", icon: BarChart3 },
       { to: "/watchlist", label: "Watchlist", icon: LineChart },
-      { to: "/portfolios", label: "Portfolios", icon: Briefcase },
       { to: "/alerts", label: "Price Alerts", icon: Bell },
     ],
   },
@@ -25,6 +36,7 @@ const navGroups = [
     group: "SETTINGS & PROFILE",
     items: [
       { to: "/profile", label: "User Profile", icon: User },
+      { to: "/portfolios", label: "Portfolios", icon: Briefcase },
       { to: "/settings", label: "Preferences", icon: Settings },
     ],
   },
@@ -76,7 +88,8 @@ export function Sidebar({ open, mobileOpen = false, onCloseMobile }: SidebarProp
               </div>
             )}
             {group.items.map(({ to, label, icon: Icon }) => {
-              const active = location.pathname === to || (to === "/dashboard" && location.pathname === "/");
+              const active =
+                location.pathname === to || (to === "/dashboard" && location.pathname === "/");
               return (
                 <Link
                   key={to}
@@ -89,7 +102,12 @@ export function Sidebar({ open, mobileOpen = false, onCloseMobile }: SidebarProp
                       : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60",
                   )}
                 >
-                  <Icon className={cn("size-4.5 shrink-0 transition-transform group-hover:scale-110", active ? "text-primary" : "text-muted-foreground")} />
+                  <Icon
+                    className={cn(
+                      "size-4.5 shrink-0 transition-transform group-hover:scale-110",
+                      active ? "text-primary" : "text-muted-foreground",
+                    )}
+                  />
                   {open && <span className="truncate">{label}</span>}
                   {open && active && (
                     <span className="ml-auto size-1.5 rounded-full bg-primary animate-pulse" />

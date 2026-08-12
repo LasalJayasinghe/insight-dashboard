@@ -26,7 +26,10 @@ export const Route = createFileRoute("/stocks")({
   head: () => ({
     meta: [
       { title: "Stocks Dashboard — AlertMe Trading" },
-      { name: "description", content: "Professional stock trading dashboard with CSE market data." },
+      {
+        name: "description",
+        content: "Professional stock trading dashboard with CSE market data.",
+      },
     ],
   }),
   component: StocksPage,
@@ -93,7 +96,6 @@ function StocksPage() {
   return (
     <AppShell>
       <div className="space-y-5">
-
         {/* Main Header Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border/40 pb-3">
           <div className="flex items-center gap-3">
@@ -102,7 +104,9 @@ function StocksPage() {
             </div>
             <div>
               <h1 className="text-2xl font-black tracking-tight text-foreground">
-                {viewMode === "detail" && activeTicker ? `${activeTicker.symbol} Stock View` : "Stocks Dashboard"}
+                {viewMode === "detail" && activeTicker
+                  ? `${activeTicker.symbol} Stock View`
+                  : "Stocks Dashboard"}
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Colombo Stock Exchange (CSE) Live Market Data · Intraday Range · Watchlist · Charts
@@ -145,7 +149,9 @@ function StocksPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-muted-foreground uppercase tracking-wider font-semibold">
                 <span>Top Tickers</span>
-                <span className="text-[10px] lowercase text-muted-foreground/70">Click symbol to view interactive chart</span>
+                <span className="text-[10px] lowercase text-muted-foreground/70">
+                  Click symbol to view interactive chart
+                </span>
               </div>
               <StockCards
                 tickers={tickers}
@@ -179,7 +185,6 @@ function StocksPage() {
             </div>
           </div>
         )}
-
       </div>
     </AppShell>
   );

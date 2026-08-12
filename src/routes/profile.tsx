@@ -8,7 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Camera, Loader2, CheckCircle2, Send, User2, ShieldCheck, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getProfile , updateProfile, changePassword, updateTelegramId } from "@/services/profileService";
+import {
+  getProfile,
+  updateProfile,
+  changePassword,
+  updateTelegramId,
+} from "@/services/profileService";
 import { toast } from "sonner";
 import { isAuthenticated } from "@/lib/auth";
 
@@ -90,7 +95,6 @@ function ProfilePage() {
     return () => {
       cancelled = true;
     };
-
   }, []);
 
   const saveProfile = async (e: FormEvent) => {

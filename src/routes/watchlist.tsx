@@ -6,7 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus } from "lucide-react";
-import { watchlistService, type StockOption, type WatchlistStock } from "@/services/watchlist-service";
+import {
+  watchlistService,
+  type StockOption,
+  type WatchlistStock,
+} from "@/services/watchlist-service";
 import { isAuthenticated } from "@/lib/auth";
 import { toast } from "sonner";
 import {
@@ -135,7 +139,9 @@ function WatchlistPage() {
       const existing = new Set(stocks.map((s) => s.symbol.toUpperCase()));
       const candidates = selected.filter((s) => !existing.has(s.toUpperCase()));
 
-      const settled = await Promise.allSettled(candidates.map((symbol) => watchlistService.add(symbol)));
+      const settled = await Promise.allSettled(
+        candidates.map((symbol) => watchlistService.add(symbol)),
+      );
 
       const added = settled
         .filter((r): r is PromiseFulfilledResult<WatchlistStock> => r.status === "fulfilled")
@@ -167,7 +173,9 @@ function WatchlistPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Watchlist</h1>
-            <p className="text-sm text-muted-foreground mt-1">Symbols you're tracking in real time.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Symbols you're tracking in real time.
+            </p>
           </div>
           <div className="flex gap-2">
             <div className="relative">
@@ -261,10 +269,7 @@ function WatchlistPage() {
               <Button variant="outline" onClick={() => setPickerOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                disabled={selectedCount === 0 || adding}
-                onClick={() => setConfirmOpen(true)}
-              >
+              <Button disabled={selectedCount === 0 || adding} onClick={() => setConfirmOpen(true)}>
                 Add selected ({selectedCount})
               </Button>
             </DialogFooter>

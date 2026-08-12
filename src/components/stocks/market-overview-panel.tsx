@@ -32,7 +32,12 @@ export function MarketOverviewPanel({ indices, status, loading }: MarketOverview
                   : "bg-red-500/10 text-red-400 border border-red-500/20",
               )}
             >
-              <span className={cn("size-1.5 rounded-full", status.isOpen ? "bg-emerald-400 animate-pulse" : "bg-red-400")} />
+              <span
+                className={cn(
+                  "size-1.5 rounded-full",
+                  status.isOpen ? "bg-emerald-400 animate-pulse" : "bg-red-400",
+                )}
+              />
               {status.isOpen ? "MARKET OPEN" : "MARKET CLOSED"}
             </span>
             <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-1 hidden sm:flex">
@@ -48,7 +53,9 @@ export function MarketOverviewPanel({ indices, status, loading }: MarketOverview
       {/* Right: Sleek Index Chips (ASPI + S&P SL20) */}
       <div className="flex items-center gap-3 overflow-x-auto py-0.5">
         {loading ? (
-          <div className="text-xs text-muted-foreground animate-pulse">Loading market indices...</div>
+          <div className="text-xs text-muted-foreground animate-pulse">
+            Loading market indices...
+          </div>
         ) : !indices ? (
           <div className="text-xs text-muted-foreground">Indices unavailable</div>
         ) : (
@@ -66,11 +73,20 @@ export function MarketOverviewPanel({ indices, status, loading }: MarketOverview
               <div
                 className={cn(
                   "text-[11px] font-bold font-mono px-1.5 py-0.5 rounded flex items-center gap-0.5",
-                  indices.aspi.change >= 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
+                  indices.aspi.change >= 0
+                    ? "bg-emerald-500/10 text-emerald-400"
+                    : "bg-red-500/10 text-red-400",
                 )}
               >
-                {indices.aspi.change >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                <span>{indices.aspi.percentage >= 0 ? "+" : ""}{indices.aspi.percentage.toFixed(2)}%</span>
+                {indices.aspi.change >= 0 ? (
+                  <TrendingUp className="size-3" />
+                ) : (
+                  <TrendingDown className="size-3" />
+                )}
+                <span>
+                  {indices.aspi.percentage >= 0 ? "+" : ""}
+                  {indices.aspi.percentage.toFixed(2)}%
+                </span>
               </div>
               <div className="text-[9px] font-mono text-muted-foreground border-l border-border/40 pl-2 hidden lg:block">
                 <div>H: {fmtPrice(indices.aspi.highValue)}</div>
@@ -91,11 +107,20 @@ export function MarketOverviewPanel({ indices, status, loading }: MarketOverview
               <div
                 className={cn(
                   "text-[11px] font-bold font-mono px-1.5 py-0.5 rounded flex items-center gap-0.5",
-                  indices.snp.change >= 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
+                  indices.snp.change >= 0
+                    ? "bg-emerald-500/10 text-emerald-400"
+                    : "bg-red-500/10 text-red-400",
                 )}
               >
-                {indices.snp.change >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                <span>{indices.snp.percentage >= 0 ? "+" : ""}{indices.snp.percentage.toFixed(2)}%</span>
+                {indices.snp.change >= 0 ? (
+                  <TrendingUp className="size-3" />
+                ) : (
+                  <TrendingDown className="size-3" />
+                )}
+                <span>
+                  {indices.snp.percentage >= 0 ? "+" : ""}
+                  {indices.snp.percentage.toFixed(2)}%
+                </span>
               </div>
               <div className="text-[9px] font-mono text-muted-foreground border-l border-border/40 pl-2 hidden lg:block">
                 <div>H: {fmtPrice(indices.snp.highValue)}</div>

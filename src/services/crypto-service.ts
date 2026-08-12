@@ -70,11 +70,7 @@ export const cryptoService = {
     return res.data;
   },
 
-  async getCandles(
-    symbol = "BTCUSDT",
-    interval = "1m",
-    limit = 300,
-  ): Promise<CandleBar[]> {
+  async getCandles(symbol = "BTCUSDT", interval = "1m", limit = 300): Promise<CandleBar[]> {
     const res = await apiClient.get<CandleBar[]>("/crypto/candles", {
       params: { symbol, interval, limit },
     });
@@ -93,10 +89,7 @@ export const cryptoService = {
     return res.data;
   },
 
-  async getWhales(
-    symbol = "BTCUSDT",
-    minUsd = 100_000,
-  ): Promise<WhaleTrade[]> {
+  async getWhales(symbol = "BTCUSDT", minUsd = 100_000): Promise<WhaleTrade[]> {
     const res = await apiClient.get<WhaleTrade[]>("/crypto/whales", {
       params: { symbol, minUsd },
     });
@@ -115,9 +108,7 @@ export const cryptoService = {
 // Imported lazily so the SignalR bundle is only loaded on the /crypto route.
 
 export async function createCryptoHubConnection(): Promise<HubConnection> {
-  const { HubConnectionBuilder, LogLevel } = await import(
-    "@microsoft/signalr"
-  );
+  const { HubConnectionBuilder, LogLevel } = await import("@microsoft/signalr");
   const { tokenService } = await import("./tokenService");
   const { ENV } = await import("@/config/env");
 

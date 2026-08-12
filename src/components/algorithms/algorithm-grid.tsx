@@ -40,9 +40,7 @@ export function AlgorithmGrid({ algorithms, loading }: Props) {
   if (!algorithms || algorithms.length === 0) {
     return (
       <Card className="p-12 text-center border-dashed border-border">
-        <p className="text-sm text-muted-foreground">
-          No algorithms running yet.
-        </p>
+        <p className="text-sm text-muted-foreground">No algorithms running yet.</p>
       </Card>
     );
   }

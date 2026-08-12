@@ -4,9 +4,9 @@ import { COIN_META, fmtPrice } from "./market-cards";
 import { RefreshCw, Loader2 } from "lucide-react";
 
 const SIG = {
-  BUY:  { pill: "bg-emerald-500/10 text-emerald-400", bar: "bg-emerald-400" },
-  SELL: { pill: "bg-red-500/10 text-red-400",         bar: "bg-red-400"     },
-  WAIT: { pill: "bg-muted text-muted-foreground",     bar: "bg-muted"       },
+  BUY: { pill: "bg-emerald-500/10 text-emerald-400", bar: "bg-emerald-400" },
+  SELL: { pill: "bg-red-500/10 text-red-400", bar: "bg-red-400" },
+  WAIT: { pill: "bg-muted text-muted-foreground", bar: "bg-muted" },
 };
 
 const COND = {
@@ -46,20 +46,29 @@ export function MarketScanner({ results, loading, onRefresh }: MarketScannerProp
           <table className="w-full text-left">
             <thead>
               <tr>
-                {["Symbol", "Signal", "Confidence", "Condition", "Price"].map(h => (
-                  <th key={h} className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b border-border">
+                {["Symbol", "Signal", "Confidence", "Condition", "Price"].map((h) => (
+                  <th
+                    key={h}
+                    className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b border-border"
+                  >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {results.map(r => {
-                const meta = COIN_META[r.symbol] ?? { base: r.symbol.replace("USDT",""), color: "#888" };
-                const sig  = SIG[r.signal];
+              {results.map((r) => {
+                const meta = COIN_META[r.symbol] ?? {
+                  base: r.symbol.replace("USDT", ""),
+                  color: "#888",
+                };
+                const sig = SIG[r.signal];
                 const cond = COND[r.marketCondition];
                 return (
-                  <tr key={r.symbol} className="hover:bg-muted/40 transition-colors border-b border-border/50 last:border-none">
+                  <tr
+                    key={r.symbol}
+                    className="hover:bg-muted/40 transition-colors border-b border-border/50 last:border-none"
+                  >
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1.5">
                         <span
@@ -68,24 +77,41 @@ export function MarketScanner({ results, loading, onRefresh }: MarketScannerProp
                         >
                           {meta.base[0]}
                         </span>
-                        <span className="text-xs font-semibold font-mono text-foreground">{meta.base}/USDT</span>
+                        <span className="text-xs font-semibold font-mono text-foreground">
+                          {meta.base}/USDT
+                        </span>
                       </div>
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider", sig.pill)}>
+                      <span
+                        className={cn(
+                          "text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider",
+                          sig.pill,
+                        )}
+                      >
                         {r.signal}
                       </span>
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1.5">
                         <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
-                          <div className={cn("h-full rounded-full", sig.bar)} style={{ width: `${r.confidence}%` }} />
+                          <div
+                            className={cn("h-full rounded-full", sig.bar)}
+                            style={{ width: `${r.confidence}%` }}
+                          />
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground">{r.confidence}%</span>
+                        <span className="text-[10px] font-mono text-muted-foreground">
+                          {r.confidence}%
+                        </span>
                       </div>
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className={cn("text-[10px] font-semibold rounded-full px-2 py-0.5 uppercase", cond)}>
+                      <span
+                        className={cn(
+                          "text-[10px] font-semibold rounded-full px-2 py-0.5 uppercase",
+                          cond,
+                        )}
+                      >
                         {r.marketCondition}
                       </span>
                     </td>

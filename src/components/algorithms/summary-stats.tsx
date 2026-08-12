@@ -21,10 +21,7 @@ export function SummaryStats({ stats }: { stats: SummaryStat[] }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((s) => (
-        <Card
-          key={s.label}
-          className="p-4 gradient-card border-border shadow-card"
-        >
+        <Card key={s.label} className="p-4 gradient-card border-border shadow-card">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
@@ -33,11 +30,7 @@ export function SummaryStats({ stats }: { stats: SummaryStat[] }) {
               <p className="mt-1.5 text-xl font-semibold tabular tracking-tight truncate">
                 {s.value}
               </p>
-              {s.hint && (
-                <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {s.hint}
-                </p>
-              )}
+              {s.hint && <p className="mt-0.5 text-[11px] text-muted-foreground">{s.hint}</p>}
             </div>
             <div
               className={cn(

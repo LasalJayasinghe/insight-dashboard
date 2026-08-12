@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/card";
 import { TrendingUp, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isAuthenticated } from "@/lib/auth";
-import { login } from "@/services/authService";
+import { login, googleLogin } from "@/services/authService";
+import { GoogleLogin } from "@react-oauth/google";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: () => {
@@ -63,7 +64,7 @@ function LoginPage() {
         setStatus("error");
         return;
       }
-      
+
       setStatus("success");
 
       setTimeout(() => navigate({ to: "/dashboard" }), 400);
@@ -71,6 +72,26 @@ function LoginPage() {
       console.error(err);
       setErrors({
         password: err?.response?.data?.message || "Invalid credentials",
+      });
+      setStatus("error");
+    }
+  };
+
+  const onGoogleSuccess = async (credentialResponse: any) => {
+    setStatus("loading");
+    try {
+      const data = await googleLogin(credentialResponse.credential);
+      if (!data.ok) {
+        setErrors({ password: "Google login failed" });
+        setStatus("error");
+        return;
+      }
+      setStatus("success");
+      setTimeout(() => navigate({ to: "/dashboard" }), 400);
+    } catch (err: any) {
+      console.error(err);
+      setErrors({
+        password: err?.response?.data?.message || "Google login failed",
       });
       setStatus("error");
     }
@@ -171,6 +192,30 @@ function LoginPage() {
             {status === "success" && <CheckCircle2 className="size-4" />}
             {status === "loading" ? "Signing in..." : status === "success" ? "Welcome" : "Sign in"}
           </Button>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="flex justify-center w-full">
+            <GoogleLogin
+              onSuccess={onGoogleSuccess}
+              onError={() => {
+                console.error("Google Login Failed");
+                setErrors({ password: "Google login failed" });
+              }}
+              useOneTap
+              theme="outline"
+              size="large"
+              shape="rectangular"
+              text="signin_with"
+            />
+          </div>
 
           <p className="text-xs text-center text-muted-foreground pt-2">
             New to AlertMe?{" "}

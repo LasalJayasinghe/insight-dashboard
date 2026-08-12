@@ -1,7 +1,4 @@
-import type {
-  Algorithm,
-  AlgorithmDetail,
-} from "@/lib/algorithm-types";
+import type { Algorithm, AlgorithmDetail } from "@/lib/algorithm-types";
 import apiClient from "./apiClient";
 
 export const algorithmsService = {

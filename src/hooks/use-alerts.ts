@@ -40,18 +40,21 @@ export function useAlerts() {
     return updated;
   }, []);
 
-  const remove = useCallback(async (id: string) => {
-    const snapshot = alerts;
-    setAlerts((prev) => prev.filter((a) => a.id !== id)); // optimistic
-    try {
-      await alertsService.remove(id);
-      toast.success("Alert deleted");
-    } catch (e) {
-      setAlerts(snapshot); // rollback
-      toast.error("Failed to delete alert");
-      throw e;
-    }
-  }, [alerts]);
+  const remove = useCallback(
+    async (id: string) => {
+      const snapshot = alerts;
+      setAlerts((prev) => prev.filter((a) => a.id !== id)); // optimistic
+      try {
+        await alertsService.remove(id);
+        toast.success("Alert deleted");
+      } catch (e) {
+        setAlerts(snapshot); // rollback
+        toast.error("Failed to delete alert");
+        throw e;
+      }
+    },
+    [alerts],
+  );
 
   return { alerts, loading, error, refresh, create, update, remove };
 }

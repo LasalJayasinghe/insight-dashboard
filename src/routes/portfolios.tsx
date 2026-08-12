@@ -72,22 +72,33 @@ export const Route = createFileRoute("/portfolios")({
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function fmt(val: number, decimals = 2) {
-  return val.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return val.toLocaleString("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 }
 
 function PnlBadge({ value, pct }: { value: number; pct: number }) {
   const pos = value >= 0;
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-semibold tabular ${pos ? "text-success" : "text-destructive"}`}>
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-semibold tabular ${pos ? "text-success" : "text-destructive"}`}
+    >
       {pos ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-      {pos ? "+" : ""}{fmt(value)} ({pos ? "+" : ""}{fmt(pct)}%)
+      {pos ? "+" : ""}
+      {fmt(value)} ({pos ? "+" : ""}
+      {fmt(pct)}%)
     </span>
   );
 }
 
 // ─── Holding Row ────────────────────────────────────────────────────────────
 
-function HoldingRow({ h, currency, onDelete }: {
+function HoldingRow({
+  h,
+  currency,
+  onDelete,
+}: {
   h: PortfolioDetailDto["holdings"][number];
   currency: string;
   onDelete: (id: number) => void;
@@ -99,13 +110,25 @@ function HoldingRow({ h, currency, onDelete }: {
         <span className="font-mono text-sm font-semibold text-foreground">{h.symbol}</span>
         <span className="ml-2 text-xs text-muted-foreground">{h.assetType}</span>
       </td>
-      <td className="px-4 py-3 text-right tabular text-sm">{fmt(h.quantity, 8).replace(/\.?0+$/, "")}</td>
-      <td className="px-4 py-3 text-right tabular text-sm">{currency} {fmt(h.averageBuyPrice, 4)}</td>
-      <td className="px-4 py-3 text-right tabular text-sm">{currency} {fmt(h.currentPrice, 4)}</td>
-      <td className="px-4 py-3 text-right tabular text-sm font-semibold">{currency} {fmt(h.currentValue)}</td>
+      <td className="px-4 py-3 text-right tabular text-sm">
+        {fmt(h.quantity, 8).replace(/\.?0+$/, "")}
+      </td>
+      <td className="px-4 py-3 text-right tabular text-sm">
+        {currency} {fmt(h.averageBuyPrice, 4)}
+      </td>
+      <td className="px-4 py-3 text-right tabular text-sm">
+        {currency} {fmt(h.currentPrice, 4)}
+      </td>
+      <td className="px-4 py-3 text-right tabular text-sm font-semibold">
+        {currency} {fmt(h.currentValue)}
+      </td>
       <td className="px-4 py-3 text-right">
-        <span className={`tabular text-xs font-semibold ${pos ? "text-success" : "text-destructive"}`}>
-          {pos ? "+" : ""}{fmt(h.profitLoss)} ({pos ? "+" : ""}{fmt(h.profitLossPercent)}%)
+        <span
+          className={`tabular text-xs font-semibold ${pos ? "text-success" : "text-destructive"}`}
+        >
+          {pos ? "+" : ""}
+          {fmt(h.profitLoss)} ({pos ? "+" : ""}
+          {fmt(h.profitLossPercent)}%)
         </span>
       </td>
       <td className="px-4 py-3 text-right">
@@ -139,7 +162,7 @@ function PortfolioPanel({
   const [deleteHoldingId, setDeleteHoldingId] = useState<number | null>(null);
   const [form, setForm] = useState({ symbol: "", quantity: "", averageBuyPrice: "", notes: "" });
   const [saving, setSaving] = useState(false);
-  
+
   const [stockOptions, setStockOptions] = useState<StockOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
 
@@ -175,7 +198,9 @@ function PortfolioPanel({
     }
   };
 
-  useEffect(() => { void load(); }, [portfolioId]);
+  useEffect(() => {
+    void load();
+  }, [portfolioId]);
 
   const handleAddHolding = async () => {
     if (!form.symbol || !form.quantity || !form.averageBuyPrice) {
@@ -249,11 +274,16 @@ function PortfolioPanel({
         {[
           { label: "Total Value", value: `${currency} ${fmt(detail.totalValue)}` },
           { label: "Total Cost", value: `${currency} ${fmt(detail.totalCost)}` },
-          { label: "P/L", value: <PnlBadge value={detail.totalProfitLoss} pct={detail.totalProfitLossPercent} /> },
+          {
+            label: "P/L",
+            value: <PnlBadge value={detail.totalProfitLoss} pct={detail.totalProfitLossPercent} />,
+          },
           { label: "Holdings", value: detail.holdings.length },
         ].map((s) => (
           <div key={s.label} className="rounded-lg bg-muted/30 px-3 py-2">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/70 mb-0.5">{s.label}</div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/70 mb-0.5">
+              {s.label}
+            </div>
             <div className="text-sm font-semibold">{s.value}</div>
           </div>
         ))}
@@ -262,17 +292,34 @@ function PortfolioPanel({
       {/* Holdings table */}
       {detail.holdings.length === 0 ? (
         <div className="px-4 py-6 text-center">
-          <p className="text-sm text-muted-foreground mb-3">No holdings yet. Add your first position.</p>
+          <p className="text-sm text-muted-foreground mb-3">
+            No holdings yet. Add your first position.
+          </p>
           <div className="flex items-center justify-center gap-3">
             {detail.type === "Stocks" && (
               <>
-                <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-                <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={syncingPdf}>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={syncingPdf}
+                >
                   <Upload className="size-4 mr-1" /> {syncingPdf ? "Syncing..." : "Sync ATrad PDF"}
                 </Button>
               </>
             )}
-            <Button size="sm" onClick={() => setAddOpen(true)} className="gradient-primary text-primary-foreground shadow-elegant">
+            <Button
+              size="sm"
+              onClick={() => setAddOpen(true)}
+              className="gradient-primary text-primary-foreground shadow-elegant"
+            >
               <Plus className="size-4 mr-1" /> Add Holding
             </Button>
           </div>
@@ -282,13 +329,28 @@ function PortfolioPanel({
           <div className="flex justify-end gap-3 px-4 pb-2">
             {detail.type === "Stocks" && (
               <>
-                <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-                <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={syncingPdf}>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={syncingPdf}
+                >
                   <Upload className="size-4 mr-1" /> {syncingPdf ? "Syncing..." : "Sync ATrad PDF"}
                 </Button>
               </>
             )}
-            <Button size="sm" onClick={() => setAddOpen(true)} className="gradient-primary text-primary-foreground shadow-elegant">
+            <Button
+              size="sm"
+              onClick={() => setAddOpen(true)}
+              className="gradient-primary text-primary-foreground shadow-elegant"
+            >
               <Plus className="size-4 mr-1" /> Add Holding
             </Button>
           </div>
@@ -296,9 +358,16 @@ function PortfolioPanel({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/40 bg-muted/20">
-                  {["Symbol", "Quantity", "Avg Buy", "Current Price", "Value", "P/L", ""].map((h) => (
-                    <th key={h} className="px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground/70 text-right first:text-left">{h}</th>
-                  ))}
+                  {["Symbol", "Quantity", "Avg Buy", "Current Price", "Value", "P/L", ""].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground/70 text-right first:text-left"
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -322,21 +391,30 @@ function PortfolioPanel({
           </DialogHeader>
           <div className="space-y-3 py-1">
             <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Symbol</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                Symbol
+              </label>
               {detail.type === "Stocks" ? (
-                <Select value={form.symbol} onValueChange={(val) => setForm((f) => ({ ...f, symbol: val }))}>
+                <Select
+                  value={form.symbol}
+                  onValueChange={(val) => setForm((f) => ({ ...f, symbol: val }))}
+                >
                   <SelectTrigger className="font-mono uppercase">
                     <SelectValue placeholder="Select Stock Symbol" />
                   </SelectTrigger>
                   <SelectContent>
                     {optionsLoading ? (
-                      <div className="p-2 text-sm text-muted-foreground text-center">Loading...</div>
+                      <div className="p-2 text-sm text-muted-foreground text-center">
+                        Loading...
+                      </div>
                     ) : (
                       stockOptions.map((s) => (
                         <SelectItem key={s.symbol} value={s.symbol}>
                           <div className="flex justify-between items-center w-full gap-8 min-w-[200px]">
                             <span className="font-semibold">{s.symbol}</span>
-                            <span className="text-muted-foreground text-xs truncate max-w-[150px]">{s.name}</span>
+                            <span className="text-muted-foreground text-xs truncate max-w-[150px]">
+                              {s.name}
+                            </span>
                           </div>
                         </SelectItem>
                       ))
@@ -344,19 +422,92 @@ function PortfolioPanel({
                   </SelectContent>
                 </Select>
               ) : (
-                <Select value={form.symbol} onValueChange={(val) => setForm((f) => ({ ...f, symbol: val }))}>
+                <Select
+                  value={form.symbol}
+                  onValueChange={(val) => setForm((f) => ({ ...f, symbol: val }))}
+                >
                   <SelectTrigger className="font-mono uppercase h-auto py-2.5">
                     <SelectValue placeholder="Select Crypto Symbol" />
                   </SelectTrigger>
                   <SelectContent className="max-w-[400px]">
                     {[
-                      { symbol: "BTCUSDT", base: "BTC", quote: "USDT", price: "$64,017.53", change: "-1.58%", h: "$65,391.14", l: "$63,806.27", vol: "888.24M", icon: "B" },
-                      { symbol: "ETHUSDT", base: "ETH", quote: "USDT", price: "$1,875.54", change: "-2.17%", h: "$1,931.57", l: "$1,867.96", vol: "387.50M", icon: "E" },
-                      { symbol: "BNBUSDT", base: "BNB", quote: "USDT", price: "$600.4000", change: "-0.78%", h: "$606.8400", l: "$597.3200", vol: "50.99M", icon: "B" },
-                      { symbol: "SOLUSDT", base: "SOL", quote: "USDT", price: "$75.8800", change: "-1.20%", h: "$77.1700", l: "$75.5800", vol: "95.41M", icon: "S" },
-                      { symbol: "XRPUSDT", base: "XRP", quote: "USDT", price: "$1.0139", change: "-1.97%", h: "$1.0410", l: "$1.0051", vol: "64.59M", icon: "X" },
-                      { symbol: "ADAUSDT", base: "ADA", quote: "USDT", price: "$0.190700", change: "-2.65%", h: "$0.199300", l: "$0.189000", vol: "13.90M", icon: "A" },
-                      { symbol: "DOGEUSDT", base: "DOGE", quote: "USDT", price: "$0.069960", change: "+0.19%", h: "$0.070240", l: "$0.069400", vol: "14.70M", icon: "D" }
+                      {
+                        symbol: "BTCUSDT",
+                        base: "BTC",
+                        quote: "USDT",
+                        price: "$64,017.53",
+                        change: "-1.58%",
+                        h: "$65,391.14",
+                        l: "$63,806.27",
+                        vol: "888.24M",
+                        icon: "B",
+                      },
+                      {
+                        symbol: "ETHUSDT",
+                        base: "ETH",
+                        quote: "USDT",
+                        price: "$1,875.54",
+                        change: "-2.17%",
+                        h: "$1,931.57",
+                        l: "$1,867.96",
+                        vol: "387.50M",
+                        icon: "E",
+                      },
+                      {
+                        symbol: "BNBUSDT",
+                        base: "BNB",
+                        quote: "USDT",
+                        price: "$600.4000",
+                        change: "-0.78%",
+                        h: "$606.8400",
+                        l: "$597.3200",
+                        vol: "50.99M",
+                        icon: "B",
+                      },
+                      {
+                        symbol: "SOLUSDT",
+                        base: "SOL",
+                        quote: "USDT",
+                        price: "$75.8800",
+                        change: "-1.20%",
+                        h: "$77.1700",
+                        l: "$75.5800",
+                        vol: "95.41M",
+                        icon: "S",
+                      },
+                      {
+                        symbol: "XRPUSDT",
+                        base: "XRP",
+                        quote: "USDT",
+                        price: "$1.0139",
+                        change: "-1.97%",
+                        h: "$1.0410",
+                        l: "$1.0051",
+                        vol: "64.59M",
+                        icon: "X",
+                      },
+                      {
+                        symbol: "ADAUSDT",
+                        base: "ADA",
+                        quote: "USDT",
+                        price: "$0.190700",
+                        change: "-2.65%",
+                        h: "$0.199300",
+                        l: "$0.189000",
+                        vol: "13.90M",
+                        icon: "A",
+                      },
+                      {
+                        symbol: "DOGEUSDT",
+                        base: "DOGE",
+                        quote: "USDT",
+                        price: "$0.069960",
+                        change: "+0.19%",
+                        h: "$0.070240",
+                        l: "$0.069400",
+                        vol: "14.70M",
+                        icon: "D",
+                      },
                     ].map((c) => (
                       <SelectItem key={c.symbol} value={c.symbol} className="py-2 cursor-pointer">
                         <div className="flex items-center gap-4 w-full min-w-[280px]">
@@ -365,14 +516,20 @@ function PortfolioPanel({
                               {c.icon}
                             </div>
                             <div className="flex flex-col text-left">
-                              <span className="font-bold text-sm leading-none">{c.base}/{c.quote}</span>
-                              <span className="text-[10px] text-muted-foreground mt-1">Vol {c.vol}</span>
+                              <span className="font-bold text-sm leading-none">
+                                {c.base}/{c.quote}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground mt-1">
+                                Vol {c.vol}
+                              </span>
                             </div>
                           </div>
-                          
+
                           <div className="flex flex-col text-right w-[75px] shrink-0">
                             <span className="font-semibold text-sm leading-none">{c.price}</span>
-                            <span className={`text-[11px] mt-1 font-bold ${c.change.startsWith('+') ? 'text-success' : 'text-destructive'}`}>
+                            <span
+                              className={`text-[11px] mt-1 font-bold ${c.change.startsWith("+") ? "text-success" : "text-destructive"}`}
+                            >
                               {c.change}
                             </span>
                           </div>
@@ -389,7 +546,9 @@ function PortfolioPanel({
               )}
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Quantity</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                Quantity
+              </label>
               <Input
                 type="number"
                 step="any"
@@ -413,7 +572,9 @@ function PortfolioPanel({
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Notes (optional)</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                Notes (optional)
+              </label>
               <Input
                 placeholder="e.g. Long-term hold"
                 value={form.notes}
@@ -422,8 +583,14 @@ function PortfolioPanel({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button onClick={() => void handleAddHolding()} disabled={saving} className="gradient-primary text-primary-foreground shadow-elegant">
+            <Button variant="outline" onClick={() => setAddOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => void handleAddHolding()}
+              disabled={saving}
+              className="gradient-primary text-primary-foreground shadow-elegant"
+            >
               {saving ? "Adding..." : "Add Holding"}
             </Button>
           </DialogFooter>
@@ -431,15 +598,23 @@ function PortfolioPanel({
       </Dialog>
 
       {/* Delete Holding Confirm */}
-      <AlertDialog open={deleteHoldingId != null} onOpenChange={(o) => !o && setDeleteHoldingId(null)}>
+      <AlertDialog
+        open={deleteHoldingId != null}
+        onOpenChange={(o) => !o && setDeleteHoldingId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove holding?</AlertDialogTitle>
-            <AlertDialogDescription>This will permanently remove this holding from the portfolio.</AlertDialogDescription>
+            <AlertDialogDescription>
+              This will permanently remove this holding from the portfolio.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive hover:bg-destructive/90 text-destructive-foreground" onClick={() => void handleDeleteHolding()}>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => void handleDeleteHolding()}
+            >
               Remove
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -471,7 +646,9 @@ function PortfolioCard({
         onClick={() => setExpanded((v) => !v)}
       >
         {/* Icon */}
-        <div className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${isStock ? "bg-primary/10" : "bg-warning/10"}`}>
+        <div
+          className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${isStock ? "bg-primary/10" : "bg-warning/10"}`}
+        >
           {isStock ? (
             <BarChart3 className="size-5 text-primary" />
           ) : (
@@ -500,32 +677,47 @@ function PortfolioCard({
 
         {/* Values */}
         <div className="text-right shrink-0 hidden sm:block">
-          <div className="text-sm font-semibold tabular">{p.baseCurrency} {fmt(p.totalValue)}</div>
+          <div className="text-sm font-semibold tabular">
+            {p.baseCurrency} {fmt(p.totalValue)}
+          </div>
           <PnlBadge value={p.totalProfitLoss} pct={p.totalProfitLossPercent} />
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-1 ml-2">
           <button
-            onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(p.id);
+            }}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
           >
             <Trash2 className="size-3.5" />
           </button>
-          {expanded ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
+          {expanded ? (
+            <ChevronDown className="size-4 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="size-4 text-muted-foreground" />
+          )}
         </div>
       </div>
 
       {/* Mobile value row */}
       <div className="sm:hidden px-5 pb-3 flex items-center justify-between">
-        <span className="text-sm font-semibold tabular">{p.baseCurrency} {fmt(p.totalValue)}</span>
+        <span className="text-sm font-semibold tabular">
+          {p.baseCurrency} {fmt(p.totalValue)}
+        </span>
         <PnlBadge value={p.totalProfitLoss} pct={p.totalProfitLossPercent} />
       </div>
 
       {/* Expanded detail panel */}
       {expanded && (
         <div className="border-t border-border/40">
-          <PortfolioPanel portfolioId={p.id} currency={p.baseCurrency} onHoldingDeleted={onRefresh} />
+          <PortfolioPanel
+            portfolioId={p.id}
+            currency={p.baseCurrency}
+            onHoldingDeleted={onRefresh}
+          />
         </div>
       )}
     </Card>
@@ -542,7 +734,12 @@ function PortfoliosPage() {
 
   // Create portfolio dialog
   const [createOpen, setCreateOpen] = useState(false);
-  const [newForm, setNewForm] = useState({ name: "", type: "1", baseCurrency: "LKR", description: "" });
+  const [newForm, setNewForm] = useState({
+    name: "",
+    type: "1",
+    baseCurrency: "LKR",
+    description: "",
+  });
   const [creating, setCreating] = useState(false);
 
   // Delete portfolio confirm
@@ -564,7 +761,9 @@ function PortfoliosPage() {
     }
   };
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   // Auto-set currency based on type
   const handleTypeChange = (val: string) => {
@@ -576,7 +775,10 @@ function PortfoliosPage() {
   };
 
   const handleCreate = async () => {
-    if (!newForm.name.trim()) { toast.error("Portfolio name is required."); return; }
+    if (!newForm.name.trim()) {
+      toast.error("Portfolio name is required.");
+      return;
+    }
     setCreating(true);
     try {
       await portfolioService.create({
@@ -620,7 +822,9 @@ function PortfoliosPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Portfolios</h1>
-            <p className="text-sm text-muted-foreground mt-1">Track your stock and crypto investments.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Track your stock and crypto investments.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => void load()} className="gap-1.5">
@@ -644,7 +848,9 @@ function PortfoliosPage() {
                 <Wallet className="size-5 text-primary" />
               </div>
               <div>
-                <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground/70 mb-1">Total Net Worth</div>
+                <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground/70 mb-1">
+                  Total Net Worth
+                </div>
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
                   <div className="text-2xl font-bold tabular tracking-tight text-foreground">
                     LKR {fmt(netWorth.totalNetWorthLkr)}
@@ -655,15 +861,20 @@ function PortfoliosPage() {
                 </div>
               </div>
               <div className="ml-auto hidden sm:block">
-                <PnlBadge value={netWorth.totalProfitLossLkr} pct={
-                  netWorth.totalNetWorthLkr > 0
-                    ? (netWorth.totalProfitLossLkr / (netWorth.totalNetWorthLkr - netWorth.totalProfitLossLkr)) * 100
-                    : 0
-                } />
+                <PnlBadge
+                  value={netWorth.totalProfitLossLkr}
+                  pct={
+                    netWorth.totalNetWorthLkr > 0
+                      ? (netWorth.totalProfitLossLkr /
+                          (netWorth.totalNetWorthLkr - netWorth.totalProfitLossLkr)) *
+                        100
+                      : 0
+                  }
+                />
                 {netWorth.usdtToLkrRate > 0 && (
                   <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                    <CircleDollarSign className="size-3" />
-                    1 USDT = LKR {fmt(netWorth.usdtToLkrRate)}
+                    <CircleDollarSign className="size-3" />1 USDT = LKR{" "}
+                    {fmt(netWorth.usdtToLkrRate)}
                   </div>
                 )}
               </div>
@@ -672,13 +883,20 @@ function PortfoliosPage() {
             {netWorth.portfolios.length > 1 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {netWorth.portfolios.map((p) => (
-                  <div key={p.id} className="rounded-lg bg-muted/30 px-3 py-2 flex items-center justify-between gap-2">
+                  <div
+                    key={p.id}
+                    className="rounded-lg bg-muted/30 px-3 py-2 flex items-center justify-between gap-2"
+                  >
                     <div>
                       <div className="text-xs font-semibold truncate max-w-[120px]">{p.name}</div>
-                      <div className="text-[10px] text-muted-foreground font-mono">{p.type} · {p.baseCurrency}</div>
+                      <div className="text-[10px] text-muted-foreground font-mono">
+                        {p.type} · {p.baseCurrency}
+                      </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs font-semibold tabular">{p.baseCurrency} {fmt(p.totalValue)}</div>
+                      <div className="text-xs font-semibold tabular">
+                        {p.baseCurrency} {fmt(p.totalValue)}
+                      </div>
                       <PnlBadge value={p.totalProfitLoss} pct={p.totalProfitLossPercent} />
                     </div>
                   </div>
@@ -741,12 +959,7 @@ function PortfoliosPage() {
         ) : (
           <div className="space-y-3">
             {filtered.map((p) => (
-              <PortfolioCard
-                key={p.id}
-                p={p}
-                onDelete={setDeleteId}
-                onRefresh={load}
-              />
+              <PortfolioCard key={p.id} p={p} onDelete={setDeleteId} onRefresh={load} />
             ))}
           </div>
         )}
@@ -762,7 +975,9 @@ function PortfoliosPage() {
             </DialogHeader>
             <div className="space-y-3 py-1">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Portfolio Name</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                  Portfolio Name
+                </label>
                 <Input
                   placeholder="e.g. CSE Growth Stocks"
                   value={newForm.name}
@@ -770,7 +985,9 @@ function PortfoliosPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Type</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                  Type
+                </label>
                 <Select value={newForm.type} onValueChange={handleTypeChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -790,7 +1007,9 @@ function PortfoliosPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Description (optional)</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                  Description (optional)
+                </label>
                 <Input
                   placeholder="e.g. Long-term dividend stocks"
                   value={newForm.description}
@@ -799,8 +1018,14 @@ function PortfoliosPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-              <Button onClick={() => void handleCreate()} disabled={creating} className="gradient-primary text-primary-foreground shadow-elegant">
+              <Button variant="outline" onClick={() => setCreateOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => void handleCreate()}
+                disabled={creating}
+                className="gradient-primary text-primary-foreground shadow-elegant"
+              >
                 {creating ? "Creating..." : "Create Portfolio"}
               </Button>
             </DialogFooter>
@@ -813,7 +1038,8 @@ function PortfoliosPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete portfolio?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently delete the portfolio and all its holdings. This action cannot be undone.
+                This will permanently delete the portfolio and all its holdings. This action cannot
+                be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

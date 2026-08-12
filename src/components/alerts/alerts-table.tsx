@@ -1,6 +1,13 @@
 // Renders the alerts as a table with interactive column sorting and edit/delete actions.
 import { useState, useMemo } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
@@ -126,15 +133,24 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
                 <TableCell>
                   <Badge
                     variant={a.status === "ACTIVE" ? "default" : "secondary"}
-                    className={a.status === "ACTIVE" ? "bg-success/15 text-success hover:bg-success/20" : ""}
+                    className={
+                      a.status === "ACTIVE" ? "bg-success/15 text-success hover:bg-success/20" : ""
+                    }
                   >
                     {a.status === "ACTIVE" ? "Active" : "Inactive"}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">{formatDate(a.createdAt)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {formatDate(a.createdAt)}
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="inline-flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => onEdit(a)} aria-label="Edit alert">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => onEdit(a)}
+                      aria-label="Edit alert"
+                    >
                       <Pencil className="size-4" />
                     </Button>
                     <Button

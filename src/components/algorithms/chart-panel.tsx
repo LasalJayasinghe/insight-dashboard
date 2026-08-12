@@ -33,17 +33,15 @@ export function ChartPanel({ pair, bias }: Props) {
     bias === "BUY"
       ? "var(--color-success)"
       : bias === "SELL"
-      ? "var(--color-destructive)"
-      : "var(--color-warning)";
+        ? "var(--color-destructive)"
+        : "var(--color-warning)";
 
   return (
     <Card className="gradient-card border-border shadow-card p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-semibold tracking-tight">Price Action — {pair}</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Candlestick chart placeholder
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">Candlestick chart placeholder</p>
         </div>
         <div className="text-xs text-muted-foreground">1H · last 36 bars</div>
       </div>

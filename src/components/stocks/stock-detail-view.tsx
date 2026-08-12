@@ -2,7 +2,18 @@ import { useState } from "react";
 import type { StockTicker } from "@/services/stock-service";
 import { StockChart } from "./stock-chart";
 import { fmtPrice, fmtChange } from "./stock-cards";
-import { ArrowLeft, TrendingUp, TrendingDown, Star, Sparkles, Activity, Info, Zap, Target, BarChart3 } from "lucide-react";
+import {
+  ArrowLeft,
+  TrendingUp,
+  TrendingDown,
+  Star,
+  Sparkles,
+  Activity,
+  Info,
+  Zap,
+  Target,
+  BarChart3,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { watchlistService } from "@/services/watchlist-service";
@@ -31,12 +42,15 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
     }
   };
 
-  const dayRangePct = stock.high > stock.low 
-    ? Math.min(100, Math.max(0, ((stock.price - stock.low) / (stock.high - stock.low)) * 100))
-    : 50;
+  const dayRangePct =
+    stock.high > stock.low
+      ? Math.min(100, Math.max(0, ((stock.price - stock.low) / (stock.high - stock.low)) * 100))
+      : 50;
 
   const range = stock.high - stock.low;
-  const confidence = Math.min(95, Math.max(68, Math.abs(stock.percentageChange) * 8 + 72)).toFixed(0);
+  const confidence = Math.min(95, Math.max(68, Math.abs(stock.percentageChange) * 8 + 72)).toFixed(
+    0,
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -70,7 +84,9 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
       <div className="rounded-xl border border-border bg-card p-5 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-black font-mono tracking-tight text-foreground">{stock.symbol}</span>
+            <span className="text-2xl font-black font-mono tracking-tight text-foreground">
+              {stock.symbol}
+            </span>
             <span className="text-[10px] uppercase font-bold font-mono px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
               Colombo Stock Exchange
             </span>
@@ -83,9 +99,16 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
             <span className="text-3xl font-black font-mono text-foreground tracking-tight">
               {fmtPrice(stock.price)}
             </span>
-            <div className={cn("flex items-center gap-1 text-sm font-bold font-mono", isUp ? "text-emerald-400" : "text-red-400")}>
+            <div
+              className={cn(
+                "flex items-center gap-1 text-sm font-bold font-mono",
+                isUp ? "text-emerald-400" : "text-red-400",
+              )}
+            >
               {isUp ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
-              <span>{fmtChange(stock.change)} ({stock.percentageChange.toFixed(2)}%)</span>
+              <span>
+                {fmtChange(stock.change)} ({stock.percentageChange.toFixed(2)}%)
+              </span>
             </div>
           </div>
         </div>
@@ -100,28 +123,42 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
         <div className="lg:col-span-2 rounded-xl border border-border bg-card shadow-card p-5 space-y-4">
           <div className="flex items-center gap-2 border-b border-border pb-3">
             <Activity className="size-4 text-primary" />
-            <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Market Metrics & Range</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
+              Market Metrics & Range
+            </h3>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-muted/30 border border-border rounded-lg p-3">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Previous Close</span>
-              <span className="font-mono font-bold text-foreground">{fmtPrice(stock.previousClose)}</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                Previous Close
+              </span>
+              <span className="font-mono font-bold text-foreground">
+                {fmtPrice(stock.previousClose)}
+              </span>
             </div>
 
             <div className="bg-muted/30 border border-border rounded-lg p-3">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Day High</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                Day High
+              </span>
               <span className="font-mono font-bold text-emerald-400">{fmtPrice(stock.high)}</span>
             </div>
 
             <div className="bg-muted/30 border border-border rounded-lg p-3">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Day Low</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                Day Low
+              </span>
               <span className="font-mono font-bold text-red-400">{fmtPrice(stock.low)}</span>
             </div>
 
             <div className="bg-muted/30 border border-border rounded-lg p-3">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Net Change</span>
-              <span className={cn("font-mono font-bold", isUp ? "text-emerald-400" : "text-red-400")}>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                Net Change
+              </span>
+              <span
+                className={cn("font-mono font-bold", isUp ? "text-emerald-400" : "text-red-400")}
+              >
                 {fmtChange(stock.change)}
               </span>
             </div>
@@ -147,7 +184,8 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
                     <TooltipContent side="top" className="max-w-xs text-xs space-y-1 p-2.5">
                       <p className="font-semibold">Intraday Range</p>
                       <p className="leading-relaxed opacity-90">
-                        Shows price fluctuations between the highest and lowest prices reached during today's active trading session.
+                        Shows price fluctuations between the highest and lowest prices reached
+                        during today's active trading session.
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -169,7 +207,9 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-border pb-3">
               <Sparkles className="size-4 text-purple-400" />
-              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">AI Market & Stock Summary</h3>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
+                AI Market & Stock Summary
+              </h3>
             </div>
 
             <div className="space-y-3">
@@ -177,9 +217,14 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Zap className="size-3 text-purple-400" /> Technical Signal
                 </span>
-                <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded uppercase",
-                  isUp ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"
-                )}>
+                <span
+                  className={cn(
+                    "text-xs font-mono font-bold px-2.5 py-0.5 rounded uppercase",
+                    isUp
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      : "bg-red-500/10 text-red-400 border border-red-500/20",
+                  )}
+                >
                   {isUp ? "BULLISH ACCUMULATION" : "BEARISH CONSOLIDATION"}
                 </span>
               </div>
@@ -188,9 +233,7 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Target className="size-3 text-purple-400" /> AI Confidence Score
                 </span>
-                <span className="text-xs font-mono font-bold text-foreground">
-                  {confidence}%
-                </span>
+                <span className="text-xs font-mono font-bold text-foreground">{confidence}%</span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -198,14 +241,19 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
                   <BarChart3 className="size-3 text-purple-400" /> Intraday Volatility
                 </span>
                 <span className="text-xs font-mono font-bold text-foreground">
-                  {stock.low > 0 ? (((stock.high - stock.low) / stock.low) * 100).toFixed(2) : "0.00"}%
+                  {stock.low > 0
+                    ? (((stock.high - stock.low) / stock.low) * 100).toFixed(2)
+                    : "0.00"}
+                  %
                 </span>
               </div>
 
               {/* Comprehensive AI Summary Narrative */}
               <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3.5 text-xs text-foreground leading-relaxed mt-2 space-y-2">
                 <p>
-                  <strong>{stock.symbol}</strong> ({stock.name}) is trading at <strong>{fmtPrice(stock.price)}</strong> ({isUp ? "+" : ""}{stock.percentageChange.toFixed(2)}%).
+                  <strong>{stock.symbol}</strong> ({stock.name}) is trading at{" "}
+                  <strong>{fmtPrice(stock.price)}</strong> ({isUp ? "+" : ""}
+                  {stock.percentageChange.toFixed(2)}%).
                 </p>
                 <p className="text-muted-foreground">
                   {isUp

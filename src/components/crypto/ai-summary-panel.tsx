@@ -24,10 +24,14 @@ export function AiSummaryPanel({ data, loading, symbol, onSymbolChange }: AiSumm
         </div>
         <select
           value={symbol}
-          onChange={e => onSymbolChange(e.target.value)}
+          onChange={(e) => onSymbolChange(e.target.value)}
           className="bg-muted/50 border border-border rounded-md px-2 py-1 text-xs font-mono text-foreground outline-none cursor-pointer"
         >
-          {TRACKED_SYMBOLS.map(s => <option key={s} value={s}>{s.replace("USDT", "")}/USDT</option>)}
+          {TRACKED_SYMBOLS.map((s) => (
+            <option key={s} value={s}>
+              {s.replace("USDT", "")}/USDT
+            </option>
+          ))}
         </select>
       </div>
 
@@ -44,12 +48,18 @@ export function AiSummaryPanel({ data, loading, symbol, onSymbolChange }: AiSumm
             </p>
             <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border">
               {[
-                { label: "EMA 9",  value: data.indicators.ema9.toFixed(2),  color: "text-[#ffd740]" },
-                { label: "EMA 21", value: data.indicators.ema21.toFixed(2), color: "text-[#40c4ff]" },
-                { label: "RSI",    value: data.indicators.rsi.toFixed(2),   color: "text-[#ea80fc]" },
+                { label: "EMA 9", value: data.indicators.ema9.toFixed(2), color: "text-[#ffd740]" },
+                {
+                  label: "EMA 21",
+                  value: data.indicators.ema21.toFixed(2),
+                  color: "text-[#40c4ff]",
+                },
+                { label: "RSI", value: data.indicators.rsi.toFixed(2), color: "text-[#ea80fc]" },
               ].map(({ label, value, color }) => (
                 <div key={label} className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-widest text-muted-foreground">{label}</span>
+                  <span className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    {label}
+                  </span>
                   <span className={`text-xs font-bold font-mono ${color}`}>{value}</span>
                 </div>
               ))}

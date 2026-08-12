@@ -28,9 +28,7 @@ export function TradeHistory({ history }: Props) {
         </div>
       </div>
       {history.length === 0 ? (
-        <div className="p-10 text-center text-sm text-muted-foreground">
-          No closed trades yet
-        </div>
+        <div className="p-10 text-center text-sm text-muted-foreground">No closed trades yet</div>
       ) : (
         <Table>
           <TableHeader>
@@ -49,12 +47,8 @@ export function TradeHistory({ history }: Props) {
               return (
                 <TableRow key={t.id}>
                   <TableCell className="font-medium">{t.pair}</TableCell>
-                  <TableCell className="text-right tabular">
-                    {formatUsd(t.entryPrice)}
-                  </TableCell>
-                  <TableCell className="text-right tabular">
-                    {formatUsd(t.exitPrice)}
-                  </TableCell>
+                  <TableCell className="text-right tabular">{formatUsd(t.entryPrice)}</TableCell>
+                  <TableCell className="text-right tabular">{formatUsd(t.exitPrice)}</TableCell>
                   <TableCell
                     className={cn(
                       "text-right tabular font-medium",
@@ -62,9 +56,7 @@ export function TradeHistory({ history }: Props) {
                     )}
                   >
                     {formatUsd(t.pnl)}{" "}
-                    <span className="text-xs opacity-80">
-                      ({formatPct(t.pnlPct)})
-                    </span>
+                    <span className="text-xs opacity-80">({formatPct(t.pnlPct)})</span>
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground text-xs">
                     {formatDuration(t.durationMinutes)}

@@ -41,9 +41,7 @@ export function TradeDetailsPanel({ trade }: Props) {
         <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
           Strategy
         </h4>
-        <p className="mt-2 text-sm leading-relaxed text-foreground/90">
-          {trade.strategy}
-        </p>
+        <p className="mt-2 text-sm leading-relaxed text-foreground/90">{trade.strategy}</p>
       </div>
     </Card>
   );

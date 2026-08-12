@@ -23,7 +23,6 @@ export function StockMoversPanel({ movers, loading, onSelectStock }: StockMovers
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border">
-        
         {/* Gainers */}
         <div className="flex-1 p-4">
           <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
@@ -40,7 +39,13 @@ export function StockMoversPanel({ movers, loading, onSelectStock }: StockMovers
           ) : (
             <div className="space-y-1">
               {gainers.map((g, i) => (
-                <MoverRow key={g.symbol} mover={g} rank={i + 1} type="gain" onSelectStock={onSelectStock} />
+                <MoverRow
+                  key={g.symbol}
+                  mover={g}
+                  rank={i + 1}
+                  type="gain"
+                  onSelectStock={onSelectStock}
+                />
               ))}
             </div>
           )}
@@ -62,18 +67,33 @@ export function StockMoversPanel({ movers, loading, onSelectStock }: StockMovers
           ) : (
             <div className="space-y-1">
               {losers.map((l, i) => (
-                <MoverRow key={l.symbol} mover={l} rank={i + 1} type="loss" onSelectStock={onSelectStock} />
+                <MoverRow
+                  key={l.symbol}
+                  mover={l}
+                  rank={i + 1}
+                  type="loss"
+                  onSelectStock={onSelectStock}
+                />
               ))}
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
 }
 
-function MoverRow({ mover, rank, type, onSelectStock }: { mover: TopMover; rank: number; type: "gain" | "loss"; onSelectStock?: (symbol: string) => void }) {
+function MoverRow({
+  mover,
+  rank,
+  type,
+  onSelectStock,
+}: {
+  mover: TopMover;
+  rank: number;
+  type: "gain" | "loss";
+  onSelectStock?: (symbol: string) => void;
+}) {
   const isGain = type === "gain";
   return (
     <div
@@ -86,11 +106,18 @@ function MoverRow({ mover, rank, type, onSelectStock }: { mover: TopMover; rank:
     >
       <div className="flex items-center gap-3">
         <span className="text-xs font-bold text-muted-foreground w-4 text-center">{rank}</span>
-        <span className="text-sm font-bold font-mono text-foreground group-hover:text-primary transition-colors">{mover.symbol}</span>
+        <span className="text-sm font-bold font-mono text-foreground group-hover:text-primary transition-colors">
+          {mover.symbol}
+        </span>
       </div>
       <div className="flex flex-col items-end">
         <span className="text-sm font-bold font-mono text-foreground">{fmtPrice(mover.price)}</span>
-        <span className={cn("text-[10px] font-bold font-mono", isGain ? "text-emerald-400" : "text-red-400")}>
+        <span
+          className={cn(
+            "text-[10px] font-bold font-mono",
+            isGain ? "text-emerald-400" : "text-red-400",
+          )}
+        >
           {fmtChange(mover.change)} ({mover.changePercentage.toFixed(2)}%)
         </span>
       </div>

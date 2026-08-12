@@ -23,7 +23,10 @@ export function RecentActivity({ items = mockTransactions }: { items?: ActivityI
         {items.map((t) => {
           const buy = t.type === "BUY";
           return (
-            <div key={t.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition">
+            <div
+              key={t.id}
+              className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition"
+            >
               <div
                 className={cn(
                   "size-9 rounded-lg flex items-center justify-center shrink-0",

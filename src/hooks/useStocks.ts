@@ -1,12 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { stockService, type StockTicker, type StockIndices, type MarketStatus, type StockMovers } from "../services/stock-service";
+import {
+  stockService,
+  type StockTicker,
+  type StockIndices,
+  type MarketStatus,
+  type StockMovers,
+} from "../services/stock-service";
 
 export function useStocks() {
   const [tickers, setTickers] = useState<StockTicker[]>([]);
   const [indices, setIndices] = useState<StockIndices | null>(null);
   const [status, setStatus] = useState<MarketStatus | null>(null);
   const [movers, setMovers] = useState<StockMovers | null>(null);
-  
+
   const [loadingTickers, setLoadingTickers] = useState(true);
   const [loadingIndices, setLoadingIndices] = useState(true);
   const [loadingMovers, setLoadingMovers] = useState(true);
@@ -28,7 +34,7 @@ export function useStocks() {
     try {
       const [ind, stat] = await Promise.all([
         stockService.getIndices(),
-        stockService.getMarketStatus()
+        stockService.getMarketStatus(),
       ]);
       setIndices(ind);
       setStatus(stat);
@@ -80,6 +86,6 @@ export function useStocks() {
       void fetchTickers();
       void fetchIndicesAndStatus();
       void fetchMovers();
-    }
+    },
   };
 }

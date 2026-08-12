@@ -81,7 +81,11 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 401:
           // Try refresh flow once before forcing logout.
-          if (originalRequest && !originalRequest._retry && !String(originalRequest.url ?? "").includes("/auth/refresh")) {
+          if (
+            originalRequest &&
+            !originalRequest._retry &&
+            !String(originalRequest.url ?? "").includes("/auth/refresh")
+          ) {
             originalRequest._retry = true;
 
             if (!isRefreshing) {

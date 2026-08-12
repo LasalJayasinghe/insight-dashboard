@@ -1,5 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Menu, Moon, Search, Sun, TrendingUp, TrendingDown, ChevronRight, Sparkles } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  Moon,
+  Search,
+  Sun,
+  TrendingUp,
+  TrendingDown,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -80,11 +90,13 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredStocks = stocks.filter((s) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return false;
-    return s.symbol.toLowerCase().includes(q) || (s.name && s.name.toLowerCase().includes(q));
-  }).slice(0, 8);
+  const filteredStocks = stocks
+    .filter((s) => {
+      const q = search.trim().toLowerCase();
+      if (!q) return false;
+      return s.symbol.toLowerCase().includes(q) || (s.name && s.name.toLowerCase().includes(q));
+    })
+    .slice(0, 8);
 
   const handleSelectStock = (symbol: string) => {
     setIsOpen(false);
@@ -110,7 +122,6 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
   return (
     <header className="h-16 border-b border-border/50 bg-card/60 backdrop-blur-xl sticky top-0 z-30 transition-colors">
       <div className="h-full px-4 md:px-6 flex items-center justify-between gap-4">
-        
         {/* Left: Sidebar Toggle Button */}
         <div className="flex items-center gap-3">
           <Button
@@ -195,14 +206,18 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
                             <div className="text-xs font-bold font-mono text-foreground group-hover:text-primary transition-colors truncate">
                               {s.symbol}
                             </div>
-                            <div className="text-[11px] text-muted-foreground truncate">{s.name}</div>
+                            <div className="text-[11px] text-muted-foreground truncate">
+                              {s.name}
+                            </div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-2">
                           {price !== undefined && (
                             <div className="text-right">
-                              <div className="text-xs font-mono font-bold text-foreground">{formatRs(price)}</div>
+                              <div className="text-xs font-mono font-bold text-foreground">
+                                {formatRs(price)}
+                              </div>
                               {changePct !== undefined && (
                                 <div
                                   className={cn(
@@ -210,8 +225,15 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
                                     isUp ? "text-emerald-400" : "text-red-400",
                                   )}
                                 >
-                                  {isUp ? <TrendingUp className="size-2.5" /> : <TrendingDown className="size-2.5" />}
-                                  <span>{isUp ? "+" : ""}{changePct.toFixed(2)}%</span>
+                                  {isUp ? (
+                                    <TrendingUp className="size-2.5" />
+                                  ) : (
+                                    <TrendingDown className="size-2.5" />
+                                  )}
+                                  <span>
+                                    {isUp ? "+" : ""}
+                                    {changePct.toFixed(2)}%
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -237,7 +259,11 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
             aria-label="Toggle theme"
             className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors cursor-pointer"
           >
-            {theme === "dark" ? <Sun className="size-4.5 text-amber-400" /> : <Moon className="size-4.5 text-slate-700" />}
+            {theme === "dark" ? (
+              <Sun className="size-4.5 text-amber-400" />
+            ) : (
+              <Moon className="size-4.5 text-slate-700" />
+            )}
           </Button>
 
           {/* Notifications */}
@@ -293,7 +319,6 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
       </div>
     </header>
   );

@@ -7,7 +7,10 @@ export function fmtPrice(price: number) {
 }
 
 export function fmtChange(change: number) {
-  return (change > 0 ? "+" : "") + change.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (
+    (change > 0 ? "+" : "") +
+    change.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  );
 }
 
 interface StockCardsProps {
@@ -23,7 +26,10 @@ export function StockCards({ tickers, selectedSymbol, onSelect, loading }: Stock
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="h-[72px] rounded-xl border border-border bg-card shadow-sm animate-pulse" />
+          <div
+            key={i}
+            className="h-[72px] rounded-xl border border-border bg-card shadow-sm animate-pulse"
+          />
         ))}
       </div>
     );
@@ -34,7 +40,7 @@ export function StockCards({ tickers, selectedSymbol, onSelect, loading }: Stock
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-      {displayTickers.map(t => {
+      {displayTickers.map((t) => {
         const isSelected = selectedSymbol === t.symbol;
         const isUp = t.change >= 0;
 
@@ -54,21 +60,31 @@ export function StockCards({ tickers, selectedSymbol, onSelect, loading }: Stock
               <span className="text-[11px] font-extrabold uppercase tracking-wide font-mono text-foreground truncate max-w-[80%]">
                 {t.symbol}
               </span>
-              <span className={cn("text-[9px] font-bold font-mono px-1 py-0.5 rounded flex items-center",
-                isUp ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
-              )}>
-                {isUp ? <TrendingUp className="size-2.5 mr-0.5" /> : <TrendingDown className="size-2.5 mr-0.5" />}
+              <span
+                className={cn(
+                  "text-[9px] font-bold font-mono px-1 py-0.5 rounded flex items-center",
+                  isUp ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
+                )}
+              >
+                {isUp ? (
+                  <TrendingUp className="size-2.5 mr-0.5" />
+                ) : (
+                  <TrendingDown className="size-2.5 mr-0.5" />
+                )}
                 {t.percentageChange.toFixed(1)}%
               </span>
             </div>
-            
+
             <div className="mt-1 flex items-baseline justify-between w-full">
               <span className="text-sm font-black tracking-tight font-mono text-foreground">
                 {fmtPrice(t.price)}
               </span>
-              <span className={cn("text-[9px] font-bold font-mono",
-                isUp ? "text-emerald-400" : "text-red-400"
-              )}>
+              <span
+                className={cn(
+                  "text-[9px] font-bold font-mono",
+                  isUp ? "text-emerald-400" : "text-red-400",
+                )}
+              >
                 {fmtChange(t.change)}
               </span>
             </div>

@@ -32,9 +32,7 @@ export function SignalsTable({ signals }: Props) {
         </p>
       </div>
       {signals.length === 0 ? (
-        <div className="p-10 text-center text-sm text-muted-foreground">
-          No signals available
-        </div>
+        <div className="p-10 text-center text-sm text-muted-foreground">No signals available</div>
       ) : (
         <Table>
           <TableHeader>
@@ -51,19 +49,14 @@ export function SignalsTable({ signals }: Props) {
               <TableRow key={s.id}>
                 <TableCell className="font-medium">{s.pair}</TableCell>
                 <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={cn("font-semibold", signalStyles[s.signal])}
-                  >
+                  <Badge variant="outline" className={cn("font-semibold", signalStyles[s.signal])}>
                     {s.signal}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right tabular">
                   ${s.price.toLocaleString(undefined, { maximumFractionDigits: 4 })}
                 </TableCell>
-                <TableCell className="text-right tabular">
-                  {s.confidence.toFixed(0)}%
-                </TableCell>
+                <TableCell className="text-right tabular">{s.confidence.toFixed(0)}%</TableCell>
                 <TableCell className="text-right text-muted-foreground text-xs">
                   {formatRelative(s.time)}
                 </TableCell>

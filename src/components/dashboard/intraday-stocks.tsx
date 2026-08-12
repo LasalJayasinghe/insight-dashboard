@@ -31,7 +31,9 @@ function IntradayCardHeader() {
             <TooltipContent side="top" className="max-w-xs text-xs space-y-1 p-3">
               <p className="font-semibold text-sm">What is Intraday?</p>
               <p className="leading-relaxed opacity-90">
-                <strong>Intraday</strong> refers to stock trades and price movements that take place within regular market hours on the same trading day. Intraday data shows real-time price fluctuations before the market closes.
+                <strong>Intraday</strong> refers to stock trades and price movements that take place
+                within regular market hours on the same trading day. Intraday data shows real-time
+                price fluctuations before the market closes.
               </p>
             </TooltipContent>
           </Tooltip>
@@ -76,15 +78,18 @@ export function IntradayStocks({ items, loading = false, onSelectStock }: Intrad
               const up = s.percentage >= 0;
               const low = s.low ?? s.price * 0.98;
               const high = s.high ?? s.price * 1.02;
-              const rangePct = high > low ? Math.min(100, Math.max(0, ((s.price - low) / (high - low)) * 100)) : 50;
+              const rangePct =
+                high > low
+                  ? Math.min(100, Math.max(0, ((s.price - low) / (high - low)) * 100))
+                  : 50;
 
               // Compute distinct Volatility (Intraday High-Low Swing %) vs Net Day Change %
               const hasHighLow = s.high && s.low && s.high > s.low;
               const volatilityVal = hasHighLow
                 ? ((s.high! - s.low!) / s.low!) * 100
                 : s.volatility && s.volatility > 0
-                ? s.volatility
-                : Math.max(0.45, Math.abs(s.percentage) * 0.75 + 0.35);
+                  ? s.volatility
+                  : Math.max(0.45, Math.abs(s.percentage) * 0.75 + 0.35);
 
               return (
                 <div
@@ -114,7 +119,9 @@ export function IntradayStocks({ items, loading = false, onSelectStock }: Intrad
                   <div className="flex-1 max-w-[180px] sm:max-w-xs space-y-1 px-1">
                     <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
                       <span>Low: {formatRs(low)}</span>
-                      <span className="text-foreground/80 font-medium hidden md:inline">Day Range</span>
+                      <span className="text-foreground/80 font-medium hidden md:inline">
+                        Day Range
+                      </span>
                       <span>High: {formatRs(high)}</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden relative">
@@ -132,15 +139,24 @@ export function IntradayStocks({ items, loading = false, onSelectStock }: Intrad
 
                   {/* 3. Stock Value (Net Price & Day Change %) */}
                   <div className="text-right shrink-0">
-                    <div className="text-sm font-bold font-mono text-foreground">{formatRs(s.price)}</div>
+                    <div className="text-sm font-bold font-mono text-foreground">
+                      {formatRs(s.price)}
+                    </div>
                     <div
                       className={cn(
                         "text-xs font-mono font-bold flex items-center justify-end gap-0.5",
                         up ? "text-emerald-400" : "text-red-400",
                       )}
                     >
-                      {up ? <ArrowUpRight className="size-3.5" /> : <ArrowDownRight className="size-3.5" />}
-                      <span>{s.percentage >= 0 ? "+" : ""}{s.percentage.toFixed(2)}%</span>
+                      {up ? (
+                        <ArrowUpRight className="size-3.5" />
+                      ) : (
+                        <ArrowDownRight className="size-3.5" />
+                      )}
+                      <span>
+                        {s.percentage >= 0 ? "+" : ""}
+                        {s.percentage.toFixed(2)}%
+                      </span>
                     </div>
                   </div>
                 </div>

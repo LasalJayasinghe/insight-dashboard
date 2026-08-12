@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/use-theme";
 import { isAuthenticated } from "@/lib/auth";
 import { settingsService, type UserSettings } from "@/services/settings-service";
@@ -30,7 +37,7 @@ function SettingsPage() {
   const { theme, toggle } = useTheme();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [rateDialogOpen, setRateDialogOpen] = useState(false);
-  
+
   const [usdtRate, setUsdtRate] = useState("");
   const [lkrRate, setLkrRate] = useState("");
 
@@ -78,7 +85,7 @@ function SettingsPage() {
       toast.error("Please enter valid numbers");
       return;
     }
-    
+
     await update({ ...settings, usdtToLkrRate: ur, lkrToUsdtRate: lr });
     setRateDialogOpen(false);
   };
@@ -92,12 +99,16 @@ function SettingsPage() {
         </div>
 
         <Card className="gradient-card border-border shadow-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Appearance</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">Appearance</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between py-2">
               <div>
                 <p className="font-medium text-sm">Dark mode</p>
-                <p className="text-sm text-muted-foreground">Use dark theme across the dashboard.</p>
+                <p className="text-sm text-muted-foreground">
+                  Use dark theme across the dashboard.
+                </p>
               </div>
               <Switch checked={theme === "dark"} onCheckedChange={toggle} />
             </div>
@@ -105,12 +116,16 @@ function SettingsPage() {
         </Card>
 
         <Card className="gradient-card border-border shadow-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Notifications & security</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">Notifications & security</CardTitle>
+          </CardHeader>
           <CardContent className="divide-y divide-border">
             <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
               <div>
                 <p className="font-medium text-sm">Email notifications</p>
-                <p className="text-sm text-muted-foreground">Daily portfolio summary at market close.</p>
+                <p className="text-sm text-muted-foreground">
+                  Daily portfolio summary at market close.
+                </p>
               </div>
               <Switch
                 checked={settings?.emailNotifications ?? false}
@@ -123,7 +138,9 @@ function SettingsPage() {
             <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
               <div>
                 <p className="font-medium text-sm">Price alerts</p>
-                <p className="text-sm text-muted-foreground">Get notified on watchlist movements &gt;5%.</p>
+                <p className="text-sm text-muted-foreground">
+                  Get notified on watchlist movements &gt;5%.
+                </p>
               </div>
               <Switch
                 checked={settings?.priceAlerts ?? false}
@@ -150,7 +167,9 @@ function SettingsPage() {
         </Card>
 
         <Card className="gradient-card border-border shadow-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Currency & Exchange</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">Currency & Exchange</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -202,7 +221,9 @@ function SettingsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRateDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setRateDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={() => void handleSaveRates()}>Save Rates</Button>
           </DialogFooter>
         </DialogContent>

@@ -11,18 +11,29 @@ interface StatCardProps {
   accent?: "primary" | "success" | "destructive";
 }
 
-export function StatCard({ label, value, delta, hint, icon: Icon, accent = "primary" }: StatCardProps) {
+export function StatCard({
+  label,
+  value,
+  delta,
+  hint,
+  icon: Icon,
+  accent = "primary",
+}: StatCardProps) {
   const positive = (delta ?? 0) >= 0;
   const accentBg =
-    accent === "success" ? "bg-success/10 text-success"
-    : accent === "destructive" ? "bg-destructive/10 text-destructive"
-    : "bg-primary/15 text-primary";
+    accent === "success"
+      ? "bg-success/10 text-success"
+      : accent === "destructive"
+        ? "bg-destructive/10 text-destructive"
+        : "bg-primary/15 text-primary";
 
   return (
     <Card className="p-5 gradient-card border-border shadow-card hover:shadow-elegant transition-shadow">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+            {label}
+          </p>
           <p className="mt-2 text-2xl md:text-3xl font-semibold tabular tracking-tight">{value}</p>
         </div>
         <div className={cn("size-10 rounded-xl flex items-center justify-center", accentBg)}>
@@ -38,7 +49,11 @@ export function StatCard({ label, value, delta, hint, icon: Icon, accent = "prim
                 positive ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive",
               )}
             >
-              {positive ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+              {positive ? (
+                <ArrowUpRight className="size-3" />
+              ) : (
+                <ArrowDownRight className="size-3" />
+              )}
               {Math.abs(delta).toFixed(2)}%
             </span>
           )}

@@ -17,8 +17,8 @@ export function AlgorithmCard({ algorithm }: Props) {
     algorithm.currentSignal === "BUY"
       ? "bg-success/10 text-success border-success/20"
       : algorithm.currentSignal === "SELL"
-      ? "bg-destructive/10 text-destructive border-destructive/20"
-      : "bg-warning/10 text-warning border-warning/20";
+        ? "bg-destructive/10 text-destructive border-destructive/20"
+        : "bg-warning/10 text-warning border-warning/20";
 
   return (
     <Link
@@ -37,9 +37,7 @@ export function AlgorithmCard({ algorithm }: Props) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold tracking-tight truncate">
-                {algorithm.name}
-              </h3>
+              <h3 className="text-lg font-semibold tracking-tight truncate">{algorithm.name}</h3>
               <Badge
                 variant="outline"
                 className={cn(
@@ -142,9 +140,7 @@ function Stat({
       >
         {value}
       </p>
-      {sub && (
-        <div className="mt-0.5 text-[11px] text-muted-foreground tabular">{sub}</div>
-      )}
+      {sub && <div className="mt-0.5 text-[11px] text-muted-foreground tabular">{sub}</div>}
     </div>
   );
 }

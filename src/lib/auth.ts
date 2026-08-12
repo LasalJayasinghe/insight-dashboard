@@ -17,4 +17,3 @@ export function logout() {
 export const getToken = () => {
   return localStorage.getItem("token");
 };
-

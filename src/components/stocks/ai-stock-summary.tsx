@@ -32,14 +32,21 @@ export function AiStockSummaryPanel({ selectedStock, loading }: AiStockSummaryPr
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-2xl font-black text-foreground font-mono">{selectedStock.symbol}</h3>
+                <h3 className="text-2xl font-black text-foreground font-mono">
+                  {selectedStock.symbol}
+                </h3>
                 <p className="text-xs text-muted-foreground">{selectedStock.name}</p>
               </div>
               <div className="text-right">
-                <span className="text-2xl font-black font-mono block">{fmtPrice(selectedStock.price)}</span>
-                <span className={cn("text-sm font-bold font-mono",
-                  selectedStock.change >= 0 ? "text-emerald-400" : "text-red-400"
-                )}>
+                <span className="text-2xl font-black font-mono block">
+                  {fmtPrice(selectedStock.price)}
+                </span>
+                <span
+                  className={cn(
+                    "text-sm font-bold font-mono",
+                    selectedStock.change >= 0 ? "text-emerald-400" : "text-red-400",
+                  )}
+                >
                   {fmtChange(selectedStock.change)} ({selectedStock.percentageChange.toFixed(2)}%)
                 </span>
               </div>
@@ -51,12 +58,20 @@ export function AiStockSummaryPanel({ selectedStock, loading }: AiStockSummaryPr
 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-muted/30 border border-border rounded-lg p-3">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Today's High</span>
-                <span className="font-mono font-bold text-foreground">{fmtPrice(selectedStock.high)}</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                  Today's High
+                </span>
+                <span className="font-mono font-bold text-foreground">
+                  {fmtPrice(selectedStock.high)}
+                </span>
               </div>
               <div className="bg-muted/30 border border-border rounded-lg p-3">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Today's Low</span>
-                <span className="font-mono font-bold text-foreground">{fmtPrice(selectedStock.low)}</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                  Today's Low
+                </span>
+                <span className="font-mono font-bold text-foreground">
+                  {fmtPrice(selectedStock.low)}
+                </span>
               </div>
             </div>
           </div>
@@ -72,13 +87,13 @@ function generateSimpleAnalysis(stock: StockTicker): React.ReactNode {
   const closeToHigh = stock.high > 0 && (stock.high - stock.price) / stock.high < 0.01;
   const closeToLow = stock.low > 0 && (stock.price - stock.low) / stock.low < 0.01;
 
-  let text = `${stock.symbol} is currently trading at ${fmtPrice(stock.price)}, which is a ${stock.percentageChange.toFixed(2)}% ${isUp ? 'increase' : 'decrease'} from its previous close. `;
+  let text = `${stock.symbol} is currently trading at ${fmtPrice(stock.price)}, which is a ${stock.percentageChange.toFixed(2)}% ${isUp ? "increase" : "decrease"} from its previous close. `;
 
   if (range === 0) {
     text += `The stock has seen no volatility today, trading completely flat.`;
   } else {
     text += `The day's trading range has been ${fmtPrice(range)} (between ${fmtPrice(stock.low)} and ${fmtPrice(stock.high)}). `;
-    
+
     if (closeToHigh) {
       text += `Notably, it is currently trading very close to its daily high, showing strong buying pressure.`;
     } else if (closeToLow) {
@@ -92,10 +107,18 @@ function generateSimpleAnalysis(stock: StockTicker): React.ReactNode {
     <>
       <p className="mb-2">{text}</p>
       <div className="flex items-center gap-2 mt-3 pt-3 border-t border-purple-500/10">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Verdict</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
+          Verdict
+        </span>
         <ArrowRight className="size-3 text-purple-400" />
         <span className="text-xs font-bold text-foreground">
-          {isUp && closeToHigh ? "Strong Bullish" : isUp ? "Bullish" : !isUp && closeToLow ? "Strong Bearish" : "Bearish"}
+          {isUp && closeToHigh
+            ? "Strong Bullish"
+            : isUp
+              ? "Bullish"
+              : !isUp && closeToLow
+                ? "Strong Bearish"
+                : "Bearish"}
         </span>
       </div>
     </>

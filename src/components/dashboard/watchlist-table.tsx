@@ -1,5 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { mockStocks, type Stock } from "@/lib/mock-data";
 import { formatRs } from "@/lib/format";
@@ -12,7 +19,11 @@ interface WatchlistTableProps {
   onSelectStock?: (symbol: string) => void;
 }
 
-export function WatchlistTable({ stocks = mockStocks, loading = false, onSelectStock }: WatchlistTableProps) {
+export function WatchlistTable({
+  stocks = mockStocks,
+  loading = false,
+  onSelectStock,
+}: WatchlistTableProps) {
   if (loading) {
     return (
       <Card className="gradient-card border-border shadow-card h-105">
@@ -57,7 +68,9 @@ export function WatchlistTable({ stocks = mockStocks, loading = false, onSelectS
               <TableRow className="border-border hover:bg-transparent">
                 <TableHead className="text-xs uppercase tracking-wider">Symbol</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-right">Price</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider text-right">Change</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right">
+                  Change
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -81,11 +94,15 @@ export function WatchlistTable({ stocks = mockStocks, loading = false, onSelectS
                           <div className="font-bold text-xs font-mono group-hover:text-primary transition-colors flex items-center gap-1">
                             {s.symbol}
                           </div>
-                          <div className="text-[11px] text-muted-foreground truncate max-w-[140px]">{s.name}</div>
+                          <div className="text-[11px] text-muted-foreground truncate max-w-[140px]">
+                            {s.name}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right tabular font-mono font-bold text-xs">{formatRs(s.price)}</TableCell>
+                    <TableCell className="text-right tabular font-mono font-bold text-xs">
+                      {formatRs(s.price)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <span
                         className={cn(
@@ -93,8 +110,13 @@ export function WatchlistTable({ stocks = mockStocks, loading = false, onSelectS
                           up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
                         )}
                       >
-                        {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
-                        {s.changePct >= 0 ? "+" : ""}{s.changePct.toFixed(2)}%
+                        {up ? (
+                          <ArrowUpRight className="size-3" />
+                        ) : (
+                          <ArrowDownRight className="size-3" />
+                        )}
+                        {s.changePct >= 0 ? "+" : ""}
+                        {s.changePct.toFixed(2)}%
                       </span>
                     </TableCell>
                   </TableRow>

@@ -5,7 +5,6 @@ export async function getProfile() {
   return res.data;
 }
 
-
 export async function updateProfile(profileData: any) {
   const res = await apiClient.put("/profile", profileData);
   return res.data;
@@ -16,18 +15,21 @@ export async function updateTelegramId(telegramId: string): Promise<any> {
   return res.data;
 }
 
-
-export async function changePassword(pwd: { current: string; next: string }): Promise<{ success: boolean; message?: string }> {
+export async function changePassword(pwd: {
+  current: string;
+  next: string;
+}): Promise<{ success: boolean; message?: string }> {
   try {
     await apiClient.post("/auth/change-password", {
       CurrentPassword: pwd.current,
       NewPassword: pwd.next,
     });
-    ["token", "firstName", "lastName", "refreshToken"].forEach(key => localStorage.removeItem(key));
+    ["token", "firstName", "lastName", "refreshToken"].forEach((key) =>
+      localStorage.removeItem(key),
+    );
     return { success: true };
   } catch (error: any) {
     const message = error?.response?.data?.message || "Failed to change password.";
     return { success: false, message };
   }
 }
-
