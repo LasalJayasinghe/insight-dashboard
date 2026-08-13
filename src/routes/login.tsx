@@ -6,6 +6,104 @@ import { isAuthenticated } from "@/lib/auth";
 import { login, googleLogin } from "@/services/authService";
 import { GoogleLogin } from "@react-oauth/google";
 
+interface EditorialVolume {
+  vol: string;
+  lines: string[];
+  description: string;
+  stats: [string, string][];
+}
+
+const EDITORIAL_VOLUMES: EditorialVolume[] = [
+  {
+    vol: "Vol. 01 — Trading Desk",
+    lines: ["Every position,", "printed on one page."],
+    description:
+      "Portfolios, live CSE prices, price alerts and automated strategies — set in a single legible ledger instead of a wall of widgets.",
+    stats: [
+      ["Markets", "CSE · Crypto"],
+      ["Alerts", "Real-time"],
+      ["Strategies", "Automated"],
+    ],
+  },
+  {
+    vol: "Vol. 02 — Portfolio Manager",
+    lines: ["Manage portfolios,", "track live performance."],
+    description:
+      "Monitor your equity holdings and digital assets with instant P&L analytics, execution history, and unified balance ledgers.",
+    stats: [
+      ["Tracking", "Multi-asset"],
+      ["Analytics", "Live P&L"],
+      ["Ledger", "Unified"],
+    ],
+  },
+  {
+    vol: "Vol. 03 — Crypto Algorithms",
+    lines: ["Algorithms for crypto,", "automated execution."],
+    description:
+      "Deploy rule-based execution bots, grid strategies, and smart trigger conditions designed for 24/7 high precision markets.",
+    stats: [
+      ["Bots", "Grid & DCA"],
+      ["Uptime", "24/7 Exec"],
+      ["Logic", "Custom triggers"],
+    ],
+  },
+  {
+    vol: "Vol. 04 — Signal Matrix",
+    lines: ["Precision alerts,", "zero latency."],
+    description:
+      "Configure multi-condition price triggers and receive instant notifications via Telegram, webhooks, or push alerts.",
+    stats: [
+      ["Latency", "< 50ms"],
+      ["Hooks", "Telegram · Webhook"],
+      ["Coverage", "100% Symbols"],
+    ],
+  },
+];
+
+function AnimatedLetters({
+  text,
+  className,
+  baseDelay = 0,
+}: {
+  text: string;
+  className?: string;
+  baseDelay?: number;
+}) {
+  const words = text.split(" ");
+  let charCounter = 0;
+
+  return (
+    <span className={cn("inline-block", className)}>
+      {words.map((word, wordIdx) => {
+        const chars = word.split("");
+        const startIdx = charCounter;
+        charCounter += chars.length + 1;
+
+        return (
+          <span key={wordIdx} className="inline-block whitespace-nowrap">
+            {chars.map((char, charIdx) => {
+              const globalIdx = startIdx + charIdx;
+              const delay = baseDelay + globalIdx * 24;
+              return (
+                <span
+                  key={charIdx}
+                  className="animate-letter-reveal"
+                  style={{ animationDelay: `${delay}ms` }}
+                >
+                  {char}
+                </span>
+              );
+            })}
+            {wordIdx < words.length - 1 && (
+              <span className="inline-block">&nbsp;</span>
+            )}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 export const Route = createFileRoute("/login")({
   beforeLoad: () => {
     if (typeof window !== "undefined" && isAuthenticated()) {
@@ -39,6 +137,16 @@ function LoginPage() {
   const [remember, setRemember] = useState(true);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [volIndex, setVolIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setVolIndex((prev) => (prev + 1) % EDITORIAL_VOLUMES.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [volIndex]);
+
+  const activeVol = EDITORIAL_VOLUMES[volIndex];
 
   useEffect(() => {
     if (typeof window !== "undefined" && isAuthenticated()) {
@@ -103,39 +211,79 @@ function LoginPage() {
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[1.1fr_1fr]">
       {/* Editorial cover */}
       <aside className="paper-grain relative hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
-        <div className="flex items-center gap-3">
-          <div className="grid size-8 place-items-center bg-primary-foreground font-display text-sm font-bold text-primary">
-            A
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="grid size-8 place-items-center bg-primary-foreground font-display text-sm font-bold text-primary">
+              A
+            </div>
+            <span className="font-display text-lg font-bold">AlertMe</span>
           </div>
-          <span className="font-display text-lg font-bold">AlertMe</span>
+
+          <div className="flex items-center gap-1.5 font-mono text-[11px] text-primary-foreground/50">
+            <span>0{volIndex + 1}</span>
+            <span>/</span>
+            <span>0{EDITORIAL_VOLUMES.length}</span>
+          </div>
         </div>
 
-        <div className="max-w-lg">
-          <span className="label-caps text-primary-foreground/60">Vol. 01 — Trading Desk</span>
-          <h2 className="mt-5 font-display text-5xl leading-[0.95] font-bold">
-            Every position,
-            <br />
-            printed on one page.
+        <div className="max-w-lg my-auto py-8">
+          {/* Progress timeline bars */}
+          <div className="mb-8 flex items-center gap-2">
+            {EDITORIAL_VOLUMES.map((v, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setVolIndex(idx)}
+                title={v.vol}
+                className={cn(
+                  "relative h-1 flex-1 overflow-hidden rounded-full transition-all duration-300 cursor-pointer",
+                  idx === volIndex
+                    ? "bg-primary-foreground/30"
+                    : "bg-primary-foreground/15 hover:bg-primary-foreground/30"
+                )}
+                aria-label={`Switch to ${v.vol}`}
+              >
+                {idx === volIndex && (
+                  <span
+                    key={`bar-${volIndex}`}
+                    className="absolute inset-y-0 left-0 bg-primary-foreground animate-progress-bar"
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div key={`vol-${volIndex}`} className="animate-fade-slide-up">
+            <span className="label-caps text-primary-foreground/60">{activeVol.vol}</span>
+          </div>
+
+          <h2 key={`h2-${volIndex}`} className="mt-5 font-display text-5xl leading-[0.95] font-bold min-h-[105px]">
+            {activeVol.lines.map((line, idx) => (
+              <span key={idx} className="block">
+                <AnimatedLetters text={line} baseDelay={idx * 140} />
+              </span>
+            ))}
           </h2>
-          <p className="mt-6 max-w-md text-sm leading-relaxed text-primary-foreground/70">
-            Portfolios, live CSE prices, price alerts and automated strategies — set in a single
-            legible ledger instead of a wall of widgets.
+
+          <p
+            key={`desc-${volIndex}`}
+            className="mt-6 max-w-md text-sm leading-relaxed text-primary-foreground/70 animate-fade-slide-up min-h-[60px]"
+            style={{ animationDelay: "280ms" }}
+          >
+            {activeVol.description}
           </p>
         </div>
 
-        <dl className="grid grid-cols-3 border-t border-primary-foreground/20 pt-6">
-          {[
-            ["Markets", "CSE · Crypto"],
-            ["Alerts", "Real-time"],
-            ["Strategies", "Automated"],
-          ].map(([k, v]) => (
+        <dl key={`stats-${volIndex}`} className="grid grid-cols-3 border-t border-primary-foreground/20 pt-6 animate-fade-slide-up">
+          {activeVol.stats.map(([k, v]) => (
             <div key={k}>
               <dt className="label-caps text-primary-foreground/50">{k}</dt>
-              <dd className="mt-1.5 font-mono text-xs">{v}</dd>
+              <dd className="mt-1.5 font-mono text-xs text-primary-foreground/90">{v}</dd>
             </div>
           ))}
         </dl>
       </aside>
+
 
       {/* Form */}
       <main className="flex items-center justify-center bg-background px-6 py-12">

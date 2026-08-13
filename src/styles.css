@@ -336,4 +336,57 @@
   .scrollbar-thin {
     scrollbar-width: thin;
   }
+
+  @keyframes letter-reveal {
+    0% {
+      opacity: 0;
+      transform: translateY(16px) rotateX(-20deg) scale(0.96);
+      filter: blur(6px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes fade-slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(12px);
+      filter: blur(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .animate-letter-reveal {
+    display: inline-block;
+    white-space: pre;
+    animation: letter-reveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity, filter;
+  }
+
+  .animate-fade-slide-up {
+    animation: fade-slide-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity, filter;
+  }
+
+  @keyframes progress-fill {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
+  .animate-progress-bar {
+    animation: progress-fill 4s linear forwards;
+  }
 }
+
+
