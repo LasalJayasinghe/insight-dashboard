@@ -1,9 +1,9 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Eye, EyeOff, ArrowLeft, Mail, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isAuthenticated } from "@/lib/auth";
-import { login, googleLogin } from "@/services/authService";
+import { login, googleLogin, sendOtp, registerWithOtp, resetPasswordWithOtp } from "@/services/authService";
 import { GoogleLogin } from "@react-oauth/google";
 
 interface EditorialVolume {
@@ -129,14 +129,26 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+type AuthMode = "signin" | "signup" | "signup-otp" | "forgot" | "forgot-otp";
+
 function LoginPage() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<AuthMode>("signin");
+
+  // Form State
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
   const [show, setShow] = useState(false);
   const [remember, setRemember] = useState(true);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
-  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [serverMsg, setServerMsg] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [volIndex, setVolIndex] = useState(0);
 
   useEffect(() => {
@@ -154,19 +166,28 @@ function LoginPage() {
     }
   }, [navigate]);
 
-  const validate = () => {
-    const e: typeof errors = {};
-    if (!username.trim()) e.username = "Username is required";
-    if (password.length < 6) e.password = "Password must be at least 6 characters";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const resetFormState = () => {
+    setErrors({});
+    setStatus("idle");
+    setServerMsg("");
+    setOtpCode("");
   };
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setStatus("loading");
+  const switchMode = (newMode: AuthMode) => {
+    resetFormState();
+    setMode(newMode);
+  };
 
+  // Sign In submit
+  const handleSignIn = async (e: FormEvent) => {
+    e.preventDefault();
+    const eMap: typeof errors = {};
+    if (!username.trim()) eMap.username = "Username or Email is required";
+    if (password.length < 6) eMap.password = "Password must be at least 6 characters";
+    setErrors(eMap);
+    if (Object.keys(eMap).length > 0) return;
+
+    setStatus("loading");
     try {
       const data = await login(username, password);
       if (!data.ok) {
@@ -179,6 +200,91 @@ function LoginPage() {
     } catch (err: any) {
       console.error(err);
       setErrors({ password: err?.response?.data?.message || "Invalid credentials" });
+      setStatus("error");
+    }
+  };
+
+  // Request Sign Up OTP
+  const handleRequestSignUpOtp = async (e: FormEvent) => {
+    e.preventDefault();
+    const eMap: typeof errors = {};
+    if (!email.trim() || !email.includes("@")) eMap.email = "Valid email address is required";
+    if (password.length < 6) eMap.password = "Password must be at least 6 characters";
+    setErrors(eMap);
+    if (Object.keys(eMap).length > 0) return;
+
+    setStatus("loading");
+    try {
+      const res = await sendOtp(email, "SignUp");
+      setStatus("idle");
+      setServerMsg(res.message || "Verification code sent to your email!");
+      setMode("signup-otp");
+    } catch (err: any) {
+      console.error(err);
+      setErrors({ email: err?.response?.data?.message || "Failed to send verification code." });
+      setStatus("error");
+    }
+  };
+
+  // Complete Registration with OTP
+  const handleCompleteRegistration = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!otpCode.trim() || otpCode.length < 6) {
+      setErrors({ otpCode: "Please enter the complete 6-digit code" });
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      const res = await registerWithOtp(email, password, firstName, lastName, otpCode);
+      setStatus("success");
+      setTimeout(() => navigate({ to: "/dashboard" }), 400);
+    } catch (err: any) {
+      console.error(err);
+      setErrors({ otpCode: err?.response?.data?.message || "Invalid or expired verification code." });
+      setStatus("error");
+    }
+  };
+
+  // Request Forgot Password OTP
+  const handleRequestForgotOtp = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !email.includes("@")) {
+      setErrors({ email: "Valid email address is required" });
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      const res = await sendOtp(email, "ForgotPassword");
+      setStatus("idle");
+      setServerMsg(res.message || "Password reset code sent to your email.");
+      setMode("forgot-otp");
+    } catch (err: any) {
+      console.error(err);
+      setErrors({ email: err?.response?.data?.message || "No account found with this email." });
+      setStatus("error");
+    }
+  };
+
+  // Complete Password Reset with OTP
+  const handleResetPassword = async (e: FormEvent) => {
+    e.preventDefault();
+    const eMap: typeof errors = {};
+    if (!otpCode.trim() || otpCode.length < 6) eMap.otpCode = "6-digit code is required";
+    if (newPassword.length < 6) eMap.newPassword = "New password must be at least 6 characters";
+    setErrors(eMap);
+    if (Object.keys(eMap).length > 0) return;
+
+    setStatus("loading");
+    try {
+      const res = await resetPasswordWithOtp(email, newPassword, otpCode);
+      setStatus("success");
+      setServerMsg("Password reset successfully! Please sign in.");
+      setTimeout(() => switchMode("signin"), 1500);
+    } catch (err: any) {
+      console.error(err);
+      setErrors({ otpCode: err?.response?.data?.message || "Invalid or expired code." });
       setStatus("error");
     }
   };
@@ -284,8 +390,7 @@ function LoginPage() {
         </dl>
       </aside>
 
-
-      {/* Form */}
+      {/* Interactive Form Panel */}
       <main className="flex items-center justify-center bg-background px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="mb-10 flex items-center gap-3 lg:hidden">
@@ -295,117 +400,434 @@ function LoginPage() {
             <span className="font-display text-lg font-bold">AlertMe</span>
           </div>
 
-          <span className="label-caps">Members only</span>
-          <h1 className="mt-3 font-display text-3xl font-bold">Sign in</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Enter your desk credentials to continue.
-          </p>
+          {/* MODE 1: SIGN IN */}
+          {mode === "signin" && (
+            <div className="animate-fade-slide-up">
+              <span className="label-caps">Members only</span>
+              <h1 className="mt-3 font-display text-3xl font-bold">Sign in</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Enter your desk credentials to continue.
+              </p>
 
-          <form onSubmit={onSubmit} className="mt-10 space-y-7" noValidate>
-            <div>
-              <label htmlFor="username" className="label-caps">
-                Username
-              </label>
-              <input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="trader@alertme.io"
-                className={cn(fieldClass(!!errors.username), "mt-2")}
-                autoComplete="username"
-              />
-              {errors.username && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
-                  <AlertCircle className="size-3" />
-                  {errors.username}
-                </p>
+              {serverMsg && (
+                <div className="mt-4 p-3 bg-success/10 border border-success/30 rounded text-xs text-success flex items-center gap-2">
+                  <CheckCircle2 className="size-4 shrink-0" />
+                  <span>{serverMsg}</span>
+                </div>
               )}
-            </div>
 
-            <div>
-              <label htmlFor="password" className="label-caps">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={show ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={cn(fieldClass(!!errors.password), "mt-2 pr-8")}
-                  autoComplete="current-password"
-                />
+              <form onSubmit={handleSignIn} className="mt-8 space-y-7" noValidate>
+                <div>
+                  <label htmlFor="username" className="label-caps">
+                    Username / Email
+                  </label>
+                  <input
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="trader@alertme.io"
+                    className={cn(fieldClass(!!errors.username), "mt-2")}
+                    autoComplete="username"
+                  />
+                  {errors.username && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.username}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="label-caps">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={show ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className={cn(fieldClass(!!errors.password), "mt-2 pr-8")}
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShow((s) => !s)}
+                      className="absolute right-0 bottom-3 text-muted-foreground hover:text-foreground"
+                      aria-label={show ? "Hide password" : "Show password"}
+                    >
+                      {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)}
+                      className="size-3.5 accent-[var(--color-primary)]"
+                    />
+                    Remember this device
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => switchMode("forgot")}
+                    className="text-xs underline underline-offset-4 hover:text-accent cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
                 <button
-                  type="button"
-                  onClick={() => setShow((s) => !s)}
-                  className="absolute right-0 bottom-3 text-muted-foreground hover:text-foreground"
-                  aria-label={show ? "Hide password" : "Show password"}
+                  type="submit"
+                  disabled={status === "loading"}
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 bg-primary px-4 py-3.5 font-mono text-[11px] tracking-[0.18em] text-primary-foreground uppercase transition-opacity hover:opacity-85 disabled:opacity-60"
                 >
-                  {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {status === "loading" && <Loader2 className="size-3.5 animate-spin" />}
+                  {status === "success" && <CheckCircle2 className="size-3.5" />}
+                  {status === "loading" ? "Signing in" : status === "success" ? "Welcome" : "Sign in"}
                 </button>
-              </div>
-              {errors.password && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
-                  <AlertCircle className="size-3" />
-                  {errors.password}
+
+                <div className="flex items-center gap-3">
+                  <span className="h-px flex-1 bg-hairline" />
+                  <span className="label-caps">or</span>
+                  <span className="h-px flex-1 bg-hairline" />
+                </div>
+
+                <div className="flex w-full justify-center">
+                  <GoogleLogin
+                    onSuccess={onGoogleSuccess}
+                    onError={() => {
+                      console.error("Google Login Failed");
+                      setErrors({ password: "Google login failed" });
+                    }}
+                    useOneTap
+                    theme="outline"
+                    size="large"
+                    shape="rectangular"
+                    text="signin_with"
+                  />
+                </div>
+
+                <p className="pt-2 text-center text-xs text-muted-foreground">
+                  New to AlertMe?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className="underline underline-offset-4 font-semibold text-foreground hover:text-accent cursor-pointer"
+                  >
+                    Create an account
+                  </button>
                 </p>
-              )}
+              </form>
             </div>
+          )}
 
-            <div className="flex items-center justify-between">
-              <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="size-3.5 accent-[var(--color-primary)]"
-                />
-                Remember this device
-              </label>
-              <a href="#" className="text-xs underline underline-offset-4 hover:text-accent">
-                Forgot password?
-              </a>
+          {/* MODE 2: SIGN UP STEP 1 */}
+          {mode === "signup" && (
+            <div className="animate-fade-slide-up">
+              <button
+                type="button"
+                onClick={() => switchMode("signin")}
+                className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <ArrowLeft className="size-3.5" /> Back to Sign in
+              </button>
+
+              <span className="label-caps">Get Access</span>
+              <h1 className="mt-2 font-display text-3xl font-bold">Create account</h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Enter your details to receive an Email verification code.
+              </p>
+
+              <form onSubmit={handleRequestSignUpOtp} className="mt-8 space-y-6" noValidate>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label-caps">First Name</label>
+                    <input
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Alex"
+                      className={cn(fieldClass(), "mt-2")}
+                    />
+                  </div>
+                  <div>
+                    <label className="label-caps">Last Name</label>
+                    <input
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Morgan"
+                      className={cn(fieldClass(), "mt-2")}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="label-caps">Email address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="trader@alertme.io"
+                    className={cn(fieldClass(!!errors.email), "mt-2")}
+                  />
+                  {errors.email && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.email}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="label-caps">Password</label>
+                  <input
+                    type={show ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    className={cn(fieldClass(!!errors.password), "mt-2")}
+                  />
+                  {errors.password && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={status === "loading"}
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 bg-primary px-4 py-3.5 font-mono text-[11px] tracking-[0.18em] text-primary-foreground uppercase transition-opacity hover:opacity-85 disabled:opacity-60"
+                >
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" /> Sending Verification Code
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="size-3.5" /> Send Verification Code
+                    </>
+                  )}
+                </button>
+
+                <p className="pt-2 text-center text-xs text-muted-foreground">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signin")}
+                    className="underline underline-offset-4 font-semibold text-foreground hover:text-accent cursor-pointer"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </form>
             </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={status === "loading"}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 bg-primary px-4 py-3.5 font-mono text-[11px] tracking-[0.18em] text-primary-foreground uppercase transition-opacity hover:opacity-85 disabled:opacity-60"
-            >
-              {status === "loading" && <Loader2 className="size-3.5 animate-spin" />}
-              {status === "success" && <CheckCircle2 className="size-3.5" />}
-              {status === "loading" ? "Signing in" : status === "success" ? "Welcome" : "Sign in"}
-            </button>
+          {/* MODE 3: SIGN UP STEP 2 (OTP VERIFICATION) */}
+          {mode === "signup-otp" && (
+            <div className="animate-fade-slide-up">
+              <button
+                type="button"
+                onClick={() => switchMode("signup")}
+                className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <ArrowLeft className="size-3.5" /> Edit details
+              </button>
 
-            <div className="flex items-center gap-3">
-              <span className="h-px flex-1 bg-hairline" />
-              <span className="label-caps">or</span>
-              <span className="h-px flex-1 bg-hairline" />
+              <span className="label-caps">Email Verification</span>
+              <h1 className="mt-2 font-display text-3xl font-bold">Enter 6-digit OTP</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                We sent a 6-digit code to <strong className="text-foreground">{email}</strong>.
+              </p>
+
+              <form onSubmit={handleCompleteRegistration} className="mt-8 space-y-6" noValidate>
+                <div>
+                  <label className="label-caps">Verification Code</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    placeholder="482910"
+                    className="w-full mt-2 border-0 border-b border-hairline focus:border-primary bg-transparent px-0 py-3 font-mono text-center text-2xl tracking-[0.4em] outline-none placeholder:text-muted-foreground/30"
+                    autoFocus
+                  />
+                  {errors.otpCode && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.otpCode}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={status === "loading" || otpCode.length < 6}
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 bg-primary px-4 py-3.5 font-mono text-[11px] tracking-[0.18em] text-primary-foreground uppercase transition-opacity hover:opacity-85 disabled:opacity-60"
+                >
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" /> Verifying Code
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="size-3.5" /> Complete Registration
+                    </>
+                  )}
+                </button>
+
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
+                  <span>Didn't receive code?</span>
+                  <button
+                    type="button"
+                    onClick={handleRequestSignUpOtp}
+                    className="underline underline-offset-4 hover:text-accent cursor-pointer"
+                  >
+                    Resend Code
+                  </button>
+                </div>
+              </form>
             </div>
+          )}
 
-            <div className="flex w-full justify-center">
-              <GoogleLogin
-                onSuccess={onGoogleSuccess}
-                onError={() => {
-                  console.error("Google Login Failed");
-                  setErrors({ password: "Google login failed" });
-                }}
-                useOneTap
-                theme="outline"
-                size="large"
-                shape="rectangular"
-                text="signin_with"
-              />
+          {/* MODE 4: FORGOT PASSWORD STEP 1 */}
+          {mode === "forgot" && (
+            <div className="animate-fade-slide-up">
+              <button
+                type="button"
+                onClick={() => switchMode("signin")}
+                className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <ArrowLeft className="size-3.5" /> Back to Sign in
+              </button>
+
+              <span className="label-caps">Account Recovery</span>
+              <h1 className="mt-2 font-display text-3xl font-bold">Reset Password</h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Enter your registered email address to receive a password reset code.
+              </p>
+
+              <form onSubmit={handleRequestForgotOtp} className="mt-8 space-y-6" noValidate>
+                <div>
+                  <label className="label-caps">Email address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="trader@alertme.io"
+                    className={cn(fieldClass(!!errors.email), "mt-2")}
+                  />
+                  {errors.email && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.email}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={status === "loading"}
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 bg-primary px-4 py-3.5 font-mono text-[11px] tracking-[0.18em] text-primary-foreground uppercase transition-opacity hover:opacity-85 disabled:opacity-60"
+                >
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" /> Sending Code
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="size-3.5" /> Send Reset Code
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
+          )}
 
-            <p className="pt-2 text-center text-xs text-muted-foreground">
-              New to AlertMe?{" "}
-              <Link to="/login" className="underline underline-offset-4 hover:text-accent">
-                Request access
-              </Link>
-            </p>
-          </form>
+          {/* MODE 5: FORGOT PASSWORD STEP 2 (OTP & NEW PASSWORD) */}
+          {mode === "forgot-otp" && (
+            <div className="animate-fade-slide-up">
+              <button
+                type="button"
+                onClick={() => switchMode("forgot")}
+                className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <ArrowLeft className="size-3.5" /> Change email
+              </button>
+
+              <span className="label-caps">Security Reset</span>
+              <h1 className="mt-2 font-display text-3xl font-bold">Set New Password</h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Enter the 6-digit code sent to <strong className="text-foreground">{email}</strong> and your new password.
+              </p>
+
+              <form onSubmit={handleResetPassword} className="mt-8 space-y-6" noValidate>
+                <div>
+                  <label className="label-caps">Verification Code</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    placeholder="482910"
+                    className="w-full mt-2 border-0 border-b border-hairline focus:border-primary bg-transparent px-0 py-3 font-mono text-center text-xl tracking-[0.3em] outline-none placeholder:text-muted-foreground/30"
+                    autoFocus
+                  />
+                  {errors.otpCode && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.otpCode}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="label-caps">New Password</label>
+                  <input
+                    type={show ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    className={cn(fieldClass(!!errors.newPassword), "mt-2")}
+                  />
+                  {errors.newPassword && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                      <AlertCircle className="size-3" />
+                      {errors.newPassword}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={status === "loading" || otpCode.length < 6}
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 bg-primary px-4 py-3.5 font-mono text-[11px] tracking-[0.18em] text-primary-foreground uppercase transition-opacity hover:opacity-85 disabled:opacity-60"
+                >
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" /> Resetting Password
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="size-3.5" /> Reset Password & Sign in
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </main>
     </div>
