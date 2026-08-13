@@ -1,16 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Bell,
-  Menu,
-  Moon,
-  Search,
-  Sun,
-  TrendingUp,
-  TrendingDown,
-  ChevronRight,
-  Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, Menu, Moon, Search, Sun, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -32,6 +21,32 @@ interface TopbarProps {
   onToggleSidebar: () => void;
 }
 
+function IconButton({
+  label,
+  onClick,
+  children,
+  className,
+}: {
+  label: string;
+  onClick?: () => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className={cn(
+        "relative grid size-9 cursor-pointer place-items-center border border-hairline bg-card text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function Topbar({ onToggleSidebar }: TopbarProps) {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
@@ -41,9 +56,9 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
   const [stocks, setStocks] = useState<StockOption[]>([]);
   const [intradayMap, setIntradayMap] = useState<Record<string, IntradayPoint>>({});
   const [loading, setLoading] = useState(false);
+  const [clock, setClock] = useState("");
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load stocks list for search autocomplete
   useEffect(() => {
     let cancelled = false;
 
@@ -59,7 +74,6 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
 
         setStocks(options);
 
-        // Build quick lookup map for intraday prices
         const map: Record<string, IntradayPoint> = {};
         for (const item of intradayData) {
           map[item.symbol.toUpperCase()] = item;
@@ -79,7 +93,20 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
     };
   }, []);
 
-  // Close search dropdown on click outside
+  useEffect(() => {
+    const tick = () =>
+      setClock(
+        new Date().toLocaleTimeString("en-GB", {
+          timeZone: "Asia/Colombo",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      );
+    tick();
+    const id = setInterval(tick, 30000);
+    return () => clearInterval(id);
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
@@ -120,25 +147,22 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
       : "AM";
 
   return (
-    <header className="h-16 border-b border-border/50 bg-card/60 backdrop-blur-xl sticky top-0 z-30 transition-colors">
-      <div className="h-full px-4 md:px-6 flex items-center justify-between gap-4">
-        {/* Left: Sidebar Toggle Button */}
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleSidebar}
-            aria-label="Toggle sidebar"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors cursor-pointer"
-          >
-            <Menu className="size-5" />
-          </Button>
+    <header className="sticky top-0 z-30 h-16 shrink-0 border-b border-hairline bg-background/90 backdrop-blur-md">
+      <div className="grid h-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3 md:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <IconButton label="Toggle navigation" onClick={onToggleSidebar}>
+            <Menu className="size-4" />
+          </IconButton>
+          <div className="hidden lg:block">
+            <div className="label-caps">Colombo · CSE</div>
+            <div className="font-mono text-xs tabular-nums">{clock}</div>
+          </div>
         </div>
 
-        {/* Center: Live Stock Search Autocomplete Bar */}
-        <div ref={searchContainerRef} className="relative max-w-md w-full hidden sm:block">
+        {/* Search */}
+        <div ref={searchContainerRef} className="relative mx-auto hidden w-full max-w-xl sm:block">
           <div className="relative">
-            <Search className="size-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={search}
@@ -150,8 +174,8 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
               onKeyDown={(e) => {
                 if (e.key === "Escape") setIsOpen(false);
               }}
-              placeholder="Search CSE stock symbol or name (e.g. COMBANK)..."
-              className="w-full pl-10 pr-10 py-2 bg-muted/40 hover:bg-muted/60 border border-border/60 focus:border-primary/60 rounded-xl text-xs font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 shadow-xs"
+              placeholder="Search a symbol — COMBANK, JKH, LOLC…"
+              className="w-full border border-hairline bg-card py-2.5 pr-9 pl-9 font-mono text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary"
             />
             {search && (
               <button
@@ -160,29 +184,28 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
                   setSearch("");
                   setIsOpen(false);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
             )}
           </div>
 
-          {/* Search Results Dropdown List */}
           {isOpen && search.trim().length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in-0 zoom-in-95 duration-150">
-              <div className="px-3 py-2 border-b border-border/40 text-[10px] uppercase font-mono font-bold text-muted-foreground flex items-center justify-between">
-                <span>Matching Stock Results</span>
-                <span>Click to View Chart</span>
+            <div className="animate-in fade-in-0 absolute inset-x-0 top-full z-50 mt-1 border border-hairline bg-popover shadow-card duration-150">
+              <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
+                <span className="label-caps">Results</span>
+                <span className="label-caps opacity-60">Enter to view</span>
               </div>
 
-              <div className="max-h-72 overflow-y-auto divide-y divide-border/20 p-1">
+              <div className="max-h-72 overflow-y-auto">
                 {loading ? (
-                  <div className="p-4 text-center text-xs text-muted-foreground animate-pulse">
-                    Loading stock symbols...
+                  <div className="animate-pulse p-4 text-center text-xs text-muted-foreground">
+                    Loading symbols…
                   </div>
                 ) : filteredStocks.length === 0 ? (
                   <div className="p-4 text-center text-xs text-muted-foreground">
-                    No stocks matching "{search}"
+                    Nothing matches “{search}”
                   </div>
                 ) : (
                   filteredStocks.map((s) => {
@@ -196,49 +219,33 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
                         key={s.symbol}
                         type="button"
                         onClick={() => handleSelectStock(s.symbol)}
-                        className="w-full p-2.5 flex items-center justify-between rounded-lg hover:bg-muted/60 transition-colors text-left group cursor-pointer"
+                        className="group flex w-full items-center justify-between gap-3 border-b border-hairline/60 px-3 py-2.5 text-left transition-colors last:border-0 hover:bg-secondary"
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="size-7 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold font-mono shrink-0">
-                            {s.symbol.slice(0, 2)}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold font-mono text-foreground group-hover:text-primary transition-colors truncate">
-                              {s.symbol}
-                            </div>
-                            <div className="text-[11px] text-muted-foreground truncate">
-                              {s.name}
-                            </div>
-                          </div>
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="w-24 shrink-0 truncate font-mono text-xs font-semibold">
+                            {s.symbol}
+                          </span>
+                          <span className="min-w-0 truncate text-xs text-muted-foreground">
+                            {s.name}
+                          </span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex shrink-0 items-center gap-3">
                           {price !== undefined && (
-                            <div className="text-right">
-                              <div className="text-xs font-mono font-bold text-foreground">
-                                {formatRs(price)}
-                              </div>
-                              {changePct !== undefined && (
-                                <div
-                                  className={cn(
-                                    "text-[10px] font-mono font-bold flex items-center justify-end gap-0.5",
-                                    isUp ? "text-emerald-400" : "text-red-400",
-                                  )}
-                                >
-                                  {isUp ? (
-                                    <TrendingUp className="size-2.5" />
-                                  ) : (
-                                    <TrendingDown className="size-2.5" />
-                                  )}
-                                  <span>
-                                    {isUp ? "+" : ""}
-                                    {changePct.toFixed(2)}%
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                            <span className="font-mono text-xs tabular-nums">{formatRs(price)}</span>
                           )}
-                          <ChevronRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          {changePct !== undefined && (
+                            <span
+                              className={cn(
+                                "font-mono text-xs tabular-nums",
+                                isUp ? "text-success" : "text-destructive",
+                              )}
+                            >
+                              {isUp ? "+" : ""}
+                              {changePct.toFixed(2)}%
+                            </span>
+                          )}
+                          <ChevronRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                         </div>
                       </button>
                     );
@@ -249,69 +256,45 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           )}
         </div>
 
-        {/* Right Actions: Theme Toggle, Notifications, Account Dropdown */}
+        {/* Right */}
         <div className="flex items-center gap-2">
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggle}
-            aria-label="Toggle theme"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors cursor-pointer"
-          >
-            {theme === "dark" ? (
-              <Sun className="size-4.5 text-amber-400" />
-            ) : (
-              <Moon className="size-4.5 text-slate-700" />
-            )}
-          </Button>
+          <IconButton label="Toggle theme" onClick={toggle}>
+            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </IconButton>
 
-          {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors cursor-pointer"
-            aria-label="Notifications"
-          >
-            <Bell className="size-4.5" />
-            <span className="absolute top-2 right-2 size-2 rounded-full bg-emerald-400 ring-2 ring-card animate-pulse" />
-          </Button>
+          <IconButton label="Notifications">
+            <Bell className="size-4" />
+            <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-accent" />
+          </IconButton>
 
-          {/* Account Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="ml-1 flex items-center gap-2.5 rounded-full pl-1 pr-3 py-1 hover:bg-muted/60 border border-border/40 transition cursor-pointer"
+                className="flex cursor-pointer items-center gap-2 border border-hairline bg-card py-1 pr-3 pl-1 transition-colors hover:bg-secondary"
               >
-                <Avatar className="size-7 border border-primary/30">
-                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold font-mono">
+                <Avatar className="size-7 rounded-none">
+                  <AvatarFallback className="rounded-none bg-primary font-mono text-[11px] font-semibold text-primary-foreground">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden md:inline text-xs font-semibold text-foreground truncate max-w-[120px]">
+                <span className="hidden max-w-[120px] truncate text-xs font-medium md:inline">
                   {userName}
                 </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-1.5 shadow-xl border-border">
-              <DropdownMenuLabel className="text-xs font-mono font-bold text-muted-foreground uppercase px-2 py-1.5">
-                Account Overview
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild className="rounded-md cursor-pointer">
-                <Link to="/profile" className="flex items-center gap-2 text-xs font-medium">
-                  Profile Details
-                </Link>
+            <DropdownMenuContent align="end" className="w-56 rounded-none border-hairline p-0">
+              <DropdownMenuLabel className="label-caps px-3 py-2.5">Account</DropdownMenuLabel>
+              <DropdownMenuSeparator className="m-0" />
+              <DropdownMenuItem asChild className="cursor-pointer rounded-none px-3 py-2.5 text-xs">
+                <Link to="/profile">Profile details</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="rounded-md cursor-pointer">
-                <Link to="/settings" className="flex items-center gap-2 text-xs font-medium">
-                  Settings & Preferences
-                </Link>
+              <DropdownMenuItem asChild className="cursor-pointer rounded-none px-3 py-2.5 text-xs">
+                <Link to="/settings">Settings & preferences</Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="m-0" />
               <DropdownMenuItem
-                className="rounded-md text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer text-xs font-medium"
+                className="cursor-pointer rounded-none px-3 py-2.5 text-xs text-destructive focus:bg-destructive/10 focus:text-destructive"
                 onClick={handleSignOut}
               >
                 Sign out
