@@ -167,6 +167,16 @@ function WatchlistPage() {
     }
   };
 
+  const removeStock = async (symbol: string) => {
+    try {
+      await watchlistService.remove(symbol);
+      setStocks((prev) => prev.filter((s) => s.symbol !== symbol));
+      toast.success(`${symbol} removed from watchlist`);
+    } catch {
+      toast.error(`Failed to remove ${symbol}`);
+    }
+  };
+
   return (
     <AppShell>
       <div className="space-y-6">
@@ -212,7 +222,7 @@ function WatchlistPage() {
             <p className="text-sm text-muted-foreground">No symbols match your filter.</p>
           </Card>
         ) : (
-          <WatchlistTable stocks={filtered} />
+          <WatchlistTable stocks={filtered} onRemoveStock={removeStock} />
         )}
 
         <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>

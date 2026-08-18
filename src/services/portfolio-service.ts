@@ -129,11 +129,11 @@ export const portfolioService = {
   },
   // ─── Sync ─────────────────────────────────────────────────────────────────
 
-  async syncFromPdf(portfolioId: number, file: File): Promise<{ count: number }> {
+  async syncFromFile(portfolioId: number, file: File): Promise<{ count: number }> {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await apiClient.post(`/portfolios/${portfolioId}/sync-pdf`, formData, {
+    const res = await apiClient.post(`/portfolios/${portfolioId}/sync-file`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Trash2 } from "lucide-react";
 import { mockStocks, type Stock } from "@/lib/mock-data";
 import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -17,12 +17,14 @@ interface WatchlistTableProps {
   stocks?: Stock[];
   loading?: boolean;
   onSelectStock?: (symbol: string) => void;
+  onRemoveStock?: (symbol: string) => void;
 }
 
 export function WatchlistTable({
   stocks = mockStocks,
   loading = false,
   onSelectStock,
+  onRemoveStock,
 }: WatchlistTableProps) {
   if (loading) {
     return (
@@ -71,6 +73,7 @@ export function WatchlistTable({
                 <TableHead className="text-xs uppercase tracking-wider text-right">
                   Change
                 </TableHead>
+                {onRemoveStock && <TableHead className="w-12"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -119,6 +122,20 @@ export function WatchlistTable({
                         {s.changePct.toFixed(2)}%
                       </span>
                     </TableCell>
+                    {onRemoveStock && (
+                      <TableCell className="text-right w-12">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveStock(s.symbol);
+                          }}
+                          className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors inline-flex items-center justify-center"
+                          title="Remove from watchlist"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
