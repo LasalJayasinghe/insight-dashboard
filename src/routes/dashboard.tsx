@@ -98,7 +98,13 @@ function DashboardPage() {
     if (totalCost > 0) totalPnlPercent = (netWorth.totalProfitLossLkr / totalCost) * 100;
   }
 
-  const totalValue = portfolios.reduce((s, p) => s + Math.abs(p.totalValue), 0) || 1;
+  const getLkrValue = (p: typeof portfolios[0]) => {
+    return p.type === "Crypto"
+      ? Math.abs(p.totalValue) * (netWorth?.usdtToLkrRate || 1)
+      : Math.abs(p.totalValue);
+  };
+
+  const totalValue = portfolios.reduce((s, p) => s + getLkrValue(p), 0) || 1;
   const holdings = portfolios.reduce((s, p) => s + p.holdingCount, 0);
   const gainers = movers?.gainers?.slice(0, 5) ?? [];
   const losers = movers?.losers?.slice(0, 5) ?? [];
@@ -282,7 +288,7 @@ function DashboardPage() {
                       className={cn(
                         i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
                       )}
-                      style={{ width: `${(Math.abs(p.totalValue) / totalValue) * 100}%` }}
+                      style={{ width: `${(getLkrValue(p) / totalValue) * 100}%` }}
                       title={p.name}
                     />
                   ))}
@@ -304,10 +310,10 @@ function DashboardPage() {
                         {p.name}
                       </Link>
                       <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                        {((Math.abs(p.totalValue) / totalValue) * 100).toFixed(1)}%
+                        {((getLkrValue(p) / totalValue) * 100).toFixed(1)}%
                       </span>
                       <span className="w-28 text-right font-mono text-xs tabular-nums">
-                        {formatRs(p.totalValue)}
+                        {formatRs(p.type === "Crypto" ? p.totalValue * (netWorth?.usdtToLkrRate || 1) : p.totalValue)}
                       </span>
                       <span className="w-20 text-right">
                         <Delta value={p.totalProfitLossPercent} />
@@ -334,7 +340,6 @@ function DashboardPage() {
             <Cell
               key={d.to}
               as={Link}
-              // @ts-expect-error Link props pass through
               to={d.to}
               className="group block p-5 hover:bg-primary hover:text-primary-foreground"
             >

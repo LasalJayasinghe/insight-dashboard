@@ -15,14 +15,18 @@ export function Cell({
   children,
   ink = false,
   as: As = "div",
+  ...props
 }: {
   className?: string;
   children: ReactNode;
   ink?: boolean;
   as?: any;
+  [key: string]: any;
 }) {
   return (
-    <As className={cn(ink ? "bento-cell-ink" : "bento-cell", "p-5", className)}>{children}</As>
+    <As className={cn(ink ? "bento-cell-ink" : "bento-cell", "p-5", className)} {...props}>
+      {children}
+    </As>
   );
 }
 
