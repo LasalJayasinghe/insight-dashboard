@@ -136,15 +136,18 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
     await navigate({ to: "/login" });
   };
 
-  const userName =
-    typeof window !== "undefined"
-      ? `${localStorage.getItem("firstName") || "User"} ${localStorage.getItem("lastName") || ""}`.trim()
-      : "User";
+  const [userName, setUserName] = useState("User");
+  const [userInitials, setUserInitials] = useState("AM");
 
-  const userInitials =
-    typeof window !== "undefined"
-      ? `${(localStorage.getItem("firstName") || "A")[0]}${(localStorage.getItem("lastName") || "M")[0]}`.toUpperCase()
-      : "AM";
+  useEffect(() => {
+    const fn = localStorage.getItem("firstName") || "User";
+    const ln = localStorage.getItem("lastName") || "";
+    setUserName(`${fn} ${ln}`.trim());
+
+    const fInit = (fn || "A")[0];
+    const lInit = (ln || "M")[0];
+    setUserInitials(`${fInit}${lInit}`.toUpperCase());
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 h-16 shrink-0 border-b border-hairline bg-background/90 backdrop-blur-md">

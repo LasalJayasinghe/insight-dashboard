@@ -55,12 +55,39 @@ function StocksPage() {
   const [watchlistStocks, setWatchlistStocks] = useState<WatchlistStock[]>([]);
   const [watchlistLoading, setWatchlistLoading] = useState(true);
 
+  const [missingTicker, setMissingTicker] = useState<any>(null);
+
   useEffect(() => {
     if (routeSearch.symbol) {
       setSelectedSymbol(routeSearch.symbol);
       setViewMode("detail");
     }
   }, [routeSearch.symbol]);
+
+  useEffect(() => {
+    if (selectedSymbol && tickers.length > 0) {
+      const found = tickers.find((t) => t.symbol === selectedSymbol);
+      if (!found) {
+        stockService
+          .getBySymbol(selectedSymbol)
+          .then((live) => {
+            setMissingTicker({
+              symbol: live.symbol,
+              name: live.name,
+              price: live.price,
+              previousClose: live.previousClose,
+              high: live.price,
+              low: live.price,
+              percentageChange: live.changePct,
+              change: live.price - live.previousClose,
+            });
+          })
+          .catch(console.error);
+      } else {
+        setMissingTicker(null);
+      }
+    }
+  }, [selectedSymbol, tickers]);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +113,7 @@ function StocksPage() {
   }, []);
 
   const activeSymbol = selectedSymbol || (tickers.length > 0 ? tickers[0].symbol : "");
-  const activeTicker = tickers.find((t) => t.symbol === activeSymbol) || null;
+  const activeTicker = tickers.find((t) => t.symbol === activeSymbol) || (missingTicker?.symbol === activeSymbol ? missingTicker : null);
 
   const handleSelectStock = (symbol: string) => {
     setSelectedSymbol(symbol);

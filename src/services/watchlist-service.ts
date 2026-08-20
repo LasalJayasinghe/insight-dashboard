@@ -47,6 +47,10 @@ export const watchlistService = {
     return toStock(res.data);
   },
 
+  async remove(symbol: string): Promise<void> {
+    await apiClient.delete(`/watchlist/${encodeURIComponent(symbol)}`);
+  },
+
   async listStockOptions(): Promise<StockOption[]> {
     const res = await apiClient.get<ApiStockOption[]>("/stocks/names");
     return Array.isArray(res.data) ? res.data : [];

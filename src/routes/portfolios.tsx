@@ -245,14 +245,14 @@ function PortfolioPanel({
     if (!file) return;
 
     setSyncingPdf(true);
-    const toastId = toast.loading("Syncing portfolio from PDF...");
+    const toastId = toast.loading("Syncing portfolio from file...");
     try {
-      const res = await portfolioService.syncFromPdf(portfolioId, file);
-      toast.success(`Successfully synced ${res.count} holdings from PDF`, { id: toastId });
+      const res = await portfolioService.syncFromFile(portfolioId, file);
+      toast.success(`Successfully synced ${res.count} holdings from file`, { id: toastId });
       void load();
       onHoldingDeleted(); // trigger parent update for net worth
     } catch (error: any) {
-      toast.error(error.response?.data || "Failed to sync PDF", { id: toastId });
+      toast.error(error.response?.data || "Failed to sync file", { id: toastId });
     } finally {
       setSyncingPdf(false);
       if (fileInputRef.current) {
@@ -300,7 +300,7 @@ function PortfolioPanel({
               <>
                 <input
                   type="file"
-                  accept="application/pdf"
+                  accept=".pdf,.xlsx,.xls"
                   className="hidden"
                   ref={fileInputRef}
                   onChange={handleFileUpload}
@@ -311,7 +311,7 @@ function PortfolioPanel({
                   onClick={() => fileInputRef.current?.click()}
                   disabled={syncingPdf}
                 >
-                  <Upload className="size-4 mr-1" /> {syncingPdf ? "Syncing..." : "Sync ATrad PDF"}
+                  <Upload className="size-4 mr-1" /> {syncingPdf ? "Syncing..." : "Sync ATrad File"}
                 </Button>
               </>
             )}
@@ -331,7 +331,7 @@ function PortfolioPanel({
               <>
                 <input
                   type="file"
-                  accept="application/pdf"
+                  accept=".pdf,.xlsx,.xls"
                   className="hidden"
                   ref={fileInputRef}
                   onChange={handleFileUpload}
@@ -342,7 +342,7 @@ function PortfolioPanel({
                   onClick={() => fileInputRef.current?.click()}
                   disabled={syncingPdf}
                 >
-                  <Upload className="size-4 mr-1" /> {syncingPdf ? "Syncing..." : "Sync ATrad PDF"}
+                  <Upload className="size-4 mr-1" /> {syncingPdf ? "Syncing..." : "Sync ATrad File"}
                 </Button>
               </>
             )}
@@ -741,6 +741,7 @@ function PortfoliosPage() {
     description: "",
   });
   const [creating, setCreating] = useState(false);
+  const [newFormFile, setNewFormFile] = useState<File | null>(null);
 
   // Delete portfolio confirm
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -781,14 +782,27 @@ function PortfoliosPage() {
     }
     setCreating(true);
     try {
-      await portfolioService.create({
+      const newPortfolio = await portfolioService.create({
         name: newForm.name.trim(),
         type: parseInt(newForm.type),
         baseCurrency: newForm.baseCurrency,
         description: newForm.description || undefined,
       });
-      toast.success(`Portfolio "${newForm.name}" created`);
+
+      if (newFormFile) {
+        toast.loading("Syncing holdings from file...", { id: "create-sync" });
+        try {
+          const res = await portfolioService.syncFromFile(newPortfolio.id, newFormFile);
+          toast.success(`Portfolio created and ${res.count} holdings synced`, { id: "create-sync" });
+        } catch (error: any) {
+          toast.error(error.response?.data || "Portfolio created, but failed to sync file", { id: "create-sync" });
+        }
+      } else {
+        toast.success(`Portfolio "${newForm.name}" created`);
+      }
+
       setNewForm({ name: "", type: "1", baseCurrency: "LKR", description: "" });
+      setNewFormFile(null);
       setCreateOpen(false);
       void load();
     } catch {
@@ -1016,6 +1030,22 @@ function PortfoliosPage() {
                   onChange={(e) => setNewForm((f) => ({ ...f, description: e.target.value }))}
                 />
               </div>
+              {newForm.type === "1" && (
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                    Upload ATrad Export (Optional)
+                  </label>
+                  <Input
+                    type="file"
+                    accept=".pdf,.xlsx,.xls"
+                    onChange={(e) => setNewFormFile(e.target.files?.[0] || null)}
+                    className="text-sm cursor-pointer"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Upload your ATrad Client Portfolio PDF or Excel file to auto-populate holdings.
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setCreateOpen(false)}>

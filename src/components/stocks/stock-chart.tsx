@@ -34,7 +34,7 @@ function generateStockHistory(stock: StockTicker, timeframe: string): CandleData
     const volatility = stock.price * 0.015;
     const change = (Math.random() - 0.48) * volatility;
 
-    const open = currentPrice;
+    const open = Math.max(0.1, currentPrice);
     const close = Math.max(0.1, i === 0 ? stock.price : open + change);
     const high = Math.max(open, close) + Math.random() * (volatility * 0.5);
     const low = Math.max(0.1, Math.min(open, close) - Math.random() * (volatility * 0.5));
