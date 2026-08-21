@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
-import { assistantClient } from "@/lib/assistant-client";
-import { createMessage, type AssistantClient, type Message } from "@/lib/assistant-types";
+import { aiService } from "@/services/ai-service";
+import { createMessage, type Message } from "@/lib/assistant-types";
 
-export function useAssistant(client: AssistantClient = assistantClient) {
+export function useAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,18 +24,28 @@ export function useAssistant(client: AssistantClient = assistantClient) {
       abortRef.current = controller;
 
       try {
-        const res = await client.send(history, controller.signal);
-        setMessages((prev) => [
-          ...prev,
-          createMessage("assistant", res.content, res.toolActivity),
-        ]);
+        setMessages((prev) => [...prev, createMessage("assistant", "")]);
+        
+        let accumulatedContent = "";
+        const generator = aiService.streamMessage({ prompt: content });
+
+        for await (const chunk of generator) {
+          if (controller.signal.aborted) break;
+          accumulatedContent += chunk;
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            const last = newMessages[newMessages.length - 1];
+            newMessages[newMessages.length - 1] = { ...last, content: accumulatedContent };
+            return newMessages;
+          });
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
       } finally {
         setIsThinking(false);
       }
     },
-    [client, isThinking, messages],
+    [isThinking, messages],
   );
 
   const reset = useCallback(() => {
