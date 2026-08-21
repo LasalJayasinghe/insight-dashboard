@@ -98,6 +98,9 @@ function DashboardPage() {
     if (totalCost > 0) totalPnlPercent = (netWorth.totalProfitLossLkr / totalCost) * 100;
   }
 
+  const totalNetWorthText = formatRs(netWorth?.totalNetWorthLkr ?? 0);
+  const totalNetWorthFigureSize = totalNetWorthText.length > 18 ? "md" : "xl";
+
   const getLkrValue = (p: typeof portfolios[0]) => {
     return p.type === "Crypto"
       ? Math.abs(p.totalValue) * (netWorth?.usdtToLkrRate || 1)
@@ -164,7 +167,11 @@ function DashboardPage() {
               {isLoading ? (
                 <Skeleton className="h-14 w-64 bg-primary-foreground/15" />
               ) : (
-                <Figure size="xl" value={formatRs(netWorth?.totalNetWorthLkr ?? 0)} />
+                <Figure
+                  size={totalNetWorthFigureSize}
+                  className="whitespace-nowrap"
+                  value={totalNetWorthText}
+                />
               )}
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <span
