@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(true);
@@ -24,6 +25,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scrollbar-thin">{children}</main>
       </div>
+
+      <AssistantWidget />
     </div>
   );
 }
