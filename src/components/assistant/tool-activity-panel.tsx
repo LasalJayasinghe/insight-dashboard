@@ -14,9 +14,12 @@ export function ToolActivityPanel({ activity }: { activity: ToolActivity[] }) {
   const running = activity.some((a) => a.status === "running");
   const [open, setOpen] = useState(running);
 
+  const failed = activity.filter((a) => a.status === "failed").length;
   const summary = running
     ? activity.find((a) => a.status === "running")?.description
-    : `${activity.length} step${activity.length === 1 ? "" : "s"} completed`;
+    : failed
+      ? `${failed} step${failed === 1 ? "" : "s"} failed`
+      : `${activity.length} step${activity.length === 1 ? "" : "s"} completed`;
 
   return (
     <div className="mb-2 border border-hairline bg-muted/40">
