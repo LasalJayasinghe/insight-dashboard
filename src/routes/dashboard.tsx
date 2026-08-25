@@ -267,10 +267,10 @@ function DashboardPage() {
           </Cell>
         </Bento>
 
-        {/* ── 2/3 Left Column (Allocation & Movers) + 1/3 Right Column (News Feed) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 2/3 Left Column */}
-          <div className="lg:col-span-2 space-y-6">
+        {/* ── Main content + dedicated News & Market Intelligence sidebar ── */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left / main column */}
+          <div className="flex-1 min-w-0 space-y-6">
             {/* Allocation + movers */}
             <Bento className="grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr]">
               <Cell className="lg:row-span-1">
@@ -368,10 +368,14 @@ function DashboardPage() {
             </Bento>
           </div>
 
-          {/* 1/3 Right Column: News Feed */}
-          <div className="lg:col-span-1">
-            <MarketNewsFeed title="Market Intelligence & News" maxHeight="h-[680px]" />
-          </div>
+          {/* Right column: News & Market Intelligence */}
+          <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0">
+            <MarketNewsFeed
+              title="News & Market Intelligence"
+              maxHeight="h-[720px] lg:h-[calc(100vh-220px)]"
+              className="h-full"
+            />
+          </aside>
         </div>
       </div>
     </AppShell>
