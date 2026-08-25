@@ -24,6 +24,15 @@ export interface NewsResponse {
   items: NewsArticle[];
 }
 
+export interface NewsStatus {
+  totalArticles: number;
+  pendingValidation: number;
+  validatedCount: number;
+  relevantCount: number;
+  isScanning: boolean;
+  timestamp: string;
+}
+
 export const newsService = {
   getNews: async (category?: string, sentiment?: string, limit = 10, page = 1): Promise<NewsResponse> => {
     const params: Record<string, any> = { limit, page };
@@ -36,6 +45,11 @@ export const newsService = {
 
   getNewsBySymbol: async (symbol: string, limit = 10): Promise<NewsArticle[]> => {
     const res = await apiClient.get<NewsArticle[]>(`/api/news/symbol/${symbol}`, { params: { limit } });
+    return res.data;
+  },
+
+  getNewsStatus: async (): Promise<NewsStatus> => {
+    const res = await apiClient.get<NewsStatus>("/api/news/status");
     return res.data;
   },
 
