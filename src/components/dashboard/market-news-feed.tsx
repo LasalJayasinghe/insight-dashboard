@@ -172,7 +172,7 @@ export function MarketNewsFeed({
               >
                 {tab.label}
               </button>
-            )}
+            ))}
           </div>
         )}
       </Cell>
