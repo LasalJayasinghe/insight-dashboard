@@ -13,6 +13,7 @@ export interface NewsArticle {
   mentionedTickersJson: string;
   isModelValidated: boolean;
   isRelevant: boolean;
+  validationReasoning?: string;
   publishedAt: string;
   createdAt: string;
 }

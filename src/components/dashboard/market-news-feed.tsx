@@ -233,6 +233,17 @@ export function MarketNewsFeed({
                           </p>
                         )}
 
+                        {article.validationReasoning && (
+                          <details className="mt-2 text-[11px] border-l-2 border-accent/60 bg-accent/5 p-2 rounded-r">
+                            <summary className="font-mono font-medium text-accent hover:underline cursor-pointer select-none flex items-center gap-1 text-[10px]">
+                              <Sparkles className="size-3 text-accent" /> AI Decision Reasoning
+                            </summary>
+                            <p className="mt-1.5 text-muted-foreground leading-relaxed font-sans text-xs">
+                              {article.validationReasoning}
+                            </p>
+                          </details>
+                        )}
+
                         {tickers.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                             {tickers.map((t) => (

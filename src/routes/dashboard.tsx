@@ -213,7 +213,7 @@ function DashboardPage() {
           {/* Allocation by Portfolio - Full Roomy Card */}
           <Cell className="p-6 flex flex-col justify-between rounded-xl border border-border/60 shadow-sm">
             <div>
-              <CellLabel index="ALLOCATION">Allocation by Portfolio</CellLabel>
+              <CellLabel>Allocation by Portfolio</CellLabel>
 
               {isLoading ? (
                 <div className="mt-5 space-y-3">
@@ -281,7 +281,7 @@ function DashboardPage() {
         {/* ── SECTION 2: Market Indices & Key Stats Bar (4 Equal Columns) ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Cell className="rounded-xl border border-border/60 shadow-sm">
-            <CellLabel index="I">ASPI Index</CellLabel>
+            <CellLabel>ASPI Index</CellLabel>
             <Figure
               size="md"
               className="mt-3"
@@ -295,7 +295,7 @@ function DashboardPage() {
           </Cell>
 
           <Cell className="rounded-xl border border-border/60 shadow-sm">
-            <CellLabel index="II">S&amp;P SL20 Index</CellLabel>
+            <CellLabel>S&amp;P SL20 Index</CellLabel>
             <Figure
               size="md"
               className="mt-3"
@@ -309,7 +309,7 @@ function DashboardPage() {
           </Cell>
 
           <Cell className="rounded-xl border border-border/60 shadow-sm">
-            <CellLabel index="III">Top Performer</CellLabel>
+            <CellLabel>Top Performer</CellLabel>
             {isLoading ? (
               <Skeleton className="mt-3 h-7 w-28" />
             ) : (
@@ -325,7 +325,7 @@ function DashboardPage() {
           </Cell>
 
           <Cell className="rounded-xl border border-border/60 shadow-sm">
-            <CellLabel index="IV">Needs Attention</CellLabel>
+            <CellLabel>Needs Attention</CellLabel>
             {isLoading ? (
               <Skeleton className="mt-3 h-7 w-28" />
             ) : (
@@ -347,17 +347,17 @@ function DashboardPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Gainers & Losers Side-by-Side Bento */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <MoversCell title="Today's Top Gainers" index="GAINERS" rows={gainers} loading={isLoading} />
-              <MoversCell title="Today's Top Losers" index="LOSERS" rows={losers} loading={isLoading} />
+              <MoversCell title="Today's Top Gainers" rows={gainers} loading={isLoading} />
+              <MoversCell title="Today's Top Losers" rows={losers} loading={isLoading} />
             </div>
 
             {/* Quick Desks Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { to: "/stocks", label: "Market board", note: "Live CSE prices & charts", n: "01" },
-                { to: "/watchlist", label: "Watchlist", note: "Symbols you're tracking", n: "02" },
-                { to: "/alerts", label: "Price alerts", note: "Trigger rules & history", n: "03" },
-                { to: "/algorithms", label: "AI strategies", note: "Automated signals", n: "04" },
+                { to: "/stocks", label: "Market board", note: "Live CSE prices & charts" },
+                { to: "/watchlist", label: "Watchlist", note: "Symbols you're tracking" },
+                { to: "/alerts", label: "Price alerts", note: "Trigger rules & history" },
+                { to: "/algorithms", label: "AI strategies", note: "Automated signals" },
               ].map((d) => (
                 <Cell
                   key={d.to}
@@ -365,8 +365,7 @@ function DashboardPage() {
                   to={d.to}
                   className="group block p-4 rounded-xl border border-border/60 hover:bg-primary hover:text-primary-foreground transition-all"
                 >
-                  <div className="flex items-baseline justify-between">
-                    <span className="label-caps group-hover:text-primary-foreground/60">{d.n}</span>
+                  <div className="flex items-baseline justify-end">
                     <span className="text-sm transition-transform group-hover:translate-x-1">→</span>
                   </div>
                   <div className="mt-4 font-display text-base font-bold">{d.label}</div>
@@ -399,7 +398,7 @@ function MoversCell({
   loading,
 }: {
   title: string;
-  index: string;
+  index?: string;
   rows: { symbol: string; price: number; changePercentage: number }[];
   loading: boolean;
 }) {
