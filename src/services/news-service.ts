@@ -39,22 +39,22 @@ export const newsService = {
     if (category && category !== "ALL") params.category = category;
     if (sentiment && sentiment !== "ALL") params.sentiment = sentiment;
 
-    const res = await apiClient.get<NewsResponse>("/api/news", { params });
+    const res = await apiClient.get<NewsResponse>("/news", { params });
     return res.data;
   },
 
   getNewsBySymbol: async (symbol: string, limit = 10): Promise<NewsArticle[]> => {
-    const res = await apiClient.get<NewsArticle[]>(`/api/news/symbol/${symbol}`, { params: { limit } });
+    const res = await apiClient.get<NewsArticle[]>(`/news/symbol/${symbol}`, { params: { limit } });
     return res.data;
   },
 
   getNewsStatus: async (): Promise<NewsStatus> => {
-    const res = await apiClient.get<NewsStatus>("/api/news/status");
+    const res = await apiClient.get<NewsStatus>("/news/status");
     return res.data;
   },
 
   syncNews: async (): Promise<{ count: number; message: string }> => {
-    const res = await apiClient.post<{ count: number; message: string }>("/api/news/sync");
+    const res = await apiClient.post<{ count: number; message: string }>("/news/sync");
     return res.data;
   }
 };

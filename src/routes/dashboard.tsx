@@ -122,7 +122,8 @@ function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-[1400px] space-y-6">
+      <div className="mx-auto max-w-[1500px] space-y-6">
+        {/* ── Masthead Header ───────────────────────────────────────────── */}
         <Masthead
           eyebrow={`${dateLine} · Edition 01`}
           title={`${greeting()}, ${firstName || "Trader"}`}
@@ -157,16 +158,18 @@ function DashboardPage() {
           }
         />
 
-        {/* Lead block: net worth + P&L + index rail */}
-        <Bento className="grid-cols-1 lg:grid-cols-[1.6fr_1fr_1fr]">
-          <Cell ink className="paper-grain flex flex-col justify-between p-6 lg:row-span-2">
+        {/* ── SECTION 1: Top Hero Financial Overview ──────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6">
+          {/* Net Worth Primary Card */}
+          <Cell className="flex flex-col justify-between p-6 rounded-xl border border-border/60 shadow-sm">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="label-caps text-primary-foreground/60">Total net worth</span>
-              <span className="label-caps text-primary-foreground/60">LKR</span>
+              <span className="label-caps">Total net worth</span>
+              <span className="label-caps text-muted-foreground">LKR</span>
             </div>
-            <div className="py-8">
+
+            <div className="py-6">
               {isLoading ? (
-                <Skeleton className="h-14 w-64 bg-primary-foreground/15" />
+                <Skeleton className="h-14 w-64" />
               ) : (
                 <Figure
                   size={totalNetWorthFigureSize}
@@ -174,75 +177,114 @@ function DashboardPage() {
                   value={totalNetWorthText}
                 />
               )}
-              <div className="mt-4 flex flex-wrap items-center gap-4">
+              <div className="mt-3 flex flex-wrap items-center gap-4">
                 <span
                   className={cn(
-                    "font-mono text-sm tabular-nums",
+                    "font-mono text-sm tabular-nums font-semibold",
                     totalPnlPercent >= 0 ? "text-success" : "text-destructive",
                   )}
                 >
                   {formatPct(totalPnlPercent)} all time
                 </span>
-                <span className="font-mono text-sm text-primary-foreground/60 tabular-nums">
+                <span className="font-mono text-sm text-muted-foreground tabular-nums">
                   {formatRs(netWorth?.totalProfitLossLkr ?? 0)}
                 </span>
               </div>
             </div>
-            <div className="flex items-end justify-between gap-4 border-t border-primary-foreground/15 pt-4">
+
+            <div className="flex items-end justify-between gap-4 pt-2">
               <div>
-                <div className="label-caps text-primary-foreground/50">In USDT</div>
-                <div className="mt-1 font-mono text-sm tabular-nums">
+                <div className="label-caps text-muted-foreground">In USDT</div>
+                <div className="mt-1 font-mono text-sm font-semibold tabular-nums">
                   {(netWorth?.totalNetWorthUsdt ?? 0).toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </div>
               </div>
               <div className="text-right">
-                <div className="label-caps text-primary-foreground/50">USDT / LKR</div>
-                <div className="mt-1 font-mono text-sm tabular-nums">
+                <div className="label-caps text-muted-foreground">USDT / LKR Rate</div>
+                <div className="mt-1 font-mono text-sm font-semibold tabular-nums">
                   {(netWorth?.usdtToLkrRate ?? 0).toFixed(2)}
                 </div>
               </div>
             </div>
           </Cell>
 
-          <Cell>
-            <CellLabel index="I">Best portfolio</CellLabel>
-            {isLoading ? (
-              <Skeleton className="mt-4 h-8 w-32" />
-            ) : (
-              <>
-                <div className="mt-4 truncate font-display text-xl font-bold">
-                  {best?.name ?? "—"}
-                </div>
-                <div className="mt-2">
-                  {best ? <Delta value={best.totalProfitLossPercent} /> : <span>—</span>}
-                </div>
-              </>
-            )}
-          </Cell>
+          {/* Allocation by Portfolio - Full Roomy Card */}
+          <Cell className="p-6 flex flex-col justify-between rounded-xl border border-border/60 shadow-sm">
+            <div>
+              <CellLabel index="ALLOCATION">Allocation by Portfolio</CellLabel>
 
-          <Cell>
-            <CellLabel index="II">Needs attention</CellLabel>
-            {isLoading ? (
-              <Skeleton className="mt-4 h-8 w-32" />
-            ) : (
-              <>
-                <div className="mt-4 truncate font-display text-xl font-bold">
-                  {worst?.name ?? "—"}
+              {isLoading ? (
+                <div className="mt-5 space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
                 </div>
-                <div className="mt-2">
-                  {worst ? <Delta value={worst.totalProfitLossPercent} /> : <span>—</span>}
-                </div>
-              </>
-            )}
-          </Cell>
+              ) : portfolios.length === 0 ? (
+                <p className="mt-6 text-sm text-muted-foreground">
+                  No portfolios yet.{" "}
+                  <Link to="/portfolios" className="underline underline-offset-4">
+                    Create your first one
+                  </Link>
+                  .
+                </p>
+              ) : (
+                <>
+                  {/* Single stacked allocation bar */}
+                  <div className="mt-4 flex h-3.5 w-full overflow-hidden border border-hairline rounded-sm">
+                    {portfolios.map((p, i) => (
+                      <div
+                        key={p.id}
+                        className={cn(
+                          i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
+                        )}
+                        style={{ width: `${(getLkrValue(p) / totalValue) * 100}%` }}
+                        title={`${p.name}: ${((getLkrValue(p) / totalValue) * 100).toFixed(1)}%`}
+                      />
+                    ))}
+                  </div>
 
-          <Cell>
-            <CellLabel index="III">ASPI</CellLabel>
+                  <ul className="mt-5 divide-y divide-hairline/70 border-t border-hairline/70 max-h-[160px] overflow-y-auto pr-1">
+                    {portfolios.map((p, i) => (
+                      <li key={p.id} className="flex items-center gap-3 py-2.5">
+                        <span
+                          className={cn(
+                            "size-2 shrink-0 rounded-full",
+                            i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
+                          )}
+                        />
+                        <Link
+                          to="/portfolios"
+                          className="min-w-0 flex-1 truncate text-sm font-medium hover:underline underline-offset-4"
+                        >
+                          {p.name}
+                        </Link>
+                        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                          {((getLkrValue(p) / totalValue) * 100).toFixed(1)}%
+                        </span>
+                        <span className="w-32 text-right font-mono text-xs tabular-nums font-semibold">
+                          {formatRs(p.type === "Crypto" ? p.totalValue * (netWorth?.usdtToLkrRate || 1) : p.totalValue)}
+                        </span>
+                        <span className="w-20 text-right">
+                          <Delta value={p.totalProfitLossPercent} />
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          </Cell>
+        </div>
+
+        {/* ── SECTION 2: Market Indices & Key Stats Bar (4 Equal Columns) ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Cell className="rounded-xl border border-border/60 shadow-sm">
+            <CellLabel index="I">ASPI Index</CellLabel>
             <Figure
               size="md"
-              className="mt-4"
+              className="mt-3"
               value={(indices?.aspi.value ?? 0).toLocaleString(undefined, {
                 maximumFractionDigits: 2,
               })}
@@ -252,11 +294,11 @@ function DashboardPage() {
             </div>
           </Cell>
 
-          <Cell>
-            <CellLabel index="IV">S&amp;P SL20</CellLabel>
+          <Cell className="rounded-xl border border-border/60 shadow-sm">
+            <CellLabel index="II">S&amp;P SL20 Index</CellLabel>
             <Figure
               size="md"
-              className="mt-4"
+              className="mt-3"
               value={(indices?.snp.value ?? 0).toLocaleString(undefined, {
                 maximumFractionDigits: 2,
               })}
@@ -265,84 +307,52 @@ function DashboardPage() {
               <Delta value={indices?.snp.percentage ?? 0} />
             </div>
           </Cell>
-        </Bento>
 
-        {/* ── Main content + dedicated News & Market Intelligence sidebar ── */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left / main column */}
-          <div className="flex-1 min-w-0 space-y-6">
-            {/* Allocation + movers */}
-            <Bento className="grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr]">
-              <Cell className="lg:row-span-1">
-                <CellLabel index="V">Allocation by portfolio</CellLabel>
+          <Cell className="rounded-xl border border-border/60 shadow-sm">
+            <CellLabel index="III">Top Performer</CellLabel>
+            {isLoading ? (
+              <Skeleton className="mt-3 h-7 w-28" />
+            ) : (
+              <>
+                <div className="mt-3 truncate font-display text-lg font-bold">
+                  {best?.name ?? "—"}
+                </div>
+                <div className="mt-2">
+                  {best ? <Delta value={best.totalProfitLossPercent} /> : <span>—</span>}
+                </div>
+              </>
+            )}
+          </Cell>
 
-                {isLoading ? (
-                  <div className="mt-5 space-y-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
-                ) : portfolios.length === 0 ? (
-                  <p className="mt-6 text-sm text-muted-foreground">
-                    No portfolios yet.{" "}
-                    <Link to="/portfolios" className="underline underline-offset-4">
-                      Create your first one
-                    </Link>
-                    .
-                  </p>
-                ) : (
-                  <>
-                    {/* Single stacked allocation bar — one line, no pie */}
-                    <div className="mt-5 flex h-3 w-full overflow-hidden border border-hairline">
-                      {portfolios.map((p, i) => (
-                        <div
-                          key={p.id}
-                          className={cn(
-                            i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
-                          )}
-                          style={{ width: `${(getLkrValue(p) / totalValue) * 100}%` }}
-                          title={p.name}
-                        />
-                      ))}
-                    </div>
+          <Cell className="rounded-xl border border-border/60 shadow-sm">
+            <CellLabel index="IV">Needs Attention</CellLabel>
+            {isLoading ? (
+              <Skeleton className="mt-3 h-7 w-28" />
+            ) : (
+              <>
+                <div className="mt-3 truncate font-display text-lg font-bold">
+                  {worst?.name ?? "—"}
+                </div>
+                <div className="mt-2">
+                  {worst ? <Delta value={worst.totalProfitLossPercent} /> : <span>—</span>}
+                </div>
+              </>
+            )}
+          </Cell>
+        </div>
 
-                    <ul className="mt-5 divide-y divide-hairline/70 border-t border-hairline/70">
-                      {portfolios.map((p, i) => (
-                        <li key={p.id} className="flex items-center gap-3 py-2.5">
-                          <span
-                            className={cn(
-                              "size-2 shrink-0",
-                              i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
-                            )}
-                          />
-                          <Link
-                            to="/portfolios"
-                            className="min-w-0 flex-1 truncate text-sm hover:underline underline-offset-4"
-                          >
-                            {p.name}
-                          </Link>
-                          <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                            {((getLkrValue(p) / totalValue) * 100).toFixed(1)}%
-                          </span>
-                          <span className="w-28 text-right font-mono text-xs tabular-nums">
-                            {formatRs(p.type === "Crypto" ? p.totalValue * (netWorth?.usdtToLkrRate || 1) : p.totalValue)}
-                          </span>
-                          <span className="w-20 text-right">
-                            <Delta value={p.totalProfitLossPercent} />
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </Cell>
+        {/* ── SECTION 3: Main Trading Desk (2/3) + News & Intelligence (1/3) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column (2/3 width): Movers + Quick Desks */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Gainers & Losers Side-by-Side Bento */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <MoversCell title="Today's Top Gainers" index="GAINERS" rows={gainers} loading={isLoading} />
+              <MoversCell title="Today's Top Losers" index="LOSERS" rows={losers} loading={isLoading} />
+            </div>
 
-              <MoversCell title="Today's gainers" index="VI" rows={gainers} loading={isLoading} />
-              <MoversCell title="Today's losers" index="VII" rows={losers} loading={isLoading} />
-            </Bento>
-
-            {/* Quick desks */}
-            <Bento className="grid-cols-2 lg:grid-cols-4">
+            {/* Quick Desks Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { to: "/stocks", label: "Market board", note: "Live CSE prices & charts", n: "01" },
                 { to: "/watchlist", label: "Watchlist", note: "Symbols you're tracking", n: "02" },
@@ -353,29 +363,29 @@ function DashboardPage() {
                   key={d.to}
                   as={Link}
                   to={d.to}
-                  className="group block p-5 hover:bg-primary hover:text-primary-foreground"
+                  className="group block p-4 rounded-xl border border-border/60 hover:bg-primary hover:text-primary-foreground transition-all"
                 >
                   <div className="flex items-baseline justify-between">
                     <span className="label-caps group-hover:text-primary-foreground/60">{d.n}</span>
                     <span className="text-sm transition-transform group-hover:translate-x-1">→</span>
                   </div>
-                  <div className="mt-6 font-display text-lg font-bold">{d.label}</div>
+                  <div className="mt-4 font-display text-base font-bold">{d.label}</div>
                   <div className="mt-1 text-xs text-muted-foreground group-hover:text-primary-foreground/70">
                     {d.note}
                   </div>
                 </Cell>
               ))}
-            </Bento>
+            </div>
           </div>
 
-          {/* Right column: News & Market Intelligence */}
-          <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0">
+          {/* Right Column (1/3 width): News & Intelligence Feed */}
+          <div className="lg:col-span-1">
             <MarketNewsFeed
-              title="News & Market Intelligence"
-              maxHeight="h-[720px] lg:h-[calc(100vh-220px)]"
+              title="Market News & Intelligence"
+              maxHeight="h-[620px]"
               className="h-full"
             />
-          </aside>
+          </div>
         </div>
       </div>
     </AppShell>
@@ -394,18 +404,18 @@ function MoversCell({
   loading: boolean;
 }) {
   return (
-    <Cell>
+    <Cell className="rounded-xl border border-border/60 shadow-sm">
       <CellLabel index={index}>{title}</CellLabel>
       {loading ? (
-        <div className="mt-5 space-y-3">
+        <div className="mt-4 space-y-3">
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-3/4" />
         </div>
       ) : rows.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">No data for today.</p>
+        <p className="mt-5 text-sm text-muted-foreground">No data for today.</p>
       ) : (
-        <ol className="mt-4 divide-y divide-hairline/70 border-t border-hairline/70">
+        <ol className="mt-3 divide-y divide-hairline/70 border-t border-hairline/70">
           {rows.map((m, i) => (
             <li key={m.symbol} className="flex items-center gap-3 py-2.5">
               <span className="w-4 shrink-0 font-mono text-[10px] text-muted-foreground">
