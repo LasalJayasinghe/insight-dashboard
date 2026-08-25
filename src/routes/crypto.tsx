@@ -20,6 +20,7 @@ import {
 } from "@/services/crypto-service";
 import { Bitcoin, Wifi, WifiOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 // ── Route config ──────────────────────────────────────────────────────────────
 
@@ -354,7 +355,7 @@ function CryptoPage() {
         </div>
 
         {/* ── Scanner + Whale ───────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <MarketScanner results={scanner} loading={scannerLoading} onRefresh={loadScanner} />
           <WhaleActivity
             trades={whales}
@@ -362,6 +363,14 @@ function CryptoPage() {
             symbol={whaleSymbol}
             onSymbolChange={setWhaleSymbol}
             onRefresh={() => loadWhales(whaleSymbol)}
+          />
+        </div>
+
+        {/* ── Crypto Market News ───────────────────────────────────────────── */}
+        <div className="pb-6">
+          <MarketNewsFeed
+            defaultCategory="GLOBAL_CRYPTO"
+            title="Crypto Market News & Intelligence"
           />
         </div>
       </div>

@@ -17,6 +17,7 @@ import {
   type StockMovers,
   type MarketStatus,
 } from "@/services/stock-service";
+import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
@@ -266,101 +267,112 @@ function DashboardPage() {
           </Cell>
         </Bento>
 
-        {/* Allocation + movers */}
-        <Bento className="grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr]">
-          <Cell className="lg:row-span-1">
-            <CellLabel index="V">Allocation by portfolio</CellLabel>
+        {/* ── 2/3 Left Column (Allocation & Movers) + 1/3 Right Column (News Feed) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 2/3 Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Allocation + movers */}
+            <Bento className="grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr]">
+              <Cell className="lg:row-span-1">
+                <CellLabel index="V">Allocation by portfolio</CellLabel>
 
-            {isLoading ? (
-              <div className="mt-5 space-y-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
-            ) : portfolios.length === 0 ? (
-              <p className="mt-6 text-sm text-muted-foreground">
-                No portfolios yet.{" "}
-                <Link to="/portfolios" className="underline underline-offset-4">
-                  Create your first one
-                </Link>
-                .
-              </p>
-            ) : (
-              <>
-                {/* Single stacked allocation bar — one line, no pie */}
-                <div className="mt-5 flex h-3 w-full overflow-hidden border border-hairline">
-                  {portfolios.map((p, i) => (
-                    <div
-                      key={p.id}
-                      className={cn(
-                        i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
-                      )}
-                      style={{ width: `${(getLkrValue(p) / totalValue) * 100}%` }}
-                      title={p.name}
-                    />
-                  ))}
-                </div>
+                {isLoading ? (
+                  <div className="mt-5 space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                ) : portfolios.length === 0 ? (
+                  <p className="mt-6 text-sm text-muted-foreground">
+                    No portfolios yet.{" "}
+                    <Link to="/portfolios" className="underline underline-offset-4">
+                      Create your first one
+                    </Link>
+                    .
+                  </p>
+                ) : (
+                  <>
+                    {/* Single stacked allocation bar — one line, no pie */}
+                    <div className="mt-5 flex h-3 w-full overflow-hidden border border-hairline">
+                      {portfolios.map((p, i) => (
+                        <div
+                          key={p.id}
+                          className={cn(
+                            i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
+                          )}
+                          style={{ width: `${(getLkrValue(p) / totalValue) * 100}%` }}
+                          title={p.name}
+                        />
+                      ))}
+                    </div>
 
-                <ul className="mt-5 divide-y divide-hairline/70 border-t border-hairline/70">
-                  {portfolios.map((p, i) => (
-                    <li key={p.id} className="flex items-center gap-3 py-2.5">
-                      <span
-                        className={cn(
-                          "size-2 shrink-0",
-                          i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
-                        )}
-                      />
-                      <Link
-                        to="/portfolios"
-                        className="min-w-0 flex-1 truncate text-sm hover:underline underline-offset-4"
-                      >
-                        {p.name}
-                      </Link>
-                      <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                        {((getLkrValue(p) / totalValue) * 100).toFixed(1)}%
-                      </span>
-                      <span className="w-28 text-right font-mono text-xs tabular-nums">
-                        {formatRs(p.type === "Crypto" ? p.totalValue * (netWorth?.usdtToLkrRate || 1) : p.totalValue)}
-                      </span>
-                      <span className="w-20 text-right">
-                        <Delta value={p.totalProfitLossPercent} />
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </Cell>
+                    <ul className="mt-5 divide-y divide-hairline/70 border-t border-hairline/70">
+                      {portfolios.map((p, i) => (
+                        <li key={p.id} className="flex items-center gap-3 py-2.5">
+                          <span
+                            className={cn(
+                              "size-2 shrink-0",
+                              i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-accent" : "bg-success",
+                            )}
+                          />
+                          <Link
+                            to="/portfolios"
+                            className="min-w-0 flex-1 truncate text-sm hover:underline underline-offset-4"
+                          >
+                            {p.name}
+                          </Link>
+                          <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                            {((getLkrValue(p) / totalValue) * 100).toFixed(1)}%
+                          </span>
+                          <span className="w-28 text-right font-mono text-xs tabular-nums">
+                            {formatRs(p.type === "Crypto" ? p.totalValue * (netWorth?.usdtToLkrRate || 1) : p.totalValue)}
+                          </span>
+                          <span className="w-20 text-right">
+                            <Delta value={p.totalProfitLossPercent} />
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </Cell>
 
-          <MoversCell title="Today's gainers" index="VI" rows={gainers} loading={isLoading} />
-          <MoversCell title="Today's losers" index="VII" rows={losers} loading={isLoading} />
-        </Bento>
+              <MoversCell title="Today's gainers" index="VI" rows={gainers} loading={isLoading} />
+              <MoversCell title="Today's losers" index="VII" rows={losers} loading={isLoading} />
+            </Bento>
 
-        {/* Quick desks */}
-        <Bento className="grid-cols-2 lg:grid-cols-4">
-          {[
-            { to: "/stocks", label: "Market board", note: "Live CSE prices & charts", n: "01" },
-            { to: "/watchlist", label: "Watchlist", note: "Symbols you're tracking", n: "02" },
-            { to: "/alerts", label: "Price alerts", note: "Trigger rules & history", n: "03" },
-            { to: "/algorithms", label: "AI strategies", note: "Automated signals", n: "04" },
-          ].map((d) => (
-            <Cell
-              key={d.to}
-              as={Link}
-              to={d.to}
-              className="group block p-5 hover:bg-primary hover:text-primary-foreground"
-            >
-              <div className="flex items-baseline justify-between">
-                <span className="label-caps group-hover:text-primary-foreground/60">{d.n}</span>
-                <span className="text-sm transition-transform group-hover:translate-x-1">→</span>
-              </div>
-              <div className="mt-6 font-display text-lg font-bold">{d.label}</div>
-              <div className="mt-1 text-xs text-muted-foreground group-hover:text-primary-foreground/70">
-                {d.note}
-              </div>
-            </Cell>
-          ))}
-        </Bento>
+            {/* Quick desks */}
+            <Bento className="grid-cols-2 lg:grid-cols-4">
+              {[
+                { to: "/stocks", label: "Market board", note: "Live CSE prices & charts", n: "01" },
+                { to: "/watchlist", label: "Watchlist", note: "Symbols you're tracking", n: "02" },
+                { to: "/alerts", label: "Price alerts", note: "Trigger rules & history", n: "03" },
+                { to: "/algorithms", label: "AI strategies", note: "Automated signals", n: "04" },
+              ].map((d) => (
+                <Cell
+                  key={d.to}
+                  as={Link}
+                  to={d.to}
+                  className="group block p-5 hover:bg-primary hover:text-primary-foreground"
+                >
+                  <div className="flex items-baseline justify-between">
+                    <span className="label-caps group-hover:text-primary-foreground/60">{d.n}</span>
+                    <span className="text-sm transition-transform group-hover:translate-x-1">→</span>
+                  </div>
+                  <div className="mt-6 font-display text-lg font-bold">{d.label}</div>
+                  <div className="mt-1 text-xs text-muted-foreground group-hover:text-primary-foreground/70">
+                    {d.note}
+                  </div>
+                </Cell>
+              ))}
+            </Bento>
+          </div>
+
+          {/* 1/3 Right Column: News Feed */}
+          <div className="lg:col-span-1">
+            <MarketNewsFeed title="Market Intelligence & News" maxHeight="h-[680px]" />
+          </div>
+        </div>
       </div>
     </AppShell>
   );

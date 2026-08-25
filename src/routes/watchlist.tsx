@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 export const Route = createFileRoute("/watchlist")({
   beforeLoad: () => {
@@ -207,23 +208,33 @@ function WatchlistPage() {
           </div>
         </div>
 
-        {loading ? (
-          <Card className="p-5 gradient-card border-border shadow-card">
-            <p className="text-sm text-muted-foreground">Loading watchlist...</p>
-          </Card>
-        ) : stocks.length === 0 ? (
-          <Card className="p-6 gradient-card border-border shadow-card">
-            <p className="text-sm text-muted-foreground">
-              No stocks in your watchlist. Add a stock symbol to get started.
-            </p>
-          </Card>
-        ) : filtered.length === 0 ? (
-          <Card className="p-6 gradient-card border-border shadow-card">
-            <p className="text-sm text-muted-foreground">No symbols match your filter.</p>
-          </Card>
-        ) : (
-          <WatchlistTable stocks={filtered} onRemoveStock={removeStock} />
-        )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 2/3 Left Column: Watchlist Table */}
+          <div className="lg:col-span-2">
+            {loading ? (
+              <Card className="p-5 gradient-card border-border shadow-card">
+                <p className="text-sm text-muted-foreground">Loading watchlist...</p>
+              </Card>
+            ) : stocks.length === 0 ? (
+              <Card className="p-6 gradient-card border-border shadow-card">
+                <p className="text-sm text-muted-foreground">
+                  No stocks in your watchlist. Add a stock symbol to get started.
+                </p>
+              </Card>
+            ) : filtered.length === 0 ? (
+              <Card className="p-6 gradient-card border-border shadow-card">
+                <p className="text-sm text-muted-foreground">No symbols match your filter.</p>
+              </Card>
+            ) : (
+              <WatchlistTable stocks={filtered} onRemoveStock={removeStock} />
+            )}
+          </div>
+
+          {/* 1/3 Right Column: News Feed */}
+          <div className="lg:col-span-1">
+            <MarketNewsFeed title="Watchlist News & Intelligence" maxHeight="h-[550px]" />
+          </div>
+        </div>
 
         <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
           <DialogContent className="sm:max-w-xl">

@@ -13,6 +13,7 @@ import { IntradayStocks } from "@/components/dashboard/intraday-stocks";
 import { WatchlistTable } from "@/components/dashboard/watchlist-table";
 import { stockService, type IntradayPoint } from "@/services/stock-service";
 import { watchlistService, type WatchlistStock } from "@/services/watchlist-service";
+import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 const stocksSearchSchema = z.object({
   symbol: z.string().optional(),
@@ -203,11 +204,19 @@ function StocksPage() {
             </div>
 
             {/* SECONDARY: Top Movers Panel */}
-            <div className="pb-6">
+            <div className="pb-2">
               <StockMoversPanel
                 movers={movers}
                 loading={loadingMovers}
                 onSelectStock={handleSelectStock}
+              />
+            </div>
+
+            {/* CSE Stock News Feed */}
+            <div className="pb-6">
+              <MarketNewsFeed
+                defaultCategory="CSE_STOCKS"
+                title="CSE Market & Stock Intelligence"
               />
             </div>
           </div>
