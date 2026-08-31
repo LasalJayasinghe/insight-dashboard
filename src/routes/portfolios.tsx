@@ -53,7 +53,7 @@ import {
   type NetWorthOverviewDto,
 } from "@/services/portfolio-service";
 import { watchlistService, type StockOption } from "@/services/watchlist-service";
-import { SkeletonRows } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonRows } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/portfolios")({
   beforeLoad: () => {
@@ -409,8 +409,10 @@ function PortfolioPanel({
                   </SelectTrigger>
                   <SelectContent>
                     {optionsLoading ? (
-                      <div className="p-2 text-sm text-muted-foreground text-center">
-                        Loading...
+                      <div className="space-y-2 p-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-4/5" />
+                        <Skeleton className="h-4 w-3/5" />
                       </div>
                     ) : (
                       stockOptions.map((s) => (
