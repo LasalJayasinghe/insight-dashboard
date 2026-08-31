@@ -146,137 +146,134 @@ function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="max-w-3xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Settings & System Preferences</h1>
-          <p className="text-sm text-muted-foreground mt-1">Configure your trading dashboard & background services.</p>
-        </div>
+      <div className="mx-auto max-w-5xl space-y-8">
+        <Masthead
+          eyebrow="Preferences"
+          title="Settings & System"
+          meta="Appearance, background intelligence services and currency conversion."
+        />
 
-        {/* ── Appearance Card ───────────────────────────────────────────── */}
-        <Card className="gradient-card border-border shadow-card">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Appearance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between py-2">
+        {/* ── Appearance ───────────────────────────────────────────── */}
+        <Bento className="grid-cols-1">
+          <Cell>
+            <CellLabel index="I">Appearance</CellLabel>
+            <div className="mt-4 flex items-center justify-between gap-6">
               <div>
-                <p className="font-medium text-sm">Dark mode</p>
-                <p className="text-sm text-muted-foreground">
-                  Use dark theme across the dashboard.
-                </p>
+                <p className="font-display text-sm font-semibold">Ink (dark) mode</p>
+                <p className="text-xs text-muted-foreground">Switch between Paper and Ink themes.</p>
               </div>
               <Switch checked={theme === "dark"} onCheckedChange={toggle} />
             </div>
-          </CardContent>
-        </Card>
+          </Cell>
+        </Bento>
 
-        {/* ── Ollama AI News Scan Poll & Status Card (Replaces Notifications & Security) ── */}
-        <Card className="gradient-card border-border/60 shadow-card bg-card/60 backdrop-blur-sm">
-          <CardHeader className="pb-3 border-b border-border/40">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Cpu className="size-5 text-primary" />
-                <div>
-                  <CardTitle className="text-base font-semibold">Local Ollama AI News Scanner</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Real-time status of background LLM news validation (<code className="text-primary/90">qwen3.5:4b</code>).
-                  </p>
-                </div>
+        {/* ── Ollama AI News Scanner ───────────────────────────────── */}
+        <Bento className="grid-cols-1">
+          <Cell>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <CellLabel index="II">
+                  <span className="flex items-center gap-2">
+                    <Cpu className="size-4 text-primary" />
+                    Local Ollama News Scanner
+                  </span>
+                </CellLabel>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Background LLM validation of ingested market news
+                  {" "}
+                  <code className="font-mono text-[11px] text-primary">qwen3.5:4b</code>
+                </p>
               </div>
 
               {pendingCount > 0 ? (
-                <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 gap-1.5 px-2.5 py-1 text-xs animate-pulse">
-                  <Sparkles className="size-3.5 animate-spin" /> Scanning Active ({pendingCount} left)
+                <Badge
+                  variant="outline"
+                  className="gap-1.5 border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-primary"
+                >
+                  <Sparkles className="size-3 animate-pulse" /> Scanning · {pendingCount} queued
                 </Badge>
               ) : (
-                <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 gap-1.5 px-2.5 py-1 text-xs">
-                  <CheckCircle2 className="size-3.5" /> All Scanned & Up to Date
+                <Badge
+                  variant="outline"
+                  className="gap-1.5 border-success/30 bg-success/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-success"
+                >
+                  <CheckCircle2 className="size-3" /> Up to date
                 </Badge>
               )}
             </div>
-          </CardHeader>
 
-          <CardContent className="pt-4 space-y-5">
-            {/* Live Progress Bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-medium">
-                <span className="text-muted-foreground flex items-center gap-1">
-                  <Clock className="size-3.5" /> AI Scan Progress:
+            {/* Progress rule */}
+            <div className="mt-5 space-y-2">
+              <div className="flex items-baseline justify-between">
+                <span className="label-caps flex items-center gap-1.5">
+                  <Clock className="size-3" /> Scan progress
                 </span>
-                <span className="text-foreground font-mono">{scannedPercentage}% Scanned</span>
+                <span className="font-mono text-xs tabular-nums text-foreground">
+                  {statusLoading ? "—" : `${scannedPercentage}%`}
+                </span>
               </div>
-              <div className="h-2.5 w-full bg-muted/60 rounded-full overflow-hidden border border-border/40 p-0.5">
+              <div className="h-1.5 w-full bg-muted">
                 <div
-                  className="h-full bg-gradient-to-r from-primary via-emerald-400 to-teal-400 rounded-full transition-all duration-500"
+                  className="h-full bg-primary transition-all duration-500"
                   style={{ width: `${scannedPercentage}%` }}
                 />
               </div>
             </div>
+          </Cell>
 
-            {/* Statistics Grid */}
-            <div className="grid grid-cols-3 gap-3 pt-1">
-              <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-1">
-                <div className="text-[11px] font-medium text-amber-400/90 uppercase tracking-wider">Remaining to Scan</div>
-                <div className="text-2xl font-bold font-mono text-amber-400">{pendingCount}</div>
-                <p className="text-[10px] text-muted-foreground">Articles in queue for Ollama AI</p>
-              </div>
+          <div className="grid grid-cols-1 gap-px sm:grid-cols-3">
+            <Cell>
+              <CellLabel>Queued</CellLabel>
+              <Figure value={pendingCount} size="md" className="mt-2" />
+              <p className="mt-1 text-[11px] text-muted-foreground">Awaiting Ollama pass</p>
+            </Cell>
+            <Cell>
+              <CellLabel>Validated</CellLabel>
+              <Figure value={validatedCount} size="md" className="mt-2 text-success" />
+              <p className="mt-1 text-[11px] text-muted-foreground">Processed & verified</p>
+            </Cell>
+            <Cell>
+              <CellLabel>Ingested</CellLabel>
+              <Figure value={totalCount} size="md" className="mt-2" />
+              <p className="mt-1 text-[11px] text-muted-foreground">Total stored articles</p>
+            </Cell>
+          </div>
 
-              <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-1">
-                <div className="text-[11px] font-medium text-emerald-400/90 uppercase tracking-wider">AI Validated</div>
-                <div className="text-2xl font-bold font-mono text-emerald-400">{validatedCount}</div>
-                <p className="text-[10px] text-muted-foreground">Articles processed & verified</p>
-              </div>
-
-              <div className="p-3 rounded-xl border border-border/40 bg-muted/20 space-y-1">
-                <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total Ingested</div>
-                <div className="text-2xl font-bold font-mono text-foreground">{totalCount}</div>
-                <p className="text-[10px] text-muted-foreground">Total saved in database</p>
-              </div>
-            </div>
-
-            {/* Action Bar */}
-            <div className="flex items-center justify-between pt-2 border-t border-border/40">
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Layers className="size-3.5 text-primary" /> Auto-polling status every 3s
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 text-xs"
-                onClick={handleManualSync}
-                disabled={syncingNews}
-              >
-                <RefreshCw className={cn("size-3.5", syncingNews && "animate-spin")} />
-                Sync New Articles
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ── Currency & Exchange Card ───────────────────────────────────── */}
-        <Card className="gradient-card border-border shadow-card">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Currency & Exchange Rates</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">USDT to LKR Rate</p>
-                <p className="text-sm text-muted-foreground">{settings?.usdtToLkrRate || 0}</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">LKR to USDT Rate</p>
-                <p className="text-sm text-muted-foreground">{settings?.lkrToUsdtRate || 0}</p>
-              </div>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => setRateDialogOpen(true)}>
-              Edit Rates
+          <Cell className="flex flex-wrap items-center justify-between gap-3 py-3">
+            <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <Layers className="size-3 text-primary" /> Polling status every 3s
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs"
+              onClick={handleManualSync}
+              disabled={syncingNews}
+            >
+              <RefreshCw className={cn("size-3.5", syncingNews && "animate-spin")} />
+              Sync new articles
             </Button>
-          </CardContent>
-        </Card>
+          </Cell>
+        </Bento>
+
+        {/* ── Currency & Exchange ──────────────────────────────────── */}
+        <Bento className="grid-cols-1 sm:grid-cols-2">
+          <Cell>
+            <CellLabel index="III">USDT → LKR</CellLabel>
+            <Figure value={settings?.usdtToLkrRate ?? 0} size="md" className="mt-2" />
+          </Cell>
+          <Cell>
+            <CellLabel index="IV">LKR → USDT</CellLabel>
+            <Figure value={settings?.lkrToUsdtRate ?? 0} size="md" className="mt-2" />
+          </Cell>
+          <Cell className="sm:col-span-2 py-3">
+            <Button variant="outline" size="sm" onClick={() => setRateDialogOpen(true)}>
+              Edit rates
+            </Button>
+          </Cell>
+        </Bento>
       </div>
+
 
       <Dialog open={rateDialogOpen} onOpenChange={setRateDialogOpen}>
         <DialogContent>
