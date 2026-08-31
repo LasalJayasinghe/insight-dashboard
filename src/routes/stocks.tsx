@@ -217,6 +217,7 @@ function StocksPage() {
               <MarketNewsFeed
                 defaultCategory="CSE_STOCKS"
                 title="CSE Market & Stock Intelligence"
+                maxHeight="h-[540px]"
               />
             </div>
           </div>

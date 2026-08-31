@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { watchlistService } from "@/services/watchlist-service";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { StockDividendPanel } from "./stock-dividend-panel";
+import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 interface StockDetailViewProps {
   stock: StockTicker;
@@ -116,6 +118,9 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
 
       {/* Interactive Candlestick Chart */}
       <StockChart stock={stock} />
+
+      {/* Dividend Panel */}
+      <StockDividendPanel symbol={stock.symbol} />
 
       {/* Grid: Metrics & Dedicated AI Analysis Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -273,6 +278,13 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           </button>
         </div>
       </div>
+
+      {/* Stock-specific news with payment-date emphasis for dividend stories */}
+      <MarketNewsFeed
+        symbolFilter={stock.symbol}
+        title={`${stock.symbol} News & Dividend Payment Timeline`}
+        maxHeight="h-[480px]"
+      />
     </div>
   );
 }

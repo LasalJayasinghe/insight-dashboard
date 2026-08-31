@@ -232,7 +232,7 @@ function WatchlistPage() {
 
           {/* 1/3 Right Column: News Feed */}
           <div className="lg:col-span-1">
-            <MarketNewsFeed title="Watchlist News & Intelligence" maxHeight="h-[550px]" />
+            <MarketNewsFeed title="Watchlist News & Intelligence" maxHeight="h-[600px]" />
           </div>
         </div>
 

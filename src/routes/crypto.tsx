@@ -371,6 +371,7 @@ function CryptoPage() {
           <MarketNewsFeed
             defaultCategory="GLOBAL_CRYPTO"
             title="Crypto Market News & Intelligence"
+            maxHeight="h-[520px]"
           />
         </div>
       </div>

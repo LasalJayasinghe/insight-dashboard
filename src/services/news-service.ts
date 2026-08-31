@@ -14,6 +14,7 @@ export interface NewsArticle {
   isModelValidated: boolean;
   isRelevant: boolean;
   validationReasoning?: string;
+  dividendPaymentDate?: string | null;
   publishedAt: string;
   createdAt: string;
 }

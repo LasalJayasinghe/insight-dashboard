@@ -161,7 +161,7 @@ function DashboardPage() {
         {/* ── SECTION 1: Top Hero Financial Overview ──────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6">
           {/* Net Worth Primary Card */}
-          <Cell className="flex flex-col justify-between p-6 rounded-xl border border-border/60 shadow-sm">
+          <Cell className="flex h-84 flex-col justify-between p-6 rounded-xl border border-border/60 shadow-sm overflow-hidden">
             <div className="flex items-baseline justify-between gap-3">
               <span className="label-caps">Total net worth</span>
               <span className="label-caps text-muted-foreground">LKR</span>
@@ -211,8 +211,8 @@ function DashboardPage() {
           </Cell>
 
           {/* Allocation by Portfolio - Full Roomy Card */}
-          <Cell className="p-6 flex flex-col justify-between rounded-xl border border-border/60 shadow-sm">
-            <div>
+          <Cell className="flex h-84 flex-col rounded-xl border border-border/60 p-6 shadow-sm overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col">
               <CellLabel>Allocation by Portfolio</CellLabel>
 
               {isLoading ? (
@@ -245,7 +245,7 @@ function DashboardPage() {
                     ))}
                   </div>
 
-                  <ul className="mt-5 divide-y divide-hairline/70 border-t border-hairline/70 max-h-[160px] overflow-y-auto pr-1">
+                  <ul className="mt-5 min-h-0 flex-1 divide-y divide-hairline/70 border-t border-hairline/70 overflow-y-auto pr-1">
                     {portfolios.map((p, i) => (
                       <li key={p.id} className="flex items-center gap-3 py-2.5">
                         <span
@@ -280,7 +280,7 @@ function DashboardPage() {
 
         {/* ── SECTION 2: Market Indices & Key Stats Bar (4 Equal Columns) ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Cell className="rounded-xl border border-border/60 shadow-sm">
+          <Cell className="h-44 rounded-xl border border-border/60 shadow-sm overflow-hidden">
             <CellLabel>ASPI Index</CellLabel>
             <Figure
               size="md"
@@ -294,7 +294,7 @@ function DashboardPage() {
             </div>
           </Cell>
 
-          <Cell className="rounded-xl border border-border/60 shadow-sm">
+          <Cell className="h-44 rounded-xl border border-border/60 shadow-sm overflow-hidden">
             <CellLabel>S&amp;P SL20 Index</CellLabel>
             <Figure
               size="md"
@@ -308,7 +308,7 @@ function DashboardPage() {
             </div>
           </Cell>
 
-          <Cell className="rounded-xl border border-border/60 shadow-sm">
+          <Cell className="h-44 rounded-xl border border-border/60 shadow-sm overflow-hidden">
             <CellLabel>Top Performer</CellLabel>
             {isLoading ? (
               <Skeleton className="mt-3 h-7 w-28" />
@@ -324,7 +324,7 @@ function DashboardPage() {
             )}
           </Cell>
 
-          <Cell className="rounded-xl border border-border/60 shadow-sm">
+          <Cell className="h-44 rounded-xl border border-border/60 shadow-sm overflow-hidden">
             <CellLabel>Needs Attention</CellLabel>
             {isLoading ? (
               <Skeleton className="mt-3 h-7 w-28" />
@@ -363,7 +363,7 @@ function DashboardPage() {
                   key={d.to}
                   as={Link}
                   to={d.to}
-                  className="group block p-4 rounded-xl border border-border/60 hover:bg-primary hover:text-primary-foreground transition-all"
+                  className="group block h-32 p-4 rounded-xl border border-border/60 hover:bg-primary hover:text-primary-foreground transition-all overflow-hidden"
                 >
                   <div className="flex items-baseline justify-end">
                     <span className="text-sm transition-transform group-hover:translate-x-1">→</span>
@@ -381,8 +381,7 @@ function DashboardPage() {
           <div className="lg:col-span-1">
             <MarketNewsFeed
               title="Market News & Intelligence"
-              maxHeight="h-[620px]"
-              className="h-full"
+              maxHeight="h-[470px]"
             />
           </div>
         </div>
@@ -403,7 +402,7 @@ function MoversCell({
   loading: boolean;
 }) {
   return (
-    <Cell className="rounded-xl border border-border/60 shadow-sm">
+    <Cell className="flex h-80 flex-col rounded-xl border border-border/60 shadow-sm overflow-hidden">
       <CellLabel index={index}>{title}</CellLabel>
       {loading ? (
         <div className="mt-4 space-y-3">
@@ -414,7 +413,7 @@ function MoversCell({
       ) : rows.length === 0 ? (
         <p className="mt-5 text-sm text-muted-foreground">No data for today.</p>
       ) : (
-        <ol className="mt-3 divide-y divide-hairline/70 border-t border-hairline/70">
+        <ol className="mt-3 min-h-0 flex-1 divide-y divide-hairline/70 border-t border-hairline/70 overflow-y-auto pr-1">
           {rows.map((m, i) => (
             <li key={m.symbol} className="flex items-center gap-3 py-2.5">
               <span className="w-4 shrink-0 font-mono text-[10px] text-muted-foreground">

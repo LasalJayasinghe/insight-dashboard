@@ -2,7 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ExternalLink, Newspaper, RefreshCw, TrendingUp, TrendingDown, Minus, Sparkles } from "lucide-react";
+import {
+  CalendarDays,
+  ExternalLink,
+  Newspaper,
+  RefreshCw,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Sparkles,
+} from "lucide-react";
 import { newsService, type NewsArticle } from "@/services/news-service";
 import { Bento, Cell, CellLabel } from "@/components/ui/panel";
 import { cn } from "@/lib/utils";
@@ -27,7 +36,7 @@ export function MarketNewsFeed({
   symbolFilter,
   title = "Market Intelligence & News",
   className,
-  maxHeight = "h-[500px]",
+  maxHeight = "h-[560px]",
 }: MarketNewsFeedProps) {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -39,10 +48,10 @@ export function MarketNewsFeed({
     try {
       if (symbolFilter) {
         const data = await newsService.getNewsBySymbol(symbolFilter, 15);
-        setArticles(data);
+        setArticles(prioritizeDividendPaymentDates(data));
       } else {
         const data = await newsService.getNews(activeCategory, undefined, 20, 1);
-        setArticles(data.items || []);
+        setArticles(prioritizeDividendPaymentDates(data.items || []));
       }
     } catch (err) {
       console.error("Failed to load news articles:", err);
@@ -121,6 +130,55 @@ export function MarketNewsFeed({
     }
   };
 
+  const isDividendArticle = (article: NewsArticle): boolean => {
+    const haystack = `${article.title} ${article.summary} ${article.validationReasoning || ""}`.toLowerCase();
+    return haystack.includes("dividend");
+  };
+
+  const extractPaymentDateText = (article: NewsArticle): string | null => {
+    if (article.dividendPaymentDate) {
+      const structuredDate = new Date(article.dividendPaymentDate);
+      if (!Number.isNaN(structuredDate.getTime())) {
+        return structuredDate.toLocaleDateString();
+      }
+
+      return article.dividendPaymentDate;
+    }
+
+    const haystack = `${article.title}\n${article.summary}\n${article.validationReasoning || ""}`;
+
+    const regexes = [
+      /payment\s*date\s*[:\-]?\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
+      /payment\s*date\s*[:\-]?\s*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4})/i,
+      /payment\s*date\s*[:\-]?\s*([A-Za-z]{3,9}\s+[0-9]{1,2},?\s+[0-9]{4})/i,
+      /payable\s*on\s*[:\-]?\s*([A-Za-z]{3,9}\s+[0-9]{1,2},?\s+[0-9]{4})/i,
+      /payable\s*on\s*[:\-]?\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
+    ];
+
+    for (const regex of regexes) {
+      const match = haystack.match(regex);
+      if (match?.[1]) return match[1].trim();
+    }
+
+    return null;
+  };
+
+  const prioritizeDividendPaymentDates = (items: NewsArticle[]): NewsArticle[] => {
+    return [...items].sort((a, b) => {
+      const aDividend = isDividendArticle(a);
+      const bDividend = isDividendArticle(b);
+      const aPayment = extractPaymentDateText(a);
+      const bPayment = extractPaymentDateText(b);
+
+      const aScore = (aDividend ? 2 : 0) + (aPayment ? 1 : 0);
+      const bScore = (bDividend ? 2 : 0) + (bPayment ? 1 : 0);
+
+      if (aScore !== bScore) return bScore - aScore;
+
+      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    });
+  };
+
   const formatRelativeTime = (dateStr: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -136,8 +194,8 @@ export function MarketNewsFeed({
   };
 
   return (
-    <Bento className={cn("flex flex-col", className)}>
-      <Cell className="p-4">
+    <Bento className={cn("flex min-h-0 flex-col overflow-hidden", maxHeight, className)}>
+      <Cell className="shrink-0 p-4">
         <div className="flex items-center justify-between gap-3">
           <CellLabel index="VIII">
             <span className="flex items-center gap-2">
@@ -177,14 +235,14 @@ export function MarketNewsFeed({
         )}
       </Cell>
 
-      <Cell className="flex flex-col p-0 min-h-0 flex-1">
+      <Cell className="flex min-h-0 flex-1 flex-col p-0">
         {loading ? (
-          <div className="flex items-center justify-center p-8 text-sm text-muted-foreground gap-2">
+          <div className="flex h-full items-center justify-center p-8 text-sm text-muted-foreground gap-2">
             <RefreshCw className="size-4 animate-spin" />
             Loading market news...
           </div>
         ) : articles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground gap-2">
+          <div className="flex h-full flex-col items-center justify-center p-8 text-center text-muted-foreground gap-2">
             <Newspaper className="size-8 opacity-40" />
             <p className="text-sm">No recent news available.</p>
             <Button variant="ghost" size="sm" onClick={handleSync} disabled={syncing}>
@@ -192,10 +250,12 @@ export function MarketNewsFeed({
             </Button>
           </div>
         ) : (
-          <ScrollArea className={cn("flex-1", maxHeight)}>
+          <ScrollArea className="h-full flex-1">
             <div className="divide-y divide-hairline/70">
               {articles.map((article) => {
                 const tickers = parseTickers(article.mentionedTickersJson);
+                const dividendArticle = isDividendArticle(article);
+                const paymentDateText = extractPaymentDateText(article);
 
                 return (
                   <article
@@ -206,6 +266,22 @@ export function MarketNewsFeed({
                       <div className="min-w-0 flex-1 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2">
                           {getSentimentBadge(article.sentiment)}
+                          {dividendArticle && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] border-primary/40 bg-primary/10 text-primary px-1.5 py-0"
+                            >
+                              Dividend
+                            </Badge>
+                          )}
+                          {paymentDateText && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] border-amber-400/40 bg-amber-500/10 text-amber-300 px-1.5 py-0 gap-1"
+                            >
+                              <CalendarDays className="size-3" /> Payment: {paymentDateText}
+                            </Badge>
+                          )}
                           <span className="label-caps">{getCategoryLabel(article.marketCategory)}</span>
                           <span className="text-[10px] text-muted-foreground/80">
                             {article.source} · {formatRelativeTime(article.publishedAt)}
