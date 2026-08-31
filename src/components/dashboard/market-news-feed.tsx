@@ -193,6 +193,15 @@ export function MarketNewsFeed({
     return `${diffDays}d ago`;
   };
 
+  const formatCalendarDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString();
+  };
+
+  const isCseFocused = !!symbolFilter || activeCategory === "CSE_STOCKS";
+
   return (
     <Bento className={cn("flex min-h-0 flex-col overflow-hidden", maxHeight, className)}>
       <Cell className="shrink-0 p-4">
@@ -251,16 +260,23 @@ export function MarketNewsFeed({
           </div>
         ) : (
           <ScrollArea className="h-full flex-1">
-            <div className="divide-y divide-hairline/70">
+            <div className={cn("divide-y divide-hairline/70", isCseFocused && "space-y-2 divide-y-0 p-2")}>
               {articles.map((article) => {
                 const tickers = parseTickers(article.mentionedTickersJson);
                 const dividendArticle = isDividendArticle(article);
                 const paymentDateText = extractPaymentDateText(article);
+                const publishedDate = formatCalendarDate(article.publishedAt);
+                const isCseArticle = article.marketCategory?.toUpperCase() === "CSE_STOCKS";
 
                 return (
                   <article
                     key={article.id}
-                    className="group p-4 transition-colors hover:bg-muted/30"
+                    className={cn(
+                      "group p-4 transition-colors hover:bg-muted/30",
+                      isCseFocused &&
+                        "rounded-lg border border-border bg-card/70 hover:border-primary/30 hover:bg-card",
+                      isCseFocused && isCseArticle && "border-l-4 border-l-primary",
+                    )}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 space-y-1.5">
@@ -277,7 +293,7 @@ export function MarketNewsFeed({
                           {paymentDateText && (
                             <Badge
                               variant="outline"
-                              className="text-[10px] border-amber-400/40 bg-amber-500/10 text-amber-300 px-1.5 py-0 gap-1"
+                              className="text-[10px] border-amber-400/40 bg-amber-500/10 text-amber-300 px-1.5 py-0 gap-1 font-semibold"
                             >
                               <CalendarDays className="size-3" /> Payment: {paymentDateText}
                             </Badge>
@@ -286,6 +302,9 @@ export function MarketNewsFeed({
                           <span className="text-[10px] text-muted-foreground/80">
                             {article.source} · {formatRelativeTime(article.publishedAt)}
                           </span>
+                          {isCseFocused && publishedDate && (
+                            <span className="text-[10px] text-muted-foreground/70">Published: {publishedDate}</span>
+                          )}
                         </div>
 
                         <a
@@ -303,21 +322,10 @@ export function MarketNewsFeed({
                         {article.summary && (
                           <p className="text-xs text-muted-foreground/90 leading-relaxed">
                             <span className="inline-flex items-center gap-1 font-semibold text-primary/90 text-[11px]">
-                              <Sparkles className="size-3 text-accent" /> AI Insights:
+                              <Sparkles className="size-3 text-accent" /> Brief:
                             </span>{" "}
                             {article.summary}
                           </p>
-                        )}
-
-                        {article.validationReasoning && (
-                          <details className="mt-2 text-[11px] border-l-2 border-accent/60 bg-accent/5 p-2 rounded-r">
-                            <summary className="font-mono font-medium text-accent hover:underline cursor-pointer select-none flex items-center gap-1 text-[10px]">
-                              <Sparkles className="size-3 text-accent" /> AI Decision Reasoning
-                            </summary>
-                            <p className="mt-1.5 text-muted-foreground leading-relaxed font-sans text-xs">
-                              {article.validationReasoning}
-                            </p>
-                          </details>
                         )}
 
                         {tickers.length > 0 && (
