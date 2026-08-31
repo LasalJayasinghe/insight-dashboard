@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Coins, Landmark, RefreshCw } from "lucide-react";
 import { dividendService, type DividendItem } from "@/services/dividend-service";
 import { cn } from "@/lib/utils";
+import { SkeletonRows, SkeletonStats } from "@/components/ui/skeleton";
 
 interface StockDividendPanelProps {
   symbol: string;
@@ -72,7 +73,10 @@ export function StockDividendPanel({ symbol }: StockDividendPanelProps) {
       </div>
 
       {loading ? (
-        <p className="text-xs text-muted-foreground">Loading dividend history...</p>
+        <div className="space-y-3">
+          <SkeletonStats count={3} />
+          <SkeletonRows rows={4} avatar={false} />
+        </div>
       ) : error ? (
         <p className="text-xs text-red-400">{error}</p>
       ) : items.length === 0 ? (

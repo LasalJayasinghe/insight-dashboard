@@ -53,6 +53,7 @@ import {
   type NetWorthOverviewDto,
 } from "@/services/portfolio-service";
 import { watchlistService, type StockOption } from "@/services/watchlist-service";
+import { SkeletonRows } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/portfolios")({
   beforeLoad: () => {
@@ -262,7 +263,11 @@ function PortfolioPanel({
   };
 
   if (loading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading holdings...</div>;
+    return (
+      <div className="p-4">
+        <SkeletonRows rows={6} />
+      </div>
+    );
   }
 
   if (!detail) return null;
