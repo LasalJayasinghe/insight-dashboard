@@ -61,10 +61,10 @@ export function useStocks() {
     void fetchIndicesAndStatus();
     void fetchMovers();
 
-    // Poll every 30 seconds to simulate real-time updates for CSE
+    // Indices are refreshed by backend jobs, so poll less aggressively from the UI.
     intervalsRef.current = [
       setInterval(() => void fetchTickers(), 30_000),
-      setInterval(() => void fetchIndicesAndStatus(), 60_000),
+      setInterval(() => void fetchIndicesAndStatus(), 300_000),
       setInterval(() => void fetchMovers(), 60_000),
     ];
 
