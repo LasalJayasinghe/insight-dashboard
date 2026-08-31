@@ -77,37 +77,35 @@ export function MarketNewsFeed({
     }
   };
 
-  const getSentimentBadge = (sentiment: string) => {
+  const getSentimentMeta = (sentiment: string) => {
     const s = sentiment?.toUpperCase();
     if (s === "BULLISH") {
-      return (
-        <Badge
-          variant="outline"
-          className="gap-1 border-success/30 bg-success/10 text-success text-[10px] font-medium px-1.5 py-0"
-        >
-          <TrendingUp className="size-3" /> Bullish
-        </Badge>
-      );
+      return {
+        label: "Bullish",
+        Icon: TrendingUp,
+        rail: "bg-success",
+        text: "text-success",
+        chip: "border-success/30 bg-success/10 text-success",
+      };
     }
     if (s === "BEARISH") {
-      return (
-        <Badge
-          variant="outline"
-          className="gap-1 border-destructive/30 bg-destructive/10 text-destructive text-[10px] font-medium px-1.5 py-0"
-        >
-          <TrendingDown className="size-3" /> Bearish
-        </Badge>
-      );
+      return {
+        label: "Bearish",
+        Icon: TrendingDown,
+        rail: "bg-destructive",
+        text: "text-destructive",
+        chip: "border-destructive/30 bg-destructive/10 text-destructive",
+      };
     }
-    return (
-      <Badge
-        variant="outline"
-        className="gap-1 border-border bg-muted/50 text-muted-foreground text-[10px] font-medium px-1.5 py-0"
-      >
-        <Minus className="size-3" /> Neutral
-      </Badge>
-    );
+    return {
+      label: "Neutral",
+      Icon: Minus,
+      rail: "bg-muted-foreground/40",
+      text: "text-muted-foreground",
+      chip: "border-border bg-muted/50 text-muted-foreground",
+    };
   };
+
 
   const getCategoryLabel = (cat: string) => {
     switch (cat?.toUpperCase()) {
