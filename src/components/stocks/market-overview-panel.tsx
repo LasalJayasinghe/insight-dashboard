@@ -3,6 +3,7 @@ import type { StockIndices, MarketStatus } from "@/services/stock-service";
 import { Clock, TrendingUp, TrendingDown, Activity } from "lucide-react";
 import { fmtPrice } from "./stock-cards";
 import { formatUtcToLocalTime } from "@/lib/format";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface MarketOverviewPanelProps {
   indices: StockIndices | null;
@@ -53,8 +54,18 @@ export function MarketOverviewPanel({ indices, status, loading }: MarketOverview
       {/* Right: Sleek Index Chips (ASPI + S&P SL20) */}
       <div className="flex items-center gap-3 overflow-x-auto py-0.5">
         {loading ? (
-          <div className="text-xs text-muted-foreground animate-pulse">
-            Loading market indices...
+          <div className="flex items-center gap-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/40 shrink-0"
+              >
+                <div className="space-y-1.5">
+                  <Skeleton className="h-2 w-16" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : !indices ? (
           <div className="text-xs text-muted-foreground">Indices unavailable</div>

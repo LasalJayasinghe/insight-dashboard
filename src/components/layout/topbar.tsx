@@ -16,6 +16,7 @@ import { watchlistService, type StockOption } from "@/services/watchlist-service
 import { stockService, type IntradayPoint } from "@/services/stock-service";
 import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { SkeletonRows } from "@/components/ui/skeleton";
 
 interface TopbarProps {
   onToggleSidebar: () => void;
@@ -203,9 +204,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
 
               <div className="max-h-72 overflow-y-auto">
                 {loading ? (
-                  <div className="animate-pulse p-4 text-center text-xs text-muted-foreground">
-                    Loading symbols…
-                  </div>
+                  <SkeletonRows rows={4} avatar={false} className="divide-hairline" />
                 ) : filteredStocks.length === 0 ? (
                   <div className="p-4 text-center text-xs text-muted-foreground">
                     Nothing matches “{search}”
