@@ -32,8 +32,8 @@ export function WatchlistTable({
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-base font-semibold">Watchlist</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Loading watchlist...</p>
+        <CardContent className="p-0">
+          <SkeletonRows rows={6} />
         </CardContent>
       </Card>
     );
