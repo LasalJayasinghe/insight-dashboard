@@ -15,6 +15,7 @@ import {
 import { newsService, type NewsArticle } from "@/services/news-service";
 import { Bento, Cell, CellLabel } from "@/components/ui/panel";
 import { cn } from "@/lib/utils";
+import { SkeletonRows } from "@/components/ui/skeleton";
 
 interface MarketNewsFeedProps {
   defaultCategory?: string;
@@ -246,9 +247,8 @@ export function MarketNewsFeed({
 
       <Cell className="flex min-h-0 flex-1 flex-col p-0">
         {loading ? (
-          <div className="flex h-full items-center justify-center p-8 text-sm text-muted-foreground gap-2">
-            <RefreshCw className="size-4 animate-spin" />
-            Loading market news...
+          <div className="h-full overflow-hidden">
+            <SkeletonRows rows={7} avatar={false} />
           </div>
         ) : articles.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center p-8 text-center text-muted-foreground gap-2">

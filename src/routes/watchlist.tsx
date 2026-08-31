@@ -34,6 +34,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
+import { SkeletonRows } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/watchlist")({
   beforeLoad: () => {
@@ -212,8 +213,8 @@ function WatchlistPage() {
           {/* 2/3 Left Column: Watchlist Table */}
           <div className="lg:col-span-2">
             {loading ? (
-              <Card className="p-5 gradient-card border-border shadow-card">
-                <p className="text-sm text-muted-foreground">Loading watchlist...</p>
+              <Card className="gradient-card border-border shadow-card overflow-hidden">
+                <SkeletonRows rows={8} />
               </Card>
             ) : stocks.length === 0 ? (
               <Card className="p-6 gradient-card border-border shadow-card">
@@ -259,7 +260,7 @@ function WatchlistPage() {
               <ScrollArea className="h-72 rounded-md border border-border p-2">
                 <div className="space-y-1">
                   {optionsLoading ? (
-                    <p className="text-sm text-muted-foreground p-2">Loading stock list...</p>
+                    <SkeletonRows rows={6} avatar={false} />
                   ) : filteredOptions.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-2">No stocks found.</p>
                   ) : (
