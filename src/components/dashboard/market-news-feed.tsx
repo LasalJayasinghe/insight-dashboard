@@ -77,37 +77,35 @@ export function MarketNewsFeed({
     }
   };
 
-  const getSentimentBadge = (sentiment: string) => {
+  const getSentimentMeta = (sentiment: string) => {
     const s = sentiment?.toUpperCase();
     if (s === "BULLISH") {
-      return (
-        <Badge
-          variant="outline"
-          className="gap-1 border-success/30 bg-success/10 text-success text-[10px] font-medium px-1.5 py-0"
-        >
-          <TrendingUp className="size-3" /> Bullish
-        </Badge>
-      );
+      return {
+        label: "Bullish",
+        Icon: TrendingUp,
+        rail: "bg-success",
+        text: "text-success",
+        chip: "border-success/30 bg-success/10 text-success",
+      };
     }
     if (s === "BEARISH") {
-      return (
-        <Badge
-          variant="outline"
-          className="gap-1 border-destructive/30 bg-destructive/10 text-destructive text-[10px] font-medium px-1.5 py-0"
-        >
-          <TrendingDown className="size-3" /> Bearish
-        </Badge>
-      );
+      return {
+        label: "Bearish",
+        Icon: TrendingDown,
+        rail: "bg-destructive",
+        text: "text-destructive",
+        chip: "border-destructive/30 bg-destructive/10 text-destructive",
+      };
     }
-    return (
-      <Badge
-        variant="outline"
-        className="gap-1 border-border bg-muted/50 text-muted-foreground text-[10px] font-medium px-1.5 py-0"
-      >
-        <Minus className="size-3" /> Neutral
-      </Badge>
-    );
+    return {
+      label: "Neutral",
+      Icon: Minus,
+      rail: "bg-muted-foreground/40",
+      text: "text-muted-foreground",
+      chip: "border-border bg-muted/50 text-muted-foreground",
+    };
   };
+
 
   const getCategoryLabel = (cat: string) => {
     switch (cat?.toUpperCase()) {
@@ -206,36 +204,44 @@ export function MarketNewsFeed({
   return (
     <Bento className={cn("flex min-h-0 flex-col overflow-hidden", maxHeight, className)}>
       <Cell className="shrink-0 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <CellLabel index="VIII">
-            <span className="flex items-center gap-2">
-              <Newspaper className="size-4 text-primary" />
-              {title}
-            </span>
-          </CellLabel>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <CellLabel index="VIII">
+              <span className="flex items-center gap-2">
+                <Newspaper className="size-4 text-primary" />
+                {title}
+              </span>
+            </CellLabel>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/70">
+              {loading ? "Loading feed" : `${articles.length} stories`}
+              {" · "}
+              AI-validated
+            </p>
+          </div>
           <Button
             variant="outline"
-            size="icon"
-            className="h-7 w-7 shrink-0"
+            size="sm"
+            className="h-7 shrink-0 gap-1.5 px-2 font-mono text-[10px] uppercase tracking-wider"
             onClick={handleSync}
             disabled={syncing}
             title="Sync latest market news"
           >
             <RefreshCw className={cn("size-3.5", syncing && "animate-spin")} />
+            {syncing ? "Syncing" : "Sync"}
           </Button>
         </div>
 
         {!symbolFilter && (
-          <div className="mt-3 flex items-center gap-1 border border-hairline p-1">
+          <div className="mt-3 flex items-center gap-4 border-b border-hairline">
             {CATEGORIES.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveCategory(tab.id)}
                 className={cn(
-                  "flex-1 px-2 py-1 text-[10px] font-mono font-medium uppercase tracking-wider transition-colors",
+                  "-mb-px border-b-2 pb-1.5 font-mono text-[10px] font-medium uppercase tracking-wider transition-colors",
                   activeCategory === tab.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
                 {tab.label}
@@ -251,7 +257,7 @@ export function MarketNewsFeed({
             <SkeletonRows rows={7} avatar={false} />
           </div>
         ) : articles.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center p-8 text-center text-muted-foreground gap-2">
+          <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-muted-foreground">
             <Newspaper className="size-8 opacity-40" />
             <p className="text-sm">No recent news available.</p>
             <Button variant="ghost" size="sm" onClick={handleSync} disabled={syncing}>
@@ -260,32 +266,69 @@ export function MarketNewsFeed({
           </div>
         ) : (
           <ScrollArea className="h-full flex-1">
-            <div className={cn("divide-y divide-hairline/70", isCseFocused && "space-y-2 divide-y-0 p-2")}>
-              {articles.map((article) => {
+            <div className="divide-y divide-hairline/70">
+              {articles.map((article, idx) => {
                 const tickers = parseTickers(article.mentionedTickersJson);
                 const dividendArticle = isDividendArticle(article);
                 const paymentDateText = extractPaymentDateText(article);
                 const publishedDate = formatCalendarDate(article.publishedAt);
                 const isCseArticle = article.marketCategory?.toUpperCase() === "CSE_STOCKS";
+                const sentiment = getSentimentMeta(article.sentiment);
 
                 return (
                   <article
                     key={article.id}
-                    className={cn(
-                      "group p-4 transition-colors hover:bg-muted/30",
-                      isCseFocused &&
-                        "rounded-lg border border-border bg-card/70 hover:border-primary/30 hover:bg-card",
-                      isCseFocused && isCseArticle && "border-l-4 border-l-primary",
-                    )}
+                    className="group relative flex gap-3 p-4 transition-colors hover:bg-muted/30"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1 space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {getSentimentBadge(article.sentiment)}
+                    <span
+                      className={cn(
+                        "absolute left-0 top-0 h-full w-[2px] opacity-70 transition-opacity group-hover:opacity-100",
+                        sentiment.rail,
+                      )}
+                      aria-hidden
+                    />
+
+                    <div className="flex w-8 shrink-0 flex-col items-start gap-1 pt-0.5">
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground/50">
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <sentiment.Icon className={cn("size-3.5", sentiment.text)} />
+                    </div>
+
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/70">
+                        <span className={cn("font-semibold", sentiment.text)}>{sentiment.label}</span>
+                        <span className="opacity-40">/</span>
+                        <span className={cn(isCseArticle && "text-primary")}>
+                          {getCategoryLabel(article.marketCategory)}
+                        </span>
+                        <span className="opacity-40">/</span>
+                        <span className="normal-case tracking-normal">{article.source}</span>
+                        <span className="opacity-40">·</span>
+                        <span className="tabular-nums">{formatRelativeTime(article.publishedAt)}</span>
+                        {isCseFocused && publishedDate && (
+                          <span className="tabular-nums opacity-70">({publishedDate})</span>
+                        )}
+                      </div>
+
+                      <a
+                        href={article.originalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block font-display text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary"
+                      >
+                        <span className="flex items-start gap-1.5">
+                          <span className="min-w-0 flex-1">{article.title}</span>
+                          <ExternalLink className="mt-0.5 size-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+                        </span>
+                      </a>
+
+                      {(dividendArticle || paymentDateText) && (
+                        <div className="flex flex-wrap items-center gap-1.5">
                           {dividendArticle && (
                             <Badge
                               variant="outline"
-                              className="text-[10px] border-primary/40 bg-primary/10 text-primary px-1.5 py-0"
+                              className="border-primary/40 bg-primary/10 px-1.5 py-0 text-[10px] text-primary"
                             >
                               Dividend
                             </Badge>
@@ -293,55 +336,36 @@ export function MarketNewsFeed({
                           {paymentDateText && (
                             <Badge
                               variant="outline"
-                              className="text-[10px] border-amber-400/40 bg-amber-500/10 text-amber-300 px-1.5 py-0 gap-1 font-semibold"
+                              className="gap-1 border-amber-400/40 bg-amber-500/10 px-1.5 py-0 text-[10px] font-semibold text-amber-500"
                             >
                               <CalendarDays className="size-3" /> Payment: {paymentDateText}
                             </Badge>
                           )}
-                          <span className="label-caps">{getCategoryLabel(article.marketCategory)}</span>
-                          <span className="text-[10px] text-muted-foreground/80">
-                            {article.source} · {formatRelativeTime(article.publishedAt)}
-                          </span>
-                          {isCseFocused && publishedDate && (
-                            <span className="text-[10px] text-muted-foreground/70">Published: {publishedDate}</span>
-                          )}
                         </div>
+                      )}
 
-                        <a
-                          href={article.originalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors"
-                        >
-                          <span className="flex items-start gap-1.5">
-                            <span className="min-w-0 flex-1">{article.title}</span>
-                            <ExternalLink className="size-3 shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      {article.summary && (
+                        <p className="border-l border-hairline pl-2.5 text-xs leading-relaxed text-muted-foreground/90">
+                          <span className="mr-1 inline-flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-primary/90">
+                            <Sparkles className="size-3 text-accent" /> Brief
                           </span>
-                        </a>
+                          {article.summary}
+                        </p>
+                      )}
 
-                        {article.summary && (
-                          <p className="text-xs text-muted-foreground/90 leading-relaxed">
-                            <span className="inline-flex items-center gap-1 font-semibold text-primary/90 text-[11px]">
-                              <Sparkles className="size-3 text-accent" /> Brief:
-                            </span>{" "}
-                            {article.summary}
-                          </p>
-                        )}
-
-                        {tickers.length > 0 && (
-                          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                            {tickers.map((t) => (
-                              <Badge
-                                key={t}
-                                variant="secondary"
-                                className="text-[10px] bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 cursor-pointer"
-                              >
-                                ${t}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      {tickers.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {tickers.map((t) => (
+                            <Badge
+                              key={t}
+                              variant="secondary"
+                              className="cursor-pointer border-primary/20 bg-primary/10 font-mono text-[10px] text-primary hover:bg-primary/20"
+                            >
+                              ${t}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </article>
                 );
@@ -351,5 +375,6 @@ export function MarketNewsFeed({
         )}
       </Cell>
     </Bento>
+
   );
 }
