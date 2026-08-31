@@ -12,6 +12,7 @@ import { mockStocks, type Stock } from "@/lib/mock-data";
 import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SkeletonRows } from "@/components/ui/skeleton";
 
 interface WatchlistTableProps {
   stocks?: Stock[];
