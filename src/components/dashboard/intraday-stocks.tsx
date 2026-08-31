@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { IntradayPoint } from "@/services/stock-service";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SkeletonRows } from "@/components/ui/skeleton";
 
 interface IntradayStocksProps {
   items: IntradayPoint[];
@@ -48,8 +49,8 @@ export function IntradayStocks({ items, loading = false, onSelectStock }: Intrad
     return (
       <Card className="gradient-card border-border shadow-card h-105">
         <IntradayCardHeader />
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Loading intraday stocks...</p>
+        <CardContent className="p-0">
+          <SkeletonRows rows={6} />
         </CardContent>
       </Card>
     );
