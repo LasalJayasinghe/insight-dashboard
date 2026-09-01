@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
-import { formatRs } from "@/lib/format";
+import { formatRs, formatPct } from "@/lib/format";
 import type { StockAlert } from "@/lib/types";
 
 interface Props {
@@ -20,7 +20,7 @@ interface Props {
   onDelete: (alert: StockAlert) => void;
 }
 
-type SortField = "symbol" | "type" | "targetPrice";
+type SortField = "symbol" | "type" | "targetPrice" | "currentPrice";
 type SortOrder = "asc" | "desc";
 
 const formatDate = (iso: string) =>
@@ -52,6 +52,13 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
         comparison = a.type.localeCompare(b.type);
       } else if (sortField === "targetPrice") {
         comparison = a.targetPrice - b.targetPrice;
+      } else if (sortField === "currentPrice") {
+        // Alerts without a quote always sink to the bottom, whichever way we sort.
+        if (a.currentPrice == null || b.currentPrice == null) {
+          if (a.currentPrice == null && b.currentPrice == null) return 0;
+          return a.currentPrice == null ? 1 : -1;
+        }
+        comparison = a.currentPrice - b.currentPrice;
       }
       return sortOrder === "asc" ? comparison : -comparison;
     });
@@ -106,6 +113,17 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
               </button>
             </TableHead>
 
+            <TableHead className="text-right">
+              <button
+                type="button"
+                onClick={() => handleSort("currentPrice")}
+                className="flex items-center justify-end font-semibold text-foreground hover:text-primary transition-colors cursor-pointer select-none ml-auto"
+              >
+                Current price
+                {renderSortIcon("currentPrice")}
+              </button>
+            </TableHead>
+
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -114,6 +132,13 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
         <TableBody>
           {sortedAlerts.map((a) => {
             const above = a.type === "ABOVE";
+            const current = a.currentPrice;
+            const gapPct =
+              current != null && a.targetPrice !== 0
+                ? ((current - a.targetPrice) / a.targetPrice) * 100
+                : null;
+            const targetReached =
+              current != null && (above ? current >= a.targetPrice : current <= a.targetPrice);
             return (
               <TableRow key={a.id}>
                 <TableCell>
@@ -129,6 +154,22 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
                 </TableCell>
                 <TableCell className="text-right font-mono font-semibold">
                   {formatPrice(a.targetPrice)}
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  {current == null ? (
+                    <span className="font-sans text-sm text-muted-foreground">—</span>
+                  ) : (
+                    <div className="flex flex-col items-end leading-tight">
+                      <span className={`font-semibold ${targetReached ? "text-success" : ""}`}>
+                        {formatPrice(current)}
+                      </span>
+                      {gapPct != null && (
+                        <span className="font-sans text-xs text-muted-foreground">
+                          {formatPct(gapPct)} vs target
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge

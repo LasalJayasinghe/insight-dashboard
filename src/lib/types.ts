@@ -9,6 +9,7 @@ export interface StockAlert {
   symbol: string;
   type: AlertType;
   targetPrice: number;
+  currentPrice: number | null; // latest market price, null when the symbol has no quote
   status: AlertStatus;
   createdAt: string; // ISO date
 }

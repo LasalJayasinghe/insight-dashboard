@@ -5,6 +5,7 @@ type ApiAlert = {
   id: number;
   symbol: string;
   targetPrice: number;
+  currentPrice: number | null;
   isAbove: boolean;
   isActive: boolean;
   createdAt: string;
@@ -16,6 +17,7 @@ function toAlert(a: ApiAlert): StockAlert {
     symbol: a.symbol,
     type: a.isAbove ? "ABOVE" : "BELOW",
     targetPrice: Number(a.targetPrice),
+    currentPrice: a.currentPrice == null ? null : Number(a.currentPrice),
     status: a.isActive ? "ACTIVE" : "INACTIVE",
     createdAt: a.createdAt,
   };
