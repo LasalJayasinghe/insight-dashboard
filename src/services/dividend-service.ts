@@ -23,4 +23,12 @@ export const dividendService = {
 
     return res.data;
   },
+
+  getUpcoming: async (limit = 20): Promise<DividendItem[]> => {
+    const res = await apiClient.get<DividendItem[]>("/dividends/upcoming", {
+      params: { limit },
+    });
+
+    return Array.isArray(res.data) ? res.data : [];
+  },
 };
