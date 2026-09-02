@@ -4,7 +4,8 @@ import { z } from "zod";
 import { AppShell } from "@/components/layout/app-shell";
 import { StockCards } from "@/components/stocks/stock-cards";
 import { MarketOverviewPanel } from "@/components/stocks/market-overview-panel";
-import { StockMoversPanel } from "@/components/stocks/stock-movers";
+import { TopGainersPanel, TopLosersPanel } from "@/components/stocks/stock-movers";
+import { UpcomingDividends } from "@/components/stocks/upcoming-dividends";
 import { StockDetailView } from "@/components/stocks/stock-detail-view";
 import { useStocks } from "@/hooks/useStocks";
 import { isAuthenticated } from "@/lib/auth";
@@ -13,6 +14,7 @@ import { IntradayStocks } from "@/components/dashboard/intraday-stocks";
 import { WatchlistTable } from "@/components/dashboard/watchlist-table";
 import { stockService, type IntradayPoint } from "@/services/stock-service";
 import { watchlistService, type WatchlistStock } from "@/services/watchlist-service";
+import { dividendService, type DividendItem } from "@/services/dividend-service";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 const stocksSearchSchema = z.object({
@@ -55,6 +57,8 @@ function StocksPage() {
   const [intraday, setIntraday] = useState<IntradayPoint[]>([]);
   const [watchlistStocks, setWatchlistStocks] = useState<WatchlistStock[]>([]);
   const [watchlistLoading, setWatchlistLoading] = useState(true);
+  const [dividends, setDividends] = useState<DividendItem[]>([]);
+  const [dividendsLoading, setDividendsLoading] = useState(true);
 
   const [missingTicker, setMissingTicker] = useState<any>(null);
 
@@ -94,9 +98,10 @@ function StocksPage() {
     let cancelled = false;
 
     const load = async () => {
-      const [intradayResult, watchlistResult] = await Promise.all([
+      const [intradayResult, watchlistResult, dividendResult] = await Promise.all([
         stockService.getIntraday().catch(() => []),
         watchlistService.list().catch(() => []),
+        dividendService.getUpcoming(20).catch(() => []),
       ]);
 
       if (cancelled) return;
@@ -104,6 +109,8 @@ function StocksPage() {
       setIntraday(intradayResult);
       setWatchlistStocks(watchlistResult);
       setWatchlistLoading(false);
+      setDividends(dividendResult);
+      setDividendsLoading(false);
     };
 
     void load();
@@ -114,7 +121,9 @@ function StocksPage() {
   }, []);
 
   const activeSymbol = selectedSymbol || (tickers.length > 0 ? tickers[0].symbol : "");
-  const activeTicker = tickers.find((t) => t.symbol === activeSymbol) || (missingTicker?.symbol === activeSymbol ? missingTicker : null);
+  const activeTicker =
+    tickers.find((t) => t.symbol === activeSymbol) ||
+    (missingTicker?.symbol === activeSymbol ? missingTicker : null);
 
   const handleSelectStock = (symbol: string) => {
     setSelectedSymbol(symbol);
@@ -203,11 +212,21 @@ function StocksPage() {
               />
             </div>
 
-            {/* SECONDARY: Top Movers Panel */}
-            <div className="pb-2">
-              <StockMoversPanel
+            {/* SECONDARY: Top Gainers · Top Losers · Upcoming Dividends */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-2">
+              <TopGainersPanel
                 movers={movers}
                 loading={loadingMovers}
+                onSelectStock={handleSelectStock}
+              />
+              <TopLosersPanel
+                movers={movers}
+                loading={loadingMovers}
+                onSelectStock={handleSelectStock}
+              />
+              <UpcomingDividends
+                items={dividends}
+                loading={dividendsLoading}
                 onSelectStock={handleSelectStock}
               />
             </div>

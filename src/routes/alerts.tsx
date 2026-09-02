@@ -19,7 +19,7 @@ import { AlertsTable } from "@/components/alerts/alerts-table";
 import { AlertFormModal } from "@/components/alerts/alert-form-modal";
 import { useAlerts } from "@/hooks/use-alerts";
 import { isAuthenticated } from "@/lib/auth";
-import { Bell, Plus, Search, AlertTriangle } from "lucide-react";
+import { Bell, Plus, Search, AlertTriangle, RefreshCw } from "lucide-react";
 import type { StockAlert } from "@/lib/types";
 import { watchlistService, type StockOption } from "@/services/watchlist-service";
 import { toast } from "sonner";
@@ -121,6 +121,16 @@ function AlertsPage() {
                 className="pl-9 h-10 w-full md:w-64"
               />
             </div>
+            <Button
+              variant="outline"
+              onClick={() => void refresh()}
+              disabled={loading}
+              className="h-10 gap-2"
+              aria-label="Refresh alerts"
+            >
+              <RefreshCw className={loading ? "size-4 animate-spin" : "size-4"} />
+              Refresh
+            </Button>
             <Button
               onClick={openCreate}
               className="gradient-primary text-primary-foreground shadow-elegant"

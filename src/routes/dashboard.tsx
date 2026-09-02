@@ -18,6 +18,7 @@ import {
   type MarketStatus,
 } from "@/services/stock-service";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
+import { NetWorthChart } from "@/components/dashboard/net-worth-chart";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
@@ -278,7 +279,10 @@ function DashboardPage() {
           </Cell>
         </div>
 
-        {/* ── SECTION 2: Market Indices & Key Stats Bar (4 Equal Columns) ── */}
+        {/* ── SECTION 2: Net Worth Over Time ─────────────────────────────── */}
+        <NetWorthChart />
+
+        {/* ── SECTION 3: Market Indices & Key Stats Bar (4 Equal Columns) ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Cell className="h-44 rounded-xl border border-border/60 shadow-sm overflow-hidden">
             <CellLabel>ASPI Index</CellLabel>
@@ -341,7 +345,7 @@ function DashboardPage() {
           </Cell>
         </div>
 
-        {/* ── SECTION 3: Main Trading Desk (2/3) + News & Intelligence (1/3) ── */}
+        {/* ── SECTION 4: Main Trading Desk (2/3) + News & Intelligence (1/3) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column (2/3 width): Movers + Quick Desks */}
           <div className="lg:col-span-2 space-y-6">

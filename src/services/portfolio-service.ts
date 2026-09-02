@@ -56,6 +56,28 @@ export interface NetWorthOverviewDto {
   portfolios: PortfolioSummaryDto[];
 }
 
+/** One hourly snapshot of portfolio value, written server-side by PortfolioSnapshotJob. */
+export interface PortfolioHistoryPointDto {
+  capturedAt: string; // ISO-8601 UTC, top of the hour
+  valueLkr: number;
+  valueUsdt: number;
+  profitLossLkr: number;
+  profitLossUsdt: number;
+}
+
+export type HistoryRange = "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL";
+
+export interface PortfolioHistoryDto {
+  range: HistoryRange;
+  portfolioId: number | null; // null = aggregated net worth
+  interval: "hour" | "day";
+  startValueLkr: number;
+  endValueLkr: number;
+  changeLkr: number;
+  changePercent: number;
+  points: PortfolioHistoryPointDto[];
+}
+
 export interface CreatePortfolioRequest {
   name: string;
   type: number; // 1 = Stocks, 2 = Crypto
@@ -91,6 +113,20 @@ export const portfolioService = {
   async getNetWorth(currency: string = "LKR"): Promise<NetWorthOverviewDto> {
     const res = await apiClient.get<NetWorthOverviewDto>("/portfolios/net-worth", {
       params: { currency },
+    });
+    return res.data;
+  },
+
+  /**
+   * Portfolio value over time from the hourly snapshots.
+   * Omit `portfolioId` for aggregated net worth; 3M and longer come back as daily points.
+   */
+  async getHistory(
+    range: HistoryRange = "1M",
+    portfolioId?: number,
+  ): Promise<PortfolioHistoryDto> {
+    const res = await apiClient.get<PortfolioHistoryDto>("/portfolios/history", {
+      params: portfolioId ? { range, portfolioId } : { range },
     });
     return res.data;
   },
