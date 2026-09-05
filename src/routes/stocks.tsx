@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { z } from "zod";
 import { AppShell } from "@/components/layout/app-shell";
 import { StockCards } from "@/components/stocks/stock-cards";
@@ -12,7 +12,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { LineChart, RefreshCw, BarChart2 } from "lucide-react";
 import { IntradayStocks } from "@/components/dashboard/intraday-stocks";
 import { WatchlistTable } from "@/components/dashboard/watchlist-table";
-import { stockService, type IntradayPoint } from "@/services/stock-service";
+import { stockService, type IntradayPoint, type StockTicker } from "@/services/stock-service";
 import { watchlistService, type WatchlistStock } from "@/services/watchlist-service";
 import { dividendService, type DividendItem } from "@/services/dividend-service";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
@@ -56,11 +56,10 @@ function StocksPage() {
 
   const [intraday, setIntraday] = useState<IntradayPoint[]>([]);
   const [watchlistStocks, setWatchlistStocks] = useState<WatchlistStock[]>([]);
-  const [watchlistLoading, setWatchlistLoading] = useState(true);
   const [dividends, setDividends] = useState<DividendItem[]>([]);
-  const [dividendsLoading, setDividendsLoading] = useState(true);
+  const [panelsLoading, setPanelsLoading] = useState(true);
 
-  const [missingTicker, setMissingTicker] = useState<any>(null);
+  const [missingTicker, setMissingTicker] = useState<StockTicker | null>(null);
 
   useEffect(() => {
     if (routeSearch.symbol) {
@@ -94,31 +93,41 @@ function StocksPage() {
     }
   }, [selectedSymbol, tickers]);
 
+  // Guards against setting state after the page unmounts, since loadPanels is also invoked
+  // imperatively by the refresh button rather than only from an effect with a cleanup.
+  const mounted = useRef(true);
   useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      const [intradayResult, watchlistResult, dividendResult] = await Promise.all([
-        stockService.getIntraday().catch(() => []),
-        watchlistService.list().catch(() => []),
-        dividendService.getUpcoming(20).catch(() => []),
-      ]);
-
-      if (cancelled) return;
-
-      setIntraday(intradayResult);
-      setWatchlistStocks(watchlistResult);
-      setWatchlistLoading(false);
-      setDividends(dividendResult);
-      setDividendsLoading(false);
-    };
-
-    void load();
-
+    mounted.current = true;
     return () => {
-      cancelled = true;
+      mounted.current = false;
     };
   }, []);
+
+  const loadPanels = useCallback(async () => {
+    const [intradayResult, watchlistResult, dividendResult] = await Promise.all([
+      stockService.getIntraday().catch(() => []),
+      watchlistService.list().catch(() => []),
+      dividendService.getUpcoming(20).catch(() => []),
+    ]);
+
+    if (!mounted.current) return;
+
+    setIntraday(intradayResult);
+    setWatchlistStocks(watchlistResult);
+    setDividends(dividendResult);
+    setPanelsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void loadPanels();
+  }, [loadPanels]);
+
+  // "Refresh Data" previously only re-fetched what useStocks owns, leaving the intraday,
+  // watchlist and dividend panels showing whatever they loaded on mount.
+  const handleRefresh = useCallback(() => {
+    refresh();
+    void loadPanels();
+  }, [refresh, loadPanels]);
 
   const activeSymbol = selectedSymbol || (tickers.length > 0 ? tickers[0].symbol : "");
   const activeTicker =
@@ -161,7 +170,7 @@ function StocksPage() {
               </button>
             )}
             <button
-              onClick={refresh}
+              onClick={handleRefresh}
               className="flex items-center gap-1.5 text-xs font-bold bg-card border border-border hover:bg-muted/80 text-foreground shadow-xs transition-colors px-3.5 py-2 rounded-lg cursor-pointer"
             >
               <RefreshCw className="size-3.5" /> Refresh Data
@@ -202,12 +211,12 @@ function StocksPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <IntradayStocks
                 items={intraday}
-                loading={watchlistLoading}
+                loading={panelsLoading}
                 onSelectStock={handleSelectStock}
               />
               <WatchlistTable
                 stocks={watchlistStocks}
-                loading={watchlistLoading}
+                loading={panelsLoading}
                 onSelectStock={handleSelectStock}
               />
             </div>
@@ -226,7 +235,7 @@ function StocksPage() {
               />
               <UpcomingDividends
                 items={dividends}
-                loading={dividendsLoading}
+                loading={panelsLoading}
                 onSelectStock={handleSelectStock}
               />
             </div>

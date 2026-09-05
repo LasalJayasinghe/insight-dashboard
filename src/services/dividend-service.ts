@@ -1,18 +1,26 @@
 import apiClient from "./apiClient";
 
+/**
+ * Mirrors the API's `DividendDto`. Dates arrive as bare `yyyy-MM-dd` calendar dates - parse them
+ * with `parseCalendarDate`/`formatCalendarDate` rather than `new Date(...)`, which would shift
+ * them a day for viewers behind UTC.
+ */
 export interface DividendItem {
   id: number;
+  /** Ticker without the CSE class suffix, e.g. `CSLK`. */
   symbol: string;
+  /** Full CSE ticker as published, e.g. `CSLK.N0000`. */
+  fullSymbol: string;
   companyName: string;
-  dateOfAnnouncement: string;
+  financialYear?: string | null;
   votingDivPerShare: number;
   nonVotingDivPerShare: number;
-  financialYear?: string | null;
+  dateOfAnnouncement: string;
   recordDate: string;
-  remarks?: string | null;
+  /** Null when CSE has not published a parseable payment date. */
   paymentDate?: string | null;
-  agmDate?: string | null;
-  createdAt: string;
+  /** Raw CSE payment-date text, shown when `paymentDate` is null. */
+  paymentDateText?: string | null;
 }
 
 export const dividendService = {
@@ -21,7 +29,7 @@ export const dividendService = {
       params: { limit },
     });
 
-    return res.data;
+    return Array.isArray(res.data) ? res.data : [];
   },
 
   getUpcoming: async (limit = 20): Promise<DividendItem[]> => {

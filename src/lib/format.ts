@@ -48,3 +48,48 @@ export const formatDuration = (mins: number) => {
   const m = mins % 60;
   return m ? `${h}h ${m}m` : `${h}h`;
 };
+
+/**
+ * Parses a bare `yyyy-MM-dd` calendar date into a local Date at midnight.
+ *
+ * `new Date("2026-09-09")` is parsed by the browser as UTC midnight, which renders as the
+ * previous day for any viewer behind UTC. Building the Date from its parts keeps a calendar
+ * date on the calendar day it names, in every time zone.
+ */
+export const parseCalendarDate = (value?: string | null): Date | null => {
+  if (!value) return null;
+
+  const parts = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (parts) {
+    return new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+  }
+
+  const fallback = new Date(value);
+  return Number.isNaN(fallback.getTime()) ? null : fallback;
+};
+
+/** Formats a `yyyy-MM-dd` calendar date, falling back to the raw text when unparseable. */
+export const formatCalendarDate = (
+  value?: string | null,
+  options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short" },
+): string => {
+  const date = parseCalendarDate(value);
+  if (!date) return value?.trim() || "-";
+
+  return date.toLocaleDateString(undefined, options);
+};
+
+/** Whole days from today to the given calendar date; negative once it has passed. */
+export const daysUntilCalendarDate = (value?: string | null): number | null => {
+  const date = parseCalendarDate(value);
+  if (!date) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return Math.round((date.getTime() - today.getTime()) / 86_400_000);
+};
+
+/** Strips the CSE class suffix: `CSLK.N0000` becomes `CSLK`. */
+export const baseSymbol = (symbol?: string | null): string =>
+  (symbol ?? "").split(".")[0].toUpperCase();

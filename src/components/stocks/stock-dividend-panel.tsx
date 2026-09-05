@@ -1,22 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Coins, Landmark, RefreshCw } from "lucide-react";
 import { dividendService, type DividendItem } from "@/services/dividend-service";
 import { cn } from "@/lib/utils";
+import { formatCalendarDate } from "@/lib/format";
 import { SkeletonRows, SkeletonStats } from "@/components/ui/skeleton";
 
 interface StockDividendPanelProps {
   symbol: string;
 }
 
+/**
+ * The API parses CSE payment dates where it can and keeps the original text when it cannot,
+ * so fall back to that raw string rather than showing a dash.
+ */
+function formatPaymentDate(item: DividendItem): string {
+  return item.paymentDate ? formatDate(item.paymentDate) : item.paymentDateText?.trim() || "-";
+}
+
+/** Calendar dates arrive as `yyyy-MM-dd`; render them without a time-zone shift. */
 function formatDate(value?: string | null): string {
-  if (!value) return "-";
-
-  const dt = new Date(value);
-  if (!Number.isNaN(dt.getTime())) {
-    return dt.toLocaleDateString();
-  }
-
-  return value;
+  return formatCalendarDate(value, { year: "numeric", month: "short", day: "2-digit" });
 }
 
 function formatLkr(value: number): string {
@@ -32,7 +35,7 @@ export function StockDividendPanel({ symbol }: StockDividendPanelProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -44,11 +47,11 @@ export function StockDividendPanel({ symbol }: StockDividendPanelProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [symbol]);
 
   useEffect(() => {
     void load();
-  }, [symbol]);
+  }, [load]);
 
   const latest = useMemo(() => items[0], [items]);
 
@@ -80,26 +83,36 @@ export function StockDividendPanel({ symbol }: StockDividendPanelProps) {
       ) : error ? (
         <p className="text-xs text-red-400">{error}</p>
       ) : items.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No dividend records found for this stock yet.</p>
+        <p className="text-xs text-muted-foreground">
+          No dividend records found for this stock yet.
+        </p>
       ) : (
         <>
           {latest && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="rounded-lg border border-primary/25 bg-primary/5 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Latest Payment Date</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Latest Payment Date
+                </p>
                 <p className="mt-1 text-sm font-bold text-primary inline-flex items-center gap-1.5">
                   <CalendarDays className="size-3.5" />
-                  {formatDate(latest.paymentDate)}
+                  {formatPaymentDate(latest)}
                 </p>
               </div>
 
               <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Voting DPS</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{formatLkr(latest.votingDivPerShare)}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Voting DPS
+                </p>
+                <p className="mt-1 text-sm font-semibold text-foreground">
+                  {formatLkr(latest.votingDivPerShare)}
+                </p>
               </div>
 
               <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Record Date</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Record Date
+                </p>
                 <p className="mt-1 text-sm font-semibold text-foreground inline-flex items-center gap-1.5">
                   <Landmark className="size-3.5 text-primary/80" />
                   {formatDate(latest.recordDate)}
@@ -125,10 +138,14 @@ export function StockDividendPanel({ symbol }: StockDividendPanelProps) {
                   <tr key={d.id} className="border-t border-border hover:bg-muted/20">
                     <td className="px-3 py-2">{formatDate(d.dateOfAnnouncement)}</td>
                     <td className="px-3 py-2">{d.financialYear || "-"}</td>
-                    <td className="px-3 py-2 text-right font-mono">{formatLkr(d.votingDivPerShare)}</td>
-                    <td className="px-3 py-2 text-right font-mono">{formatLkr(d.nonVotingDivPerShare)}</td>
+                    <td className="px-3 py-2 text-right font-mono">
+                      {formatLkr(d.votingDivPerShare)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono">
+                      {formatLkr(d.nonVotingDivPerShare)}
+                    </td>
                     <td className="px-3 py-2">{formatDate(d.recordDate)}</td>
-                    <td className="px-3 py-2 font-semibold text-primary">{formatDate(d.paymentDate)}</td>
+                    <td className="px-3 py-2 font-semibold text-primary">{formatPaymentDate(d)}</td>
                   </tr>
                 ))}
               </tbody>
