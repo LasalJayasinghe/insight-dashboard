@@ -1,7 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+
+  // Becomes the deployed subdomain: https://insight-dashboard.<your-account>.workers.dev
+  // This exact origin has to be set as FRONTEND_ORIGIN in dot-net-app/deploy/.env,
+  // or the API's CORS policy rejects every browser request.
+  "name": "insight-dashboard",
+
   "compatibility_date": "2025-09-24",
+
+  // TanStack Start's server entry uses Node built-ins; without this flag the
+  // Worker fails to boot with "Cannot resolve node:stream".
   "compatibility_flags": ["nodejs_compat"],
+
   "main": "@tanstack/react-start/server-entry",
+
+  // Routes Worker logs to the dashboard's Logs tab and `wrangler tail`.
+  // Off by default, and the omission is only noticed while debugging a 500.
+  "observability": {
+    "enabled": true
+  }
 }

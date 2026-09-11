@@ -112,10 +112,8 @@ export async function createCryptoHubConnection(): Promise<HubConnection> {
   const { tokenService } = await import("./tokenService");
   const { ENV } = await import("@/config/env");
 
-  const baseUrl = ENV.API_BASE_URL.replace(/\/api\/?$/, "");
-
   return new HubConnectionBuilder()
-    .withUrl(`${baseUrl}/hubs/crypto`, {
+    .withUrl(`${ENV.API_ORIGIN}/hubs/crypto`, {
       accessTokenFactory: () => tokenService.get() ?? "",
     })
     .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])

@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import { Toaster } from "@/components/ui/sonner";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
+import { ENV } from "@/config/env";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -68,7 +69,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+    <GoogleOAuthProvider clientId={ENV.GOOGLE_CLIENT_ID}>
       <Outlet />
       <Toaster richColors position="top-right" />
     </GoogleOAuthProvider>

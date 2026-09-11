@@ -31,7 +31,11 @@ dist-ssr
 *.sln
 *.sw?
 package-lock.json
+# Every env file except the committed template. .env.development and
+# .env.production were tracked in git until now; they no longer are.
 .env
+.env.*
+!.env.example
 
 # Playwright
 /test-results/
