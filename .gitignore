@@ -30,7 +30,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-package-lock.json
+
+# package-lock.json is COMMITTED on purpose: Cloudflare Workers Builds runs
+# the install with a frozen lockfile, so an absent or stale lockfile fails the
+# build. Run npm install and commit the result whenever package.json changes.
 # Every env file except the committed template. .env.development and
 # .env.production were tracked in git until now; they no longer are.
 .env
