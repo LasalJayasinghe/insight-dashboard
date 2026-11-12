@@ -56,6 +56,11 @@ export function AlgorithmCard({ algorithm }: Props) {
                 {running ? "Running" : "Stopped"}
               </Badge>
             </div>
+            {(algorithm.category || algorithm.pair) && (
+              <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground/80 font-medium">
+                {[algorithm.category, algorithm.pair, algorithm.timeframe].filter(Boolean).join(" · ")}
+              </p>
+            )}
             {algorithm.description && (
               <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
                 {algorithm.description}
@@ -77,7 +82,11 @@ export function AlgorithmCard({ algorithm }: Props) {
           <Stat
             label="Total PnL"
             value={formatUsd(algorithm.totalPnl)}
-            sub={formatPct(algorithm.totalPnlPct)}
+            sub={
+              algorithm.totalFees != null
+                ? `${formatPct(algorithm.totalPnlPct)} · fees ${formatUsd(algorithm.totalFees)}`
+                : formatPct(algorithm.totalPnlPct)
+            }
             tone={positive ? "success" : "destructive"}
           />
           <Stat

@@ -23,7 +23,7 @@ export function TradeHistory({ history }: Props) {
         <div>
           <h3 className="font-semibold tracking-tight">Trade History</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Last {history.length} closed positions
+            Last {history.length} closed positions · P/L net of Binance fees
           </p>
         </div>
       </div>
@@ -36,7 +36,8 @@ export function TradeHistory({ history }: Props) {
               <TableHead>Pair</TableHead>
               <TableHead className="text-right">Entry</TableHead>
               <TableHead className="text-right">Exit</TableHead>
-              <TableHead className="text-right">P/L</TableHead>
+              <TableHead className="text-right">Fees</TableHead>
+              <TableHead className="text-right">P/L (net)</TableHead>
               <TableHead className="text-right">Duration</TableHead>
               <TableHead className="text-right">Result</TableHead>
             </TableRow>
@@ -49,6 +50,9 @@ export function TradeHistory({ history }: Props) {
                   <TableCell className="font-medium">{t.pair}</TableCell>
                   <TableCell className="text-right tabular">{formatUsd(t.entryPrice)}</TableCell>
                   <TableCell className="text-right tabular">{formatUsd(t.exitPrice)}</TableCell>
+                  <TableCell className="text-right tabular text-muted-foreground text-xs">
+                    {t.fees != null ? formatUsd(t.fees) : "—"}
+                  </TableCell>
                   <TableCell
                     className={cn(
                       "text-right tabular font-medium",

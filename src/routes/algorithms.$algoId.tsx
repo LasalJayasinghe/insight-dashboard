@@ -12,6 +12,7 @@ import { SignalsTable } from "@/components/algorithms/signals-table";
 import { ChartPanel } from "@/components/algorithms/chart-panel";
 import { TradeDetailsPanel } from "@/components/algorithms/trade-details-panel";
 import { TradeHistory } from "@/components/algorithms/trade-history";
+import { IndicatorsPanel } from "@/components/algorithms/indicators-panel";
 import { useAlgorithmDetail } from "@/hooks/use-algorithms";
 import { isAuthenticated } from "@/lib/auth";
 import { formatPct, formatUsd } from "@/lib/format";
@@ -94,6 +95,11 @@ function AlgorithmDetailPage() {
                   </Badge>
                 )}
               </div>
+              {data && (data.category || data.pair) && (
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground/80 font-medium mt-0.5">
+                  {[data.category, data.pair, data.timeframe].filter(Boolean).join(" · ")}
+                </p>
+              )}
               {data?.description && (
                 <p className="text-sm text-muted-foreground mt-0.5">{data.description}</p>
               )}
@@ -164,6 +170,10 @@ function AlgorithmDetailPage() {
               {
                 label: "Total Profit",
                 value: `${formatUsd(data.totalPnl)} (${formatPct(data.totalPnlPct)})`,
+                hint:
+                  data.totalFees != null
+                    ? `Net of ${formatUsd(data.totalFees)} Binance fees`
+                    : undefined,
                 icon: TrendingUp,
                 tone: data.totalPnl >= 0 ? "success" : "destructive",
               },
@@ -200,8 +210,14 @@ function AlgorithmDetailPage() {
               </>
             ) : (
               <>
-                <ChartPanel pair={data.signals[0]?.pair ?? "BTC/USDT"} bias={data.currentSignal} />
-                <TradeDetailsPanel trade={data.trade} />
+                <ChartPanel
+                  pair={data.trade?.pair ?? data.signals[0]?.pair ?? data.pair ?? "BTC/USDT"}
+                  bias={data.currentSignal}
+                />
+                <TradeDetailsPanel trade={data.trade} feeRate={data.feeRate} />
+                {data.indicators && Object.keys(data.indicators).length > 0 && (
+                  <IndicatorsPanel indicators={data.indicators} />
+                )}
               </>
             )}
           </div>

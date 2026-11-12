@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { RefreshCw } from "lucide-react";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { AlgorithmGrid } from "@/components/algorithms/algorithm-grid";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,23 @@ export const Route = createFileRoute("/algorithms/")({
 
 function AlgorithmsPage() {
   const { data, loading, error, refresh } = useAlgorithms();
+  const [category, setCategory] = useState<string>("All");
+
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set((data ?? []).map((a) => a.category).filter(Boolean) as string[]))],
+    [data],
+  );
+  const visible = useMemo(
+    () => (category === "All" ? data : (data?.filter((a) => a.category === category) ?? null)),
+    [data, category],
+  );
+  const summary = useMemo(() => {
+    if (!data?.length) return null;
+    const running = data.filter((a) => a.status === "RUNNING").length;
+    const fees = data.reduce((sum, a) => sum + (a.totalFees ?? 0), 0);
+    const best = data.reduce((b, a) => (a.totalPnlPct > b.totalPnlPct ? a : b));
+    return { running, fees, best };
+  }, [data]);
 
   return (
     <AppShell>
@@ -36,8 +54,16 @@ function AlgorithmsPage() {
               Trading Algorithms
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Live performance across your active Binance strategies.
+              Paper-trading performance across your Binance strategies. P/L is net of Binance
+              fees.
             </p>
+            {summary && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {summary.running}/{data?.length} running · ${summary.fees.toFixed(2)} total fees ·
+                best: {summary.best.name} ({summary.best.totalPnlPct >= 0 ? "+" : ""}
+                {summary.best.totalPnlPct.toFixed(2)}%)
+              </p>
+            )}
           </div>
           <Button
             variant="outline"
@@ -57,7 +83,23 @@ function AlgorithmsPage() {
           </div>
         )}
 
-        <AlgorithmGrid algorithms={data} loading={loading} />
+        {categories.length > 2 && (
+          <div className="flex flex-wrap gap-2">
+            {categories.map((c) => (
+              <Button
+                key={c}
+                size="sm"
+                variant={c === category ? "default" : "outline"}
+                onClick={() => setCategory(c)}
+                className="h-7 rounded-full px-3 text-xs"
+              >
+                {c}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        <AlgorithmGrid algorithms={visible} loading={loading} />
       </div>
     </AppShell>
   );

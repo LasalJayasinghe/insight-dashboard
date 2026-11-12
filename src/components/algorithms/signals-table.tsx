@@ -56,7 +56,7 @@ export function SignalsTable({ signals }: Props) {
                 <TableCell className="text-right tabular">
                   ${s.price.toLocaleString(undefined, { maximumFractionDigits: 4 })}
                 </TableCell>
-                <TableCell className="text-right tabular">{s.confidence.toFixed(0)}%</TableCell>
+                <TableCell className="text-right tabular">{s.confidence != null ? `${s.confidence.toFixed(0)}%` : "—"}</TableCell>
                 <TableCell className="text-right text-muted-foreground text-xs">
                   {formatRelative(s.time)}
                 </TableCell>
