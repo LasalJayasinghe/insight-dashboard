@@ -121,10 +121,7 @@ export const portfolioService = {
    * Portfolio value over time from the hourly snapshots.
    * Omit `portfolioId` for aggregated net worth; 3M and longer come back as daily points.
    */
-  async getHistory(
-    range: HistoryRange = "1M",
-    portfolioId?: number,
-  ): Promise<PortfolioHistoryDto> {
+  async getHistory(range: HistoryRange = "1M", portfolioId?: number): Promise<PortfolioHistoryDto> {
     const res = await apiClient.get<PortfolioHistoryDto>("/portfolios/history", {
       params: portfolioId ? { range, portfolioId } : { range },
     });

@@ -213,6 +213,7 @@ function AlgorithmDetailPage() {
                 <ChartPanel
                   pair={data.trade?.pair ?? data.signals[0]?.pair ?? data.pair ?? "BTC/USDT"}
                   bias={data.currentSignal}
+                  interval={data.timeframe}
                 />
                 <TradeDetailsPanel trade={data.trade} feeRate={data.feeRate} />
                 {data.indicators && Object.keys(data.indicators).length > 0 && (

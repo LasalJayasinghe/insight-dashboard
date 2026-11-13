@@ -35,7 +35,9 @@ export function TradeDetailsPanel({ trade, feeRate }: Props) {
     ...(trade.currentPrice != null
       ? [{ label: "Current Price", value: formatUsd(trade.currentPrice) }]
       : []),
-    ...(trade.entryFee != null ? [{ label: "Entry Fee Paid", value: formatUsd(trade.entryFee) }] : []),
+    ...(trade.entryFee != null
+      ? [{ label: "Entry Fee Paid", value: formatUsd(trade.entryFee) }]
+      : []),
     ...(trade.unrealizedPnl != null
       ? [
           {
@@ -83,12 +85,12 @@ export function TradeDetailsPanel({ trade, feeRate }: Props) {
       </div>
 
       {trade.strategy && (
-      <div className="mt-5">
-        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-          Strategy
-        </h4>
-        <p className="mt-2 text-sm leading-relaxed text-foreground/90">{trade.strategy}</p>
-      </div>
+        <div className="mt-5">
+          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+            Strategy
+          </h4>
+          <p className="mt-2 text-sm leading-relaxed text-foreground/90">{trade.strategy}</p>
+        </div>
       )}
     </Card>
   );

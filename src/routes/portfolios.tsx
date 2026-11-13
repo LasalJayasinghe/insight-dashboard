@@ -1,11 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { isAuthenticated } from "@/lib/auth";
+import { apiErrorMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 import {
   Plus,
@@ -187,7 +188,7 @@ function PortfolioPanel({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [syncingPdf, setSyncingPdf] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const d = await portfolioService.getById(portfolioId);
@@ -197,11 +198,11 @@ function PortfolioPanel({
     } finally {
       setLoading(false);
     }
-  };
+  }, [portfolioId]);
 
   useEffect(() => {
     void load();
-  }, [portfolioId]);
+  }, [load]);
 
   const handleAddHolding = async () => {
     if (!form.symbol || !form.quantity || !form.averageBuyPrice) {
@@ -252,8 +253,8 @@ function PortfolioPanel({
       toast.success(`Successfully synced ${res.count} holdings from file`, { id: toastId });
       void load();
       onHoldingDeleted(); // trigger parent update for net worth
-    } catch (error: any) {
-      toast.error(error.response?.data || "Failed to sync file", { id: toastId });
+    } catch (error) {
+      toast.error(apiErrorMessage(error, "Failed to sync file"), { id: toastId });
     } finally {
       setSyncingPdf(false);
       if (fileInputRef.current) {
@@ -800,9 +801,13 @@ function PortfoliosPage() {
         toast.loading("Syncing holdings from file...", { id: "create-sync" });
         try {
           const res = await portfolioService.syncFromFile(newPortfolio.id, newFormFile);
-          toast.success(`Portfolio created and ${res.count} holdings synced`, { id: "create-sync" });
-        } catch (error: any) {
-          toast.error(error.response?.data || "Portfolio created, but failed to sync file", { id: "create-sync" });
+          toast.success(`Portfolio created and ${res.count} holdings synced`, {
+            id: "create-sync",
+          });
+        } catch (error) {
+          toast.error(apiErrorMessage(error, "Portfolio created, but failed to sync file"), {
+            id: "create-sync",
+          });
         }
       } else {
         toast.success(`Portfolio "${newForm.name}" created`);

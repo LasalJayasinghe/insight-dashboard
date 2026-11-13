@@ -103,7 +103,7 @@ function DashboardPage() {
   const totalNetWorthText = formatRs(netWorth?.totalNetWorthLkr ?? 0);
   const totalNetWorthFigureSize = totalNetWorthText.length > 18 ? "md" : "xl";
 
-  const getLkrValue = (p: typeof portfolios[0]) => {
+  const getLkrValue = (p: (typeof portfolios)[0]) => {
     return p.type === "Crypto"
       ? Math.abs(p.totalValue) * (netWorth?.usdtToLkrRate || 1)
       : Math.abs(p.totalValue);
@@ -265,7 +265,11 @@ function DashboardPage() {
                           {((getLkrValue(p) / totalValue) * 100).toFixed(1)}%
                         </span>
                         <span className="w-32 text-right font-mono text-xs tabular-nums font-semibold">
-                          {formatRs(p.type === "Crypto" ? p.totalValue * (netWorth?.usdtToLkrRate || 1) : p.totalValue)}
+                          {formatRs(
+                            p.type === "Crypto"
+                              ? p.totalValue * (netWorth?.usdtToLkrRate || 1)
+                              : p.totalValue,
+                          )}
                         </span>
                         <span className="w-20 text-right">
                           <Delta value={p.totalProfitLossPercent} />
@@ -370,7 +374,9 @@ function DashboardPage() {
                   className="group block h-32 p-4 rounded-xl border border-border/60 hover:bg-primary hover:text-primary-foreground transition-all overflow-hidden"
                 >
                   <div className="flex items-baseline justify-end">
-                    <span className="text-sm transition-transform group-hover:translate-x-1">→</span>
+                    <span className="text-sm transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
                   </div>
                   <div className="mt-4 font-display text-base font-bold">{d.label}</div>
                   <div className="mt-1 text-xs text-muted-foreground group-hover:text-primary-foreground/70">
@@ -383,10 +389,7 @@ function DashboardPage() {
 
           {/* Right Column (1/3 width): News & Intelligence Feed */}
           <div className="lg:col-span-1">
-            <MarketNewsFeed
-              title="Market News & Intelligence"
-              maxHeight="h-[470px]"
-            />
+            <MarketNewsFeed title="Market News & Intelligence" maxHeight="h-[470px]" />
           </div>
         </div>
       </div>

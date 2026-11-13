@@ -35,7 +35,7 @@ function HeaderButton({
 export function AssistantWidget() {
   const [mode, setMode] = useState<Mode>("closed");
   const isMobile = useIsMobile();
-  const { messages, isThinking, error, send } = useAssistant();
+  const { messages, isThinking, error, send, stop } = useAssistant();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -139,7 +139,7 @@ export function AssistantWidget() {
                 expanded={expanded}
               />
               <div className={cn(expanded && "mx-auto w-full max-w-2xl")}>
-                <ChatInput onSend={send} disabled={isThinking} autoFocusKey={mode} />
+                <ChatInput onSend={send} onStop={stop} disabled={isThinking} autoFocusKey={mode} />
               </div>
             </>
           )}

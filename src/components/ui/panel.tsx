@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,8 +20,9 @@ export function Cell({
   className?: string;
   children: ReactNode;
   ink?: boolean;
-  as?: any;
-  [key: string]: any;
+  as?: ElementType;
+  /** Extra props are forwarded to the rendered element (e.g. `to` when `as={Link}`). */
+  [key: string]: unknown;
 }) {
   return (
     <As className={cn(ink ? "bento-cell-ink" : "bento-cell", "p-5", className)} {...props}>

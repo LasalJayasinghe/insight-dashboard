@@ -30,7 +30,10 @@ function AlgorithmsPage() {
   const [category, setCategory] = useState<string>("All");
 
   const categories = useMemo(
-    () => ["All", ...Array.from(new Set((data ?? []).map((a) => a.category).filter(Boolean) as string[]))],
+    () => [
+      "All",
+      ...Array.from(new Set((data ?? []).map((a) => a.category).filter(Boolean) as string[])),
+    ],
     [data],
   );
   const visible = useMemo(
@@ -54,8 +57,7 @@ function AlgorithmsPage() {
               Trading Algorithms
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Paper-trading performance across your Binance strategies. P/L is net of Binance
-              fees.
+              Paper-trading performance across your Binance strategies. P/L is net of Binance fees.
             </p>
             {summary && (
               <p className="text-xs text-muted-foreground mt-1">

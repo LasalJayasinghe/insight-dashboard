@@ -4,7 +4,7 @@ import { SkeletonRows } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { StockMovers, TopMover } from "@/services/stock-service";
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { fmtPrice, fmtChange } from "./stock-cards";
+import { fmtPrice, fmtChange } from "./format";
 
 type MoverType = "gain" | "loss";
 

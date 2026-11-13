@@ -5,7 +5,7 @@ import { AssistantMark } from "./assistant-mark";
 import { MessageMarkdown } from "./message-markdown";
 import { ToolActivityPanel } from "./tool-activity-panel";
 
-export const SUGGESTIONS = [
+const SUGGESTIONS = [
   "How are my portfolios doing today?",
   "What are my best performing positions?",
   "What's moving in my portfolio?",

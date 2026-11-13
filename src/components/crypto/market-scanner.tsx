@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { ScannerResult } from "@/services/crypto-service";
-import { COIN_META, fmtPrice } from "./market-cards";
+import { COIN_META, fmtPrice } from "./market-format";
 import { RefreshCw, Loader2 } from "lucide-react";
 
 const SIG = {

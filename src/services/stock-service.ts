@@ -1,4 +1,5 @@
 import apiClient from "./apiClient";
+import type { PricePoint } from "@/lib/technicals";
 
 export interface StockTicker {
   symbol: string;
@@ -130,4 +131,15 @@ export const stockService = {
     const res = await apiClient.get<IntradayPoint[]>("/stocks/intraday");
     return Array.isArray(res.data) ? res.data : [];
   },
+
+  /** Real CSE price history (oldest first). 1D = today's trades; others are daily closes (≈1 year max). */
+  async getHistory(symbol: string, range: HistoryRange): Promise<PricePoint[]> {
+    const clean = encodeURIComponent(symbol.trim().toUpperCase());
+    const res = await apiClient.get<PricePoint[]>(`/stocks/${clean}/history`, {
+      params: { range },
+    });
+    return Array.isArray(res.data) ? res.data : [];
+  },
 };
+
+export type HistoryRange = "1D" | "1W" | "1M" | "3M" | "1Y";

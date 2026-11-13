@@ -24,5 +24,11 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // Generated shadcn/ui primitives export variant helpers (e.g. buttonVariants) next to their
+    // components by design; splitting them would diverge from upstream shadcn.
+    files: ["src/components/ui/**/*.{ts,tsx}"],
+    rules: { "react-refresh/only-export-components": "off" },
+  },
   eslintPluginPrettier,
 );

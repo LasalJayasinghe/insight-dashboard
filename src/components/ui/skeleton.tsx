@@ -5,13 +5,7 @@ function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
 }
 
 /** Stacked text lines, last line shortened for a natural look. */
-function SkeletonText({
-  lines = 3,
-  className,
-}: {
-  lines?: number;
-  className?: string;
-}) {
+function SkeletonText({ lines = 3, className }: { lines?: number; className?: string }) {
   return (
     <div className={cn("space-y-2", className)}>
       {Array.from({ length: lines }).map((_, i) => (
@@ -53,7 +47,10 @@ function SkeletonRows({
 /** Grid of small stat blocks. */
 function SkeletonStats({ count = 3, className }: { count?: number; className?: string }) {
   return (
-    <div className={cn("grid gap-3", className)} style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}>
+    <div
+      className={cn("grid gap-3", className)}
+      style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}
+    >
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="rounded-lg border border-border/60 p-3 space-y-2">
           <Skeleton className="h-2.5 w-16" />

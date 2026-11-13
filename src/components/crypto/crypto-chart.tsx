@@ -5,6 +5,7 @@ import {
   CrosshairMode,
   type IChartApi,
   type ISeriesApi,
+  type UTCTimestamp,
 } from "lightweight-charts";
 import type { CandleBar } from "@/services/crypto-service";
 
@@ -192,7 +193,7 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
 
     candleSeriesRef.current.setData(
       candles.map((c) => ({
-        time: c.time as any,
+        time: c.time as UTCTimestamp,
         open: c.open,
         high: c.high,
         low: c.low,
@@ -202,26 +203,30 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
 
     volSeriesRef.current?.setData(
       candles.map((c) => ({
-        time: c.time as any,
+        time: c.time as UTCTimestamp,
         value: c.volume,
         color: c.close >= c.open ? "rgba(0,230,118,0.22)" : "rgba(255,23,68,0.18)",
       })),
     );
 
     ema9SeriesRef.current?.setData(
-      candles.map((c, i) => ({ time: c.time as any, value: parseFloat(ema9[i].toFixed(4)) })),
+      candles.map((c, i) => ({
+        time: c.time as UTCTimestamp,
+        value: parseFloat(ema9[i].toFixed(4)),
+      })),
     );
     ema21SeriesRef.current?.setData(
-      candles.map((c, i) => ({ time: c.time as any, value: parseFloat(ema21v[i].toFixed(4)) })),
+      candles.map((c, i) => ({
+        time: c.time as UTCTimestamp,
+        value: parseFloat(ema21v[i].toFixed(4)),
+      })),
     );
     rsiSeriesRef.current?.setData(
-      candles
-        .map((c, i) =>
-          rsi[i] !== null
-            ? { time: c.time as any, value: parseFloat((rsi[i] as number).toFixed(2)) }
-            : null,
-        )
-        .filter(Boolean) as any,
+      candles.flatMap((c, i) =>
+        rsi[i] !== null
+          ? [{ time: c.time as UTCTimestamp, value: parseFloat((rsi[i] as number).toFixed(2)) }]
+          : [],
+      ),
     );
 
     chartRef.current?.timeScale().fitContent();
@@ -231,7 +236,7 @@ export function CryptoChart({ candles, newCandle }: CryptoChartProps) {
   useEffect(() => {
     if (!newCandle || !candleSeriesRef.current) return;
     candleSeriesRef.current.update({
-      time: newCandle.time as any,
+      time: newCandle.time as UTCTimestamp,
       open: newCandle.open,
       high: newCandle.high,
       low: newCandle.low,

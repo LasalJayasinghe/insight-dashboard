@@ -1,16 +1,25 @@
 import apiClient from "./apiClient";
+import { apiErrorMessage } from "@/lib/api-error";
 
 export async function getProfile() {
   const res = await apiClient.get("/profile");
   return res.data;
 }
 
-export async function updateProfile(profileData: any) {
+export interface ProfileUpdate {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+}
+
+export async function updateProfile(profileData: ProfileUpdate) {
   const res = await apiClient.put("/profile", profileData);
   return res.data;
 }
 
-export async function updateTelegramId(telegramId: string): Promise<any> {
+export async function updateTelegramId(telegramId: string): Promise<unknown> {
   const res = await apiClient.put("/profile/telegram", { telegramId });
   return res.data;
 }
@@ -28,8 +37,7 @@ export async function changePassword(pwd: {
       localStorage.removeItem(key),
     );
     return { success: true };
-  } catch (error: any) {
-    const message = error?.response?.data?.message || "Failed to change password.";
-    return { success: false, message };
+  } catch (error) {
+    return { success: false, message: apiErrorMessage(error, "Failed to change password.") };
   }
 }

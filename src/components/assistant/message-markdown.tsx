@@ -48,10 +48,7 @@ export function MessageMarkdown({ content }: { content: string }) {
           ),
           thead: ({ children }) => <thead className="bg-muted/60">{children}</thead>,
           th: ({ children, style }) => (
-            <th
-              style={style}
-              className="label-caps border-b border-hairline px-2.5 py-2 text-left"
-            >
+            <th style={style} className="label-caps border-b border-hairline px-2.5 py-2 text-left">
               {children}
             </th>
           ),

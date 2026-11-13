@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,6 +32,56 @@ const CATEGORIES = [
   { id: "GLOBAL_BUSINESS", label: "Global" },
 ];
 
+function isDividendArticle(article: NewsArticle): boolean {
+  const haystack =
+    `${article.title} ${article.summary} ${article.validationReasoning || ""}`.toLowerCase();
+  return haystack.includes("dividend");
+}
+
+function extractPaymentDateText(article: NewsArticle): string | null {
+  if (article.dividendPaymentDate) {
+    const structuredDate = new Date(article.dividendPaymentDate);
+    if (!Number.isNaN(structuredDate.getTime())) {
+      return structuredDate.toLocaleDateString();
+    }
+
+    return article.dividendPaymentDate;
+  }
+
+  const haystack = `${article.title}\n${article.summary}\n${article.validationReasoning || ""}`;
+
+  const regexes = [
+    /payment\s*date\s*[:-]?\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
+    /payment\s*date\s*[:-]?\s*([0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4})/i,
+    /payment\s*date\s*[:-]?\s*([A-Za-z]{3,9}\s+[0-9]{1,2},?\s+[0-9]{4})/i,
+    /payable\s*on\s*[:-]?\s*([A-Za-z]{3,9}\s+[0-9]{1,2},?\s+[0-9]{4})/i,
+    /payable\s*on\s*[:-]?\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
+  ];
+
+  for (const regex of regexes) {
+    const match = haystack.match(regex);
+    if (match?.[1]) return match[1].trim();
+  }
+
+  return null;
+}
+
+function prioritizeDividendPaymentDates(items: NewsArticle[]): NewsArticle[] {
+  return [...items].sort((a, b) => {
+    const aDividend = isDividendArticle(a);
+    const bDividend = isDividendArticle(b);
+    const aPayment = extractPaymentDateText(a);
+    const bPayment = extractPaymentDateText(b);
+
+    const aScore = (aDividend ? 2 : 0) + (aPayment ? 1 : 0);
+    const bScore = (bDividend ? 2 : 0) + (bPayment ? 1 : 0);
+
+    if (aScore !== bScore) return bScore - aScore;
+
+    return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+  });
+}
+
 export function MarketNewsFeed({
   defaultCategory = "ALL",
   symbolFilter,
@@ -44,7 +94,7 @@ export function MarketNewsFeed({
   const [syncing, setSyncing] = useState<boolean>(false);
   const [activeCategory, setActiveCategory] = useState<string>(defaultCategory);
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     setLoading(true);
     try {
       if (symbolFilter) {
@@ -59,11 +109,11 @@ export function MarketNewsFeed({
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeCategory, symbolFilter]);
 
   useEffect(() => {
-    fetchNews();
-  }, [activeCategory, symbolFilter]);
+    void fetchNews();
+  }, [fetchNews]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -106,7 +156,6 @@ export function MarketNewsFeed({
     };
   };
 
-
   const getCategoryLabel = (cat: string) => {
     switch (cat?.toUpperCase()) {
       case "CSE_STOCKS":
@@ -127,55 +176,6 @@ export function MarketNewsFeed({
     } catch {
       return [];
     }
-  };
-
-  const isDividendArticle = (article: NewsArticle): boolean => {
-    const haystack = `${article.title} ${article.summary} ${article.validationReasoning || ""}`.toLowerCase();
-    return haystack.includes("dividend");
-  };
-
-  const extractPaymentDateText = (article: NewsArticle): string | null => {
-    if (article.dividendPaymentDate) {
-      const structuredDate = new Date(article.dividendPaymentDate);
-      if (!Number.isNaN(structuredDate.getTime())) {
-        return structuredDate.toLocaleDateString();
-      }
-
-      return article.dividendPaymentDate;
-    }
-
-    const haystack = `${article.title}\n${article.summary}\n${article.validationReasoning || ""}`;
-
-    const regexes = [
-      /payment\s*date\s*[:\-]?\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
-      /payment\s*date\s*[:\-]?\s*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4})/i,
-      /payment\s*date\s*[:\-]?\s*([A-Za-z]{3,9}\s+[0-9]{1,2},?\s+[0-9]{4})/i,
-      /payable\s*on\s*[:\-]?\s*([A-Za-z]{3,9}\s+[0-9]{1,2},?\s+[0-9]{4})/i,
-      /payable\s*on\s*[:\-]?\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
-    ];
-
-    for (const regex of regexes) {
-      const match = haystack.match(regex);
-      if (match?.[1]) return match[1].trim();
-    }
-
-    return null;
-  };
-
-  const prioritizeDividendPaymentDates = (items: NewsArticle[]): NewsArticle[] => {
-    return [...items].sort((a, b) => {
-      const aDividend = isDividendArticle(a);
-      const bDividend = isDividendArticle(b);
-      const aPayment = extractPaymentDateText(a);
-      const bPayment = extractPaymentDateText(b);
-
-      const aScore = (aDividend ? 2 : 0) + (aPayment ? 1 : 0);
-      const bScore = (bDividend ? 2 : 0) + (bPayment ? 1 : 0);
-
-      if (aScore !== bScore) return bScore - aScore;
-
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-    });
   };
 
   const formatRelativeTime = (dateStr: string) => {
@@ -297,7 +297,9 @@ export function MarketNewsFeed({
 
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/70">
-                        <span className={cn("font-semibold", sentiment.text)}>{sentiment.label}</span>
+                        <span className={cn("font-semibold", sentiment.text)}>
+                          {sentiment.label}
+                        </span>
                         <span className="opacity-40">/</span>
                         <span className={cn(isCseArticle && "text-primary")}>
                           {getCategoryLabel(article.marketCategory)}
@@ -305,7 +307,9 @@ export function MarketNewsFeed({
                         <span className="opacity-40">/</span>
                         <span className="normal-case tracking-normal">{article.source}</span>
                         <span className="opacity-40">·</span>
-                        <span className="tabular-nums">{formatRelativeTime(article.publishedAt)}</span>
+                        <span className="tabular-nums">
+                          {formatRelativeTime(article.publishedAt)}
+                        </span>
                         {isCseFocused && publishedDate && (
                           <span className="tabular-nums opacity-70">({publishedDate})</span>
                         )}
@@ -375,6 +379,5 @@ export function MarketNewsFeed({
         )}
       </Cell>
     </Bento>
-
   );
 }

@@ -6,6 +6,9 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { loadEnv, type Plugin } from "vite";
+// Type-only: loads Nitro's augmentation of Vite's UserConfig so the `nitro` option below type-checks.
+// (The plain-object config is passed through to Vite as-is, where Nitro reads `nitro`.)
+import type {} from "nitro/vite";
 
 /**
  * Fails a production build when VITE_API_BASE_URL is missing, still pointing at

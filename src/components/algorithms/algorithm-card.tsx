@@ -58,7 +58,9 @@ export function AlgorithmCard({ algorithm }: Props) {
             </div>
             {(algorithm.category || algorithm.pair) && (
               <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground/80 font-medium">
-                {[algorithm.category, algorithm.pair, algorithm.timeframe].filter(Boolean).join(" · ")}
+                {[algorithm.category, algorithm.pair, algorithm.timeframe]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
             )}
             {algorithm.description && (

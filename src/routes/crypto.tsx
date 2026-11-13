@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
-import { MarketCards, TRACKED_SYMBOLS } from "@/components/crypto/market-cards";
+import { MarketCards } from "@/components/crypto/market-cards";
+import { TRACKED_SYMBOLS } from "@/components/crypto/market-format";
 import { CryptoChart } from "@/components/crypto/crypto-chart";
 import { StrategyPanel } from "@/components/crypto/strategy-panel";
 import { AiSummaryPanel } from "@/components/crypto/ai-summary-panel";

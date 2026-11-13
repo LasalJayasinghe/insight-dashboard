@@ -41,7 +41,7 @@ export const registerWithOtp = async (
   password: string,
   firstName: string,
   lastName: string,
-  otpCode: string
+  otpCode: string,
 ) => {
   const { data } = await axiosClient.post("/auth/register", {
     email,
@@ -63,11 +63,7 @@ export const registerWithOtp = async (
   return { ok: true, ...data };
 };
 
-export const resetPasswordWithOtp = async (
-  email: string,
-  newPassword: string,
-  otpCode: string
-) => {
+export const resetPasswordWithOtp = async (email: string, newPassword: string, otpCode: string) => {
   const { data } = await axiosClient.post("/auth/reset-password", {
     email,
     newPassword,
@@ -75,4 +71,3 @@ export const resetPasswordWithOtp = async (
   });
   return { ok: true, ...data };
 };
-

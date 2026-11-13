@@ -16,19 +16,6 @@ export interface Message {
   toolActivity?: ToolActivity[];
 }
 
-/**
- * Transport abstraction. Swap the local handler for a real .NET / MCP agent
- * call without touching any of the chat UI components.
- */
-export interface AssistantResponse {
-  content: string;
-  toolActivity?: ToolActivity[];
-}
-
-export interface AssistantClient {
-  send(messages: Message[], signal?: AbortSignal): Promise<AssistantResponse>;
-}
-
 export const createMessage = (
   role: MessageRole,
   content: string,

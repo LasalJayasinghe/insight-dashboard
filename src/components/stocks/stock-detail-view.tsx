@@ -1,24 +1,14 @@
 import { useState } from "react";
 import type { StockTicker } from "@/services/stock-service";
 import { StockChart } from "./stock-chart";
-import { fmtPrice, fmtChange } from "./stock-cards";
-import {
-  ArrowLeft,
-  TrendingUp,
-  TrendingDown,
-  Star,
-  Sparkles,
-  Activity,
-  Info,
-  Zap,
-  Target,
-  BarChart3,
-} from "lucide-react";
+import { fmtPrice, fmtChange } from "./format";
+import { ArrowLeft, TrendingUp, TrendingDown, Star, Activity, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { watchlistService } from "@/services/watchlist-service";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { StockDividendPanel } from "./stock-dividend-panel";
+import { StockTechnicalSummary } from "./stock-technical-summary";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 interface StockDetailViewProps {
@@ -48,11 +38,6 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
     stock.high > stock.low
       ? Math.min(100, Math.max(0, ((stock.price - stock.low) / (stock.high - stock.low)) * 100))
       : 50;
-
-  const range = stock.high - stock.low;
-  const confidence = Math.min(95, Math.max(68, Math.abs(stock.percentageChange) * 8 + 72)).toFixed(
-    0,
-  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -122,7 +107,7 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
       {/* Dividend Panel */}
       <StockDividendPanel symbol={stock.symbol} />
 
-      {/* Grid: Metrics & Dedicated AI Analysis Panel */}
+      {/* Grid: Metrics & Technical Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Financial Metrics */}
         <div className="lg:col-span-2 rounded-xl border border-border bg-card shadow-card p-5 space-y-4">
@@ -207,68 +192,9 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
           </div>
         </div>
 
-        {/* Dedicated AI Market & Stock Summary Panel */}
-        <div className="rounded-xl border border-border bg-card shadow-card p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-border pb-3">
-              <Sparkles className="size-4 text-purple-400" />
-              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
-                AI Market & Stock Summary
-              </h3>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Zap className="size-3 text-purple-400" /> Technical Signal
-                </span>
-                <span
-                  className={cn(
-                    "text-xs font-mono font-bold px-2.5 py-0.5 rounded uppercase",
-                    isUp
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      : "bg-red-500/10 text-red-400 border border-red-500/20",
-                  )}
-                >
-                  {isUp ? "BULLISH ACCUMULATION" : "BEARISH CONSOLIDATION"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Target className="size-3 text-purple-400" /> AI Confidence Score
-                </span>
-                <span className="text-xs font-mono font-bold text-foreground">{confidence}%</span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <BarChart3 className="size-3 text-purple-400" /> Intraday Volatility
-                </span>
-                <span className="text-xs font-mono font-bold text-foreground">
-                  {stock.low > 0
-                    ? (((stock.high - stock.low) / stock.low) * 100).toFixed(2)
-                    : "0.00"}
-                  %
-                </span>
-              </div>
-
-              {/* Comprehensive AI Summary Narrative */}
-              <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3.5 text-xs text-foreground leading-relaxed mt-2 space-y-2">
-                <p>
-                  <strong>{stock.symbol}</strong> ({stock.name}) is trading at{" "}
-                  <strong>{fmtPrice(stock.price)}</strong> ({isUp ? "+" : ""}
-                  {stock.percentageChange.toFixed(2)}%).
-                </p>
-                <p className="text-muted-foreground">
-                  {isUp
-                    ? `Intraday buying momentum is strong as price trades near today's high of ${fmtPrice(stock.high)}. Key moving averages indicate sustained buyer interest.`
-                    : `Selling pressure dominates today's session as price pulls back towards day low of ${fmtPrice(stock.low)}. Consolidating near support bounds.`}
-                </p>
-              </div>
-            </div>
-          </div>
-
+        {/* Technical summary from real CSE price history (replaces the old hard-coded "AI" panel) */}
+        <div className="flex flex-col gap-3">
+          <StockTechnicalSummary stock={stock} />
           <button
             type="button"
             onClick={handleAddToWatchlist}

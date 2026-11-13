@@ -1,5 +1,5 @@
 import type { AiSummary } from "@/services/crypto-service";
-import { TRACKED_SYMBOLS } from "./market-cards";
+import { TRACKED_SYMBOLS } from "./market-format";
 import { Loader2, Cpu } from "lucide-react";
 
 interface AiSummaryPanelProps {

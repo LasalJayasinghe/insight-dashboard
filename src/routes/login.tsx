@@ -1,10 +1,26 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { Loader2, AlertCircle, CheckCircle2, Eye, EyeOff, ArrowLeft, Mail, ShieldCheck } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isAuthenticated } from "@/lib/auth";
-import { login, googleLogin, sendOtp, registerWithOtp, resetPasswordWithOtp } from "@/services/authService";
-import { GoogleLogin } from "@react-oauth/google";
+import { apiErrorMessage } from "@/lib/api-error";
+import {
+  login,
+  googleLogin,
+  sendOtp,
+  registerWithOtp,
+  resetPasswordWithOtp,
+} from "@/services/authService";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 
 interface EditorialVolume {
   vol: string;
@@ -94,9 +110,7 @@ function AnimatedLetters({
                 </span>
               );
             })}
-            {wordIdx < words.length - 1 && (
-              <span className="inline-block">&nbsp;</span>
-            )}
+            {wordIdx < words.length - 1 && <span className="inline-block">&nbsp;</span>}
           </span>
         );
       })}
@@ -197,9 +211,9 @@ function LoginPage() {
       }
       setStatus("success");
       setTimeout(() => navigate({ to: "/dashboard" }), 400);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrors({ password: err?.response?.data?.message || "Invalid credentials" });
+      setErrors({ password: apiErrorMessage(err, "Invalid credentials") });
       setStatus("error");
     }
   };
@@ -219,9 +233,9 @@ function LoginPage() {
       setStatus("idle");
       setServerMsg(res.message || "Verification code sent to your email!");
       setMode("signup-otp");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrors({ email: err?.response?.data?.message || "Failed to send verification code." });
+      setErrors({ email: apiErrorMessage(err, "Failed to send verification code.") });
       setStatus("error");
     }
   };
@@ -239,9 +253,11 @@ function LoginPage() {
       const res = await registerWithOtp(email, password, firstName, lastName, otpCode);
       setStatus("success");
       setTimeout(() => navigate({ to: "/dashboard" }), 400);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrors({ otpCode: err?.response?.data?.message || "Invalid or expired verification code." });
+      setErrors({
+        otpCode: apiErrorMessage(err, "Invalid or expired verification code."),
+      });
       setStatus("error");
     }
   };
@@ -260,9 +276,9 @@ function LoginPage() {
       setStatus("idle");
       setServerMsg(res.message || "Password reset code sent to your email.");
       setMode("forgot-otp");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrors({ email: err?.response?.data?.message || "No account found with this email." });
+      setErrors({ email: apiErrorMessage(err, "No account found with this email.") });
       setStatus("error");
     }
   };
@@ -282,16 +298,21 @@ function LoginPage() {
       setStatus("success");
       setServerMsg("Password reset successfully! Please sign in.");
       setTimeout(() => switchMode("signin"), 1500);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrors({ otpCode: err?.response?.data?.message || "Invalid or expired code." });
+      setErrors({ otpCode: apiErrorMessage(err, "Invalid or expired code.") });
       setStatus("error");
     }
   };
 
-  const onGoogleSuccess = async (credentialResponse: any) => {
+  const onGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     setStatus("loading");
     try {
+      if (!credentialResponse.credential) {
+        setErrors({ password: "Google login failed" });
+        setStatus("error");
+        return;
+      }
       const data = await googleLogin(credentialResponse.credential);
       if (!data.ok) {
         setErrors({ password: "Google login failed" });
@@ -300,9 +321,9 @@ function LoginPage() {
       }
       setStatus("success");
       setTimeout(() => navigate({ to: "/dashboard" }), 400);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrors({ password: err?.response?.data?.message || "Google login failed" });
+      setErrors({ password: apiErrorMessage(err, "Google login failed") });
       setStatus("error");
     }
   };
@@ -345,7 +366,7 @@ function LoginPage() {
                   "relative h-1 flex-1 overflow-hidden rounded-full transition-all duration-300 cursor-pointer",
                   idx === volIndex
                     ? "bg-primary-foreground/30"
-                    : "bg-primary-foreground/15 hover:bg-primary-foreground/30"
+                    : "bg-primary-foreground/15 hover:bg-primary-foreground/30",
                 )}
                 aria-label={`Switch to ${v.vol}`}
               >
@@ -363,7 +384,10 @@ function LoginPage() {
             <span className="label-caps text-primary-foreground/60">{activeVol.vol}</span>
           </div>
 
-          <h2 key={`h2-${volIndex}`} className="mt-5 font-display text-5xl leading-[0.95] font-bold min-h-[105px]">
+          <h2
+            key={`h2-${volIndex}`}
+            className="mt-5 font-display text-5xl leading-[0.95] font-bold min-h-[105px]"
+          >
             {activeVol.lines.map((line, idx) => (
               <span key={idx} className="block">
                 <AnimatedLetters text={line} baseDelay={idx * 140} />
@@ -380,7 +404,10 @@ function LoginPage() {
           </p>
         </div>
 
-        <dl key={`stats-${volIndex}`} className="grid grid-cols-3 border-t border-primary-foreground/20 pt-6 animate-fade-slide-up">
+        <dl
+          key={`stats-${volIndex}`}
+          className="grid grid-cols-3 border-t border-primary-foreground/20 pt-6 animate-fade-slide-up"
+        >
           {activeVol.stats.map(([k, v]) => (
             <div key={k}>
               <dt className="label-caps text-primary-foreground/50">{k}</dt>
@@ -494,7 +521,11 @@ function LoginPage() {
                 >
                   {status === "loading" && <Loader2 className="size-3.5 animate-spin" />}
                   {status === "success" && <CheckCircle2 className="size-3.5" />}
-                  {status === "loading" ? "Signing in" : status === "success" ? "Welcome" : "Sign in"}
+                  {status === "loading"
+                    ? "Signing in"
+                    : status === "success"
+                      ? "Welcome"
+                      : "Sign in"}
                 </button>
 
                 <div className="flex items-center gap-3">
@@ -770,7 +801,8 @@ function LoginPage() {
               <span className="label-caps">Security Reset</span>
               <h1 className="mt-2 font-display text-3xl font-bold">Set New Password</h1>
               <p className="mt-1.5 text-sm text-muted-foreground">
-                Enter the 6-digit code sent to <strong className="text-foreground">{email}</strong> and your new password.
+                Enter the 6-digit code sent to <strong className="text-foreground">{email}</strong>{" "}
+                and your new password.
               </p>
 
               <form onSubmit={handleResetPassword} className="mt-8 space-y-6" noValidate>

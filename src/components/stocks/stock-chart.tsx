@@ -1,85 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createChart,
   ColorType,
   CrosshairMode,
   type IChartApi,
   type ISeriesApi,
+  type Time,
+  type UTCTimestamp,
 } from "lightweight-charts";
 import type { StockTicker } from "@/services/stock-service";
+import { useStockHistory } from "@/hooks/use-stock-history";
+import {
+  COLOMBO_OFFSET_SECONDS,
+  colomboDate,
+  emaSeries,
+  rsiSeries,
+  type PricePoint,
+} from "@/lib/technicals";
 import { cn } from "@/lib/utils";
 
-interface CandleData {
-  time: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
+// CSE serves about one year of daily history, so there is no "ALL".
+const TIMEFRAMES = ["1D", "1W", "1M", "3M", "1Y"] as const;
+type Timeframe = (typeof TIMEFRAMES)[number];
 
-const TIMEFRAMES = ["1D", "1W", "1M", "1Y", "ALL"] as const;
-
-function generateStockHistory(stock: StockTicker, timeframe: string): CandleData[] {
-  const points = timeframe === "1D" ? 30 : timeframe === "1W" ? 60 : timeframe === "1M" ? 90 : 180;
-  const result: CandleData[] = [];
-
-  let currentPrice = stock.previousClose > 0 ? stock.previousClose : stock.price * 0.95;
-  const now = new Date();
-
-  for (let i = points; i >= 0; i--) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    const dateStr = d.toISOString().split("T")[0];
-
-    const volatility = stock.price * 0.015;
-    const change = (Math.random() - 0.48) * volatility;
-
-    const open = Math.max(0.1, currentPrice);
-    const close = Math.max(0.1, i === 0 ? stock.price : open + change);
-    const high = Math.max(open, close) + Math.random() * (volatility * 0.5);
-    const low = Math.max(0.1, Math.min(open, close) - Math.random() * (volatility * 0.5));
-    const volume = Math.floor(Math.random() * 50000) + 5000;
-
-    result.push({
-      time: dateStr,
-      open: Number(open.toFixed(2)),
-      high: Number(high.toFixed(2)),
-      low: Number(low.toFixed(2)),
-      close: Number(close.toFixed(2)),
-      volume,
-    });
-
-    currentPrice = close;
-  }
-
-  return result;
-}
-
-function calcEMA(closes: number[], period: number): number[] {
-  const k = 2 / (period + 1);
-  const out: number[] = [];
-  let ema: number | null = null;
-  for (const c of closes) {
-    ema = ema === null ? c : c * k + ema * (1 - k);
-    out.push(Number(ema.toFixed(2)));
-  }
-  return out;
-}
-
-function calcRSI(closes: number[], period = 14): (number | null)[] {
-  const out: (number | null)[] = new Array(period).fill(null);
-  for (let i = period; i < closes.length; i++) {
-    let gain = 0,
-      loss = 0;
-    for (let j = i - period + 1; j <= i; j++) {
-      const diff = closes[j] - closes[j - 1];
-      if (diff > 0) gain += diff;
-      else loss += Math.abs(diff);
-    }
-    out.push(loss === 0 ? 100 : Number((100 - 100 / (1 + gain / loss)).toFixed(2)));
-  }
-  return out;
-}
+const DAYS: Record<Exclude<Timeframe, "1D">, number> = { "1W": 7, "1M": 31, "3M": 92, "1Y": 366 };
 
 function getThemeColors() {
   const isLight =
@@ -92,8 +36,43 @@ function getThemeColors() {
   };
 }
 
+interface Prepared {
+  time: Time;
+  point: PricePoint;
+  ema9: number | null;
+  ema21: number | null;
+  rsi: number | null;
+}
+
+/**
+ * Indicators are computed over the full history and only then sliced to the selected range,
+ * so EMA/RSI values at the left edge of a short range are still correct.
+ */
+function prepare(points: PricePoint[], timeframe: Timeframe): Prepared[] {
+  const closes = points.map((p) => p.close);
+  const ema9 = emaSeries(closes, 9);
+  const ema21 = emaSeries(closes, 21);
+  const rsi = rsiSeries(closes, 14);
+
+  const all = points.map((p, i) => ({
+    // Daily bars use the Colombo trading date; intraday uses Colombo-shifted timestamps.
+    time: (timeframe === "1D"
+      ? ((p.time + COLOMBO_OFFSET_SECONDS) as UTCTimestamp)
+      : colomboDate(p.time)) as Time,
+    point: p,
+    ema9: ema9[i],
+    ema21: ema21[i],
+    rsi: rsi[i],
+  }));
+
+  if (timeframe === "1D") return all;
+  const cutoff = Date.now() / 1000 - DAYS[timeframe] * 86400;
+  return all.filter((d) => d.point.time >= cutoff);
+}
+
 export function StockChart({ stock }: { stock: StockTicker }) {
-  const [timeframe, setTimeframe] = useState<string>("1M");
+  const [timeframe, setTimeframe] = useState<Timeframe>("3M");
+  const { data, loading, error } = useStockHistory(stock.symbol, timeframe === "1D" ? "1D" : "1Y");
 
   const mainRef = useRef<HTMLDivElement>(null);
   const rsiRef = useRef<HTMLDivElement>(null);
@@ -106,6 +85,8 @@ export function StockChart({ stock }: { stock: StockTicker }) {
   const ema21SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const rsiSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const volSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+
+  const prepared = useMemo(() => (data ? prepare(data, timeframe) : []), [data, timeframe]);
 
   useEffect(() => {
     if (!mainRef.current || !rsiRef.current) return;
@@ -213,44 +194,39 @@ export function StockChart({ stock }: { stock: StockTicker }) {
     };
   }, []);
 
-  // Update chart data when stock or timeframe changes
+  // Push real history into the chart whenever it (or the range) changes.
   useEffect(() => {
     if (!candleSeriesRef.current) return;
 
-    const data = generateStockHistory(stock, timeframe);
-    const closes = data.map((d) => d.close);
-    const ema9 = calcEMA(closes, 9);
-    const ema21 = calcEMA(closes, 21);
-    const rsi = calcRSI(closes, 14);
-
     candleSeriesRef.current.setData(
-      data.map((d) => ({
-        time: d.time as any,
-        open: d.open,
-        high: d.high,
-        low: d.low,
-        close: d.close,
+      prepared.map((d) => ({
+        time: d.time,
+        open: d.point.open,
+        high: d.point.high,
+        low: d.point.low,
+        close: d.point.close,
       })),
     );
     volSeriesRef.current?.setData(
-      data.map((d) => ({
-        time: d.time as any,
-        value: d.volume,
-        color: d.close >= d.open ? "rgba(0,230,118,0.3)" : "rgba(255,23,68,0.3)",
+      prepared.map((d) => ({
+        time: d.time,
+        value: d.point.volume,
+        color: d.point.close >= d.point.open ? "rgba(0,230,118,0.3)" : "rgba(255,23,68,0.3)",
       })),
     );
 
-    ema9SeriesRef.current?.setData(data.map((d, i) => ({ time: d.time as any, value: ema9[i] })));
-    ema21SeriesRef.current?.setData(data.map((d, i) => ({ time: d.time as any, value: ema21[i] })));
+    const line = (key: "ema9" | "ema21" | "rsi") =>
+      prepared.flatMap((d) => (d[key] === null ? [] : [{ time: d.time, value: d[key]! }]));
 
-    const rsiData: { time: any; value: number }[] = [];
-    data.forEach((d, i) => {
-      if (rsi[i] !== null) rsiData.push({ time: d.time as any, value: rsi[i]! });
-    });
-    rsiSeriesRef.current?.setData(rsiData);
+    ema9SeriesRef.current?.setData(line("ema9"));
+    ema21SeriesRef.current?.setData(line("ema21"));
+    rsiSeriesRef.current?.setData(line("rsi"));
 
     chartRef.current?.timeScale().fitContent();
-  }, [stock.symbol, timeframe]);
+    rsiChartRef.current?.timeScale().fitContent();
+  }, [prepared]);
+
+  const empty = !loading && prepared.length === 0;
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden flex flex-col">
@@ -258,10 +234,10 @@ export function StockChart({ stock }: { stock: StockTicker }) {
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
-            Interactive Chart · {stock.symbol}
+            Price Chart · {stock.symbol}
           </span>
           <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-primary/10 text-primary uppercase">
-            CSE LIVE
+            {timeframe === "1D" ? "Today's trades" : "Daily · CSE"}
           </span>
         </div>
 
@@ -301,7 +277,18 @@ export function StockChart({ stock }: { stock: StockTicker }) {
       </div>
 
       {/* Main Chart Canvas */}
-      <div className="p-3 flex flex-col gap-2">
+      <div className="p-3 flex flex-col gap-2 relative">
+        {(loading || empty) && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center text-xs text-muted-foreground bg-card/60">
+            {loading
+              ? "Loading price history…"
+              : error
+                ? "Couldn't load price history from CSE."
+                : timeframe === "1D"
+                  ? "No trades yet today."
+                  : "No price history available."}
+          </div>
+        )}
         <div ref={mainRef} className="w-full h-[360px]" />
         <div className="border-t border-border pt-1">
           <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 mb-1">

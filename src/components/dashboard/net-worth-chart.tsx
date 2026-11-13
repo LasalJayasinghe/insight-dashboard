@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Cell, CellLabel, Delta } from "@/components/ui/panel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -147,11 +155,7 @@ export function NetWorthChart({ portfolioId }: { portfolioId?: number }) {
                   <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--color-border)"
-                vertical={false}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
               <XAxis
                 dataKey="label"
                 stroke="var(--color-muted-foreground)"

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { StockIndices, MarketStatus } from "@/services/stock-service";
 import { Clock, TrendingUp, TrendingDown, Activity } from "lucide-react";
-import { fmtPrice } from "./stock-cards";
+import { fmtPrice } from "./format";
 import { formatUtcToLocalTime } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 

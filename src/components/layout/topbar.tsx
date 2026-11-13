@@ -234,7 +234,9 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
 
                         <div className="flex shrink-0 items-center gap-3">
                           {price !== undefined && (
-                            <span className="font-mono text-xs tabular-nums">{formatRs(price)}</span>
+                            <span className="font-mono text-xs tabular-nums">
+                              {formatRs(price)}
+                            </span>
                           )}
                           {changePct !== undefined && (
                             <span

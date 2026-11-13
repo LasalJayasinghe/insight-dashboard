@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { WhaleTrade } from "@/services/crypto-service";
-import { COIN_META, TRACKED_SYMBOLS, fmtPrice, fmtVolume } from "./market-cards";
+import { COIN_META, TRACKED_SYMBOLS, fmtPrice, fmtVolume } from "./market-format";
 import { RefreshCw, Loader2 } from "lucide-react";
 
 function timeAgo(dateStr: string) {

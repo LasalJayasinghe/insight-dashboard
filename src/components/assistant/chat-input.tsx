@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ChatInput({
   onSend,
+  onStop,
   disabled,
   autoFocusKey,
 }: {
   onSend: (text: string) => void;
+  /** When provided and `disabled` (a reply is streaming), shows a Stop button instead of Send. */
+  onStop?: () => void;
   disabled?: boolean;
   autoFocusKey?: string | number;
 }) {
@@ -59,19 +62,30 @@ export function ChatInput({
         placeholder="Ask about your portfolio..."
         className="min-h-9 flex-1 resize-none bg-transparent px-1.5 py-2 text-sm leading-relaxed text-foreground outline-none placeholder:text-muted-foreground scrollbar-thin"
       />
-      <button
-        type="submit"
-        aria-label="Send message"
-        disabled={!value.trim() || disabled}
-        className={cn(
-          "grid size-9 shrink-0 place-items-center border border-hairline transition-colors",
-          !value.trim() || disabled
-            ? "cursor-not-allowed bg-muted text-muted-foreground"
-            : "cursor-pointer bg-primary text-primary-foreground hover:bg-primary-glow",
-        )}
-      >
-        <ArrowUp className="size-4" />
-      </button>
+      {disabled && onStop ? (
+        <button
+          type="button"
+          aria-label="Stop generating"
+          onClick={onStop}
+          className="grid size-9 shrink-0 cursor-pointer place-items-center border border-hairline bg-muted text-foreground transition-colors hover:bg-muted/70"
+        >
+          <Square className="size-3.5 fill-current" />
+        </button>
+      ) : (
+        <button
+          type="submit"
+          aria-label="Send message"
+          disabled={!value.trim() || disabled}
+          className={cn(
+            "grid size-9 shrink-0 place-items-center border border-hairline transition-colors",
+            !value.trim() || disabled
+              ? "cursor-not-allowed bg-muted text-muted-foreground"
+              : "cursor-pointer bg-primary text-primary-foreground hover:bg-primary-glow",
+          )}
+        >
+          <ArrowUp className="size-4" />
+        </button>
+      )}
     </form>
   );
 }

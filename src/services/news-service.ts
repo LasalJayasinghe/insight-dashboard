@@ -36,8 +36,13 @@ export interface NewsStatus {
 }
 
 export const newsService = {
-  getNews: async (category?: string, sentiment?: string, limit = 10, page = 1): Promise<NewsResponse> => {
-    const params: Record<string, any> = { limit, page };
+  getNews: async (
+    category?: string,
+    sentiment?: string,
+    limit = 10,
+    page = 1,
+  ): Promise<NewsResponse> => {
+    const params: Record<string, string | number> = { limit, page };
     if (category && category !== "ALL") params.category = category;
     if (sentiment && sentiment !== "ALL") params.sentiment = sentiment;
 
@@ -58,5 +63,5 @@ export const newsService = {
   syncNews: async (): Promise<{ count: number; message: string }> => {
     const res = await apiClient.post<{ count: number; message: string }>("/news/sync");
     return res.data;
-  }
+  },
 };

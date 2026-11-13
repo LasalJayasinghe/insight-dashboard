@@ -1,17 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { StockTicker } from "@/services/stock-service";
 import { TrendingUp, TrendingDown, Clock } from "lucide-react";
-
-export function fmtPrice(price: number) {
-  return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-export function fmtChange(change: number) {
-  return (
-    (change > 0 ? "+" : "") +
-    change.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  );
-}
+import { fmtChange, fmtPrice } from "./format";
 
 interface StockCardsProps {
   tickers: StockTicker[];

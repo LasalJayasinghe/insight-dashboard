@@ -8,11 +8,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowDownRight, ArrowUpRight, Trash2 } from "lucide-react";
-import { mockStocks, type Stock } from "@/lib/mock-data";
 import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonRows } from "@/components/ui/skeleton";
+
+export interface Stock {
+  symbol: string;
+  name: string;
+  price: number;
+  changePct: number;
+  volume: number;
+}
 
 interface WatchlistTableProps {
   stocks?: Stock[];
@@ -22,7 +29,7 @@ interface WatchlistTableProps {
 }
 
 export function WatchlistTable({
-  stocks = mockStocks,
+  stocks = [],
   loading = false,
   onSelectStock,
   onRemoveStock,

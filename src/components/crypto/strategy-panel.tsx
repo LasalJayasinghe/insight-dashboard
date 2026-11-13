@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { StrategySnapshot } from "@/services/crypto-service";
-import { TRACKED_SYMBOLS, fmtPrice } from "./market-cards";
+import { TRACKED_SYMBOLS, fmtPrice } from "./market-format";
 
 const SIGNAL_STYLES = {
   BUY: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25",

@@ -160,7 +160,9 @@ function SettingsPage() {
             <div className="mt-4 flex items-center justify-between gap-6">
               <div>
                 <p className="font-display text-sm font-semibold">Ink (dark) mode</p>
-                <p className="text-xs text-muted-foreground">Switch between Paper and Ink themes.</p>
+                <p className="text-xs text-muted-foreground">
+                  Switch between Paper and Ink themes.
+                </p>
               </div>
               <Switch checked={theme === "dark"} onCheckedChange={toggle} />
             </div>
@@ -179,8 +181,7 @@ function SettingsPage() {
                   </span>
                 </CellLabel>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Background LLM validation of ingested market news
-                  {" "}
+                  Background LLM validation of ingested market news{" "}
                   <code className="font-mono text-[11px] text-primary">qwen3.5:4b</code>
                 </p>
               </div>
@@ -273,7 +274,6 @@ function SettingsPage() {
           </Cell>
         </Bento>
       </div>
-
 
       <Dialog open={rateDialogOpen} onOpenChange={setRateDialogOpen}>
         <DialogContent>
