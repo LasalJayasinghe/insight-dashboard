@@ -9,13 +9,30 @@ export type PortfolioType = "Stocks" | "Crypto";
 export interface HoldingDto {
   id: number;
   symbol: string;
+  /** Company name (CSE stocks). */
+  name?: string | null;
   assetType: string;
   quantity: number;
   averageBuyPrice: number;
+  /** Break-even selling price after CSE selling charges (stocks only). */
+  breakEvenPrice?: number | null;
   currentPrice: number;
+  /** Previous session close (CSE) or 24h open (crypto). */
+  previousClose: number;
+  dayChange: number;
+  dayChangePercent: number;
+  /** quantity × dayChange */
+  dayProfitLoss: number;
   currentValue: number;
+  /** Share of the portfolio's value, 0–100. */
+  weightPercent: number;
+  /** Net of CSE selling charges for stocks. */
   profitLoss: number;
   profitLossPercent: number;
+  /** Today's market activity for the security (CSE only; null before the first poll). */
+  shareVolume?: number | null;
+  tradeVolume?: number | null;
+  turnover?: number | null;
   notes?: string;
 }
 
@@ -28,6 +45,8 @@ export interface PortfolioSummaryDto {
   totalValue: number;
   totalProfitLoss: number;
   totalProfitLossPercent: number;
+  todayProfitLoss: number;
+  todayProfitLossPercent: number;
   holdingCount: number;
   createdAt: string;
 }
@@ -42,8 +61,51 @@ export interface PortfolioDetailDto {
   totalCost: number;
   totalProfitLoss: number;
   totalProfitLossPercent: number;
+  todayProfitLoss: number;
+  todayProfitLossPercent: number;
   createdAt: string;
   holdings: HoldingDto[];
+}
+
+export type Trend = "UPTREND" | "DOWNTREND" | "MIXED" | "INSUFFICIENT_DATA";
+
+/** Rule-based signals for one holding, computed server-side from ~1 year of CSE daily prices. */
+export interface HoldingSignalsDto {
+  symbol: string;
+  sessions: number;
+  trend: Trend;
+  sma50: number | null;
+  sma200: number | null;
+  rsi14: number | null;
+  rsiState: "OVERBOUGHT" | "OVERSOLD" | null;
+  high52w: number | null;
+  low52w: number | null;
+  /** 0 = at the 52-week low, 100 = at the 52-week high. */
+  rangePosition: number | null;
+  nearHigh52w: boolean;
+  nearLow52w: boolean;
+  volumeRatio: number | null;
+  volumeSpike: boolean;
+}
+
+export interface HoldingDividendDto {
+  symbol: string;
+  companyName?: string | null;
+  dividendPerShare: number;
+  quantity: number;
+  expectedPayout: number;
+  recordDate: string;
+  paymentDate?: string | null;
+  paymentDateRaw?: string | null;
+  financialYear?: string | null;
+}
+
+export interface PortfolioInsightsDto {
+  portfolioId: number;
+  generatedAt: string;
+  signals: HoldingSignalsDto[];
+  upcomingDividends: HoldingDividendDto[];
+  expectedDividendIncome: number;
 }
 
 export interface NetWorthOverviewDto {
@@ -131,6 +193,12 @@ export const portfolioService = {
   /** Get a single portfolio with full holdings and live valuations */
   async getById(id: number): Promise<PortfolioDetailDto> {
     const res = await apiClient.get<PortfolioDetailDto>(`/portfolios/${id}`);
+    return res.data;
+  },
+
+  /** Signals per holding + upcoming dividends (stocks). Slower than getById: loads price history. */
+  async getInsights(id: number): Promise<PortfolioInsightsDto> {
+    const res = await apiClient.get<PortfolioInsightsDto>(`/portfolios/${id}/insights`);
     return res.data;
   },
 

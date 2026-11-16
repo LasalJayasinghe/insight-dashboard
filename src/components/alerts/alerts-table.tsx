@@ -1,5 +1,4 @@
 // Renders the alerts as a table with interactive column sorting and edit/delete actions.
-import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -10,7 +9,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
+import { SortableHead } from "@/components/ui/sortable-head";
+import { useSort, type SortAccessors } from "@/hooks/use-sort";
 import { formatRs, formatPct } from "@/lib/format";
 import type { StockAlert } from "@/lib/types";
 
@@ -21,7 +22,14 @@ interface Props {
 }
 
 type SortField = "symbol" | "type" | "targetPrice" | "currentPrice";
-type SortOrder = "asc" | "desc";
+
+const ACCESSORS: SortAccessors<StockAlert, SortField> = {
+  symbol: (a) => a.symbol,
+  type: (a) => a.type,
+  targetPrice: (a) => a.targetPrice,
+  // Alerts without a quote always sink to the bottom (null sorts last).
+  currentPrice: (a) => a.currentPrice ?? null,
+};
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -29,100 +37,33 @@ const formatDate = (iso: string) =>
 const formatPrice = (n: number) => formatRs(n);
 
 export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
-
-  const sortedAlerts = useMemo(() => {
-    if (!sortField) return alerts;
-
-    return [...alerts].sort((a, b) => {
-      let comparison = 0;
-      if (sortField === "symbol") {
-        comparison = a.symbol.localeCompare(b.symbol);
-      } else if (sortField === "type") {
-        comparison = a.type.localeCompare(b.type);
-      } else if (sortField === "targetPrice") {
-        comparison = a.targetPrice - b.targetPrice;
-      } else if (sortField === "currentPrice") {
-        // Alerts without a quote always sink to the bottom, whichever way we sort.
-        if (a.currentPrice == null || b.currentPrice == null) {
-          if (a.currentPrice == null && b.currentPrice == null) return 0;
-          return a.currentPrice == null ? 1 : -1;
-        }
-        comparison = a.currentPrice - b.currentPrice;
-      }
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
-  }, [alerts, sortField, sortOrder]);
-
-  const renderSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="size-3 text-muted-foreground/50 ml-1.5 shrink-0" />;
-    }
-    return sortOrder === "asc" ? (
-      <ArrowUp className="size-3.5 text-primary ml-1.5 shrink-0" />
-    ) : (
-      <ArrowDown className="size-3.5 text-primary ml-1.5 shrink-0" />
-    );
-  };
+  const sort = useSort(alerts, ACCESSORS, { storageKey: "alerts" });
 
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead>
-              <button
-                type="button"
-                onClick={() => handleSort("symbol")}
-                className="flex items-center font-semibold text-foreground hover:text-primary transition-colors cursor-pointer select-none"
-              >
-                Symbol
-                {renderSortIcon("symbol")}
-              </button>
-            </TableHead>
-
-            <TableHead>
-              <button
-                type="button"
-                onClick={() => handleSort("type")}
-                className="flex items-center font-semibold text-foreground hover:text-primary transition-colors cursor-pointer select-none"
-              >
-                Alert type
-                {renderSortIcon("type")}
-              </button>
-            </TableHead>
-
-            <TableHead className="text-right">
-              <button
-                type="button"
-                onClick={() => handleSort("targetPrice")}
-                className="flex items-center justify-end font-semibold text-foreground hover:text-primary transition-colors cursor-pointer select-none ml-auto"
-              >
-                Target price
-                {renderSortIcon("targetPrice")}
-              </button>
-            </TableHead>
-
-            <TableHead className="text-right">
-              <button
-                type="button"
-                onClick={() => handleSort("currentPrice")}
-                className="flex items-center justify-end font-semibold text-foreground hover:text-primary transition-colors cursor-pointer select-none ml-auto"
-              >
-                Current price
-                {renderSortIcon("currentPrice")}
-              </button>
-            </TableHead>
+            <SortableHead sortDir={sort.dirOf("symbol")} onSort={() => sort.toggle("symbol")}>
+              Symbol
+            </SortableHead>
+            <SortableHead sortDir={sort.dirOf("type")} onSort={() => sort.toggle("type")}>
+              Alert type
+            </SortableHead>
+            <SortableHead
+              align="right"
+              sortDir={sort.dirOf("targetPrice")}
+              onSort={() => sort.toggle("targetPrice")}
+            >
+              Target price
+            </SortableHead>
+            <SortableHead
+              align="right"
+              sortDir={sort.dirOf("currentPrice")}
+              onSort={() => sort.toggle("currentPrice")}
+            >
+              Current price
+            </SortableHead>
 
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
@@ -130,7 +71,7 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedAlerts.map((a) => {
+          {sort.sorted.map((a) => {
             const above = a.type === "ABOVE";
             const current = a.currentPrice;
             const gapPct =

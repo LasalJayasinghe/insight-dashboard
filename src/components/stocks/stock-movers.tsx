@@ -1,10 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonRows } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import type { StockMovers, TopMover } from "@/services/stock-service";
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { fmtPrice, fmtChange } from "./format";
+import { MoversTable } from "./movers-table";
 
 type MoverType = "gain" | "loss";
 
@@ -85,18 +84,8 @@ function MoversCard({ items, type, loading = false, onSelectStock }: MoversCardP
     <Card className="gradient-card border-border shadow-card h-105 flex flex-col">
       <MoversCardHeader type={type} count={items.length} />
       <CardContent className="p-0 flex-1 min-h-0">
-        <ScrollArea className="h-85 px-6 pb-6">
-          <div className="space-y-2.5">
-            {items.map((m, i) => (
-              <MoverRow
-                key={m.symbol}
-                mover={m}
-                rank={i + 1}
-                type={type}
-                onSelectStock={onSelectStock}
-              />
-            ))}
-          </div>
+        <ScrollArea className="h-85 px-4 pb-4">
+          <MoversTable rows={items} type={type} onSelect={onSelectStock} />
         </ScrollArea>
       </CardContent>
     </Card>
@@ -122,58 +111,5 @@ export function TopLosersPanel({ movers, loading, onSelectStock }: MoversPanelPr
       loading={loading}
       onSelectStock={onSelectStock}
     />
-  );
-}
-
-function MoverRow({
-  mover,
-  rank,
-  type,
-  onSelectStock,
-}: {
-  mover: TopMover;
-  rank: number;
-  type: MoverType;
-  onSelectStock?: (symbol: string) => void;
-}) {
-  const isGain = type === "gain";
-
-  return (
-    <div
-      onClick={() => onSelectStock?.(mover.symbol)}
-      className={cn(
-        "p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200 flex items-center justify-between gap-3 border border-border/20 group",
-        onSelectStock && "cursor-pointer",
-        isGain ? "hover:border-emerald-500/40" : "hover:border-red-500/40",
-      )}
-    >
-      <div className="flex items-center gap-3 min-w-0">
-        <div
-          className={cn(
-            "size-8 rounded-lg flex items-center justify-center text-xs font-bold tracking-tight shrink-0 font-mono",
-            isGain ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
-          )}
-        >
-          {rank}
-        </div>
-        <div className="font-bold text-xs font-mono truncate group-hover:text-primary transition-colors">
-          {mover.symbol}
-        </div>
-      </div>
-
-      <div className="flex flex-col items-end gap-1 shrink-0">
-        <span className="text-xs font-bold font-mono tabular text-foreground">
-          {fmtPrice(mover.price)}
-        </span>
-        <span
-          className={cn(
-            "inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-bold font-mono tabular",
-            isGain ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
-          )}
-        >
-          {fmtChange(mover.change)} ({mover.changePercentage.toFixed(2)}%)
-        </span>
-      </div>
-    </div>
   );
 }

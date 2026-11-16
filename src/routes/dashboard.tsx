@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { isAuthenticated } from "@/lib/auth";
@@ -16,9 +16,12 @@ import {
   type StockIndices,
   type StockMovers,
   type MarketStatus,
+  type TopMover,
 } from "@/services/stock-service";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 import { NetWorthChart } from "@/components/dashboard/net-worth-chart";
+import { MoversTable } from "@/components/stocks/movers-table";
+import { MostActivePanel } from "@/components/stocks/most-active";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
@@ -54,6 +57,7 @@ const greeting = () => {
 };
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const firstName = typeof window !== "undefined" ? localStorage.getItem("firstName") : "";
 
   const [netWorth, setNetWorth] = useState<NetWorthOverviewDto | null>(null);
@@ -111,8 +115,9 @@ function DashboardPage() {
 
   const totalValue = portfolios.reduce((s, p) => s + getLkrValue(p), 0) || 1;
   const holdings = portfolios.reduce((s, p) => s + p.holdingCount, 0);
-  const gainers = movers?.gainers?.slice(0, 5) ?? [];
-  const losers = movers?.losers?.slice(0, 5) ?? [];
+  // All rows CSE returns (10 each).
+  const gainers = movers?.gainers ?? [];
+  const losers = movers?.losers ?? [];
 
   const dateLine = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
@@ -355,9 +360,24 @@ function DashboardPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Gainers & Losers Side-by-Side Bento */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <MoversCell title="Today's Top Gainers" rows={gainers} loading={isLoading} />
-              <MoversCell title="Today's Top Losers" rows={losers} loading={isLoading} />
+              <MoversCell
+                title="Today's Top Gainers"
+                type="gain"
+                rows={gainers}
+                loading={isLoading}
+              />
+              <MoversCell
+                title="Today's Top Losers"
+                type="loss"
+                rows={losers}
+                loading={isLoading}
+              />
             </div>
+
+            {/* Today's most active stocks by turnover / volume */}
+            <MostActivePanel
+              onSelectStock={(symbol) => void navigate({ to: "/stocks", search: { symbol } })}
+            />
 
             {/* Quick Desks Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -400,16 +420,19 @@ function DashboardPage() {
 function MoversCell({
   title,
   index,
+  type,
   rows,
   loading,
 }: {
   title: string;
   index?: string;
-  rows: { symbol: string; price: number; changePercentage: number }[];
+  type: "gain" | "loss";
+  rows: TopMover[];
   loading: boolean;
 }) {
+  const navigate = useNavigate();
   return (
-    <Cell className="flex h-80 flex-col rounded-xl border border-border/60 shadow-sm overflow-hidden">
+    <Cell className="flex h-[26rem] flex-col rounded-xl border border-border/60 shadow-sm overflow-hidden">
       <CellLabel index={index}>{title}</CellLabel>
       {loading ? (
         <div className="mt-4 space-y-3">
@@ -420,24 +443,13 @@ function MoversCell({
       ) : rows.length === 0 ? (
         <p className="mt-5 text-sm text-muted-foreground">No data for today.</p>
       ) : (
-        <ol className="mt-3 min-h-0 flex-1 divide-y divide-hairline/70 border-t border-hairline/70 overflow-y-auto pr-1">
-          {rows.map((m, i) => (
-            <li key={m.symbol} className="flex items-center gap-3 py-2.5">
-              <span className="w-4 shrink-0 font-mono text-[10px] text-muted-foreground">
-                {i + 1}
-              </span>
-              <span className="min-w-0 flex-1 truncate font-mono text-xs font-semibold">
-                {m.symbol}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                {formatRs(m.price)}
-              </span>
-              <span className="w-20 text-right">
-                <Delta value={m.changePercentage} />
-              </span>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-3 min-h-0 flex-1 overflow-y-auto border-t border-hairline/70">
+          <MoversTable
+            rows={rows}
+            type={type}
+            onSelect={(symbol) => void navigate({ to: "/stocks", search: { symbol } })}
+          />
+        </div>
       )}
     </Cell>
   );

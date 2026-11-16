@@ -12,6 +12,8 @@ import { formatRs } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonRows } from "@/components/ui/skeleton";
+import { SortableHead } from "@/components/ui/sortable-head";
+import { useSort, type SortAccessors } from "@/hooks/use-sort";
 
 export interface Stock {
   symbol: string;
@@ -20,6 +22,14 @@ export interface Stock {
   changePct: number;
   volume: number;
 }
+
+type Col = "symbol" | "price" | "change";
+
+const ACCESSORS: SortAccessors<Stock, Col> = {
+  symbol: (s) => s.symbol,
+  price: (s) => s.price,
+  change: (s) => s.changePct,
+};
 
 interface WatchlistTableProps {
   stocks?: Stock[];
@@ -34,6 +44,9 @@ export function WatchlistTable({
   onSelectStock,
   onRemoveStock,
 }: WatchlistTableProps) {
+  // Called before the early returns below (hooks must run on every render).
+  const sort = useSort(stocks, ACCESSORS, { storageKey: "watchlist" });
+
   if (loading) {
     return (
       <Card className="gradient-card border-border shadow-card h-105">
@@ -76,16 +89,34 @@ export function WatchlistTable({
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="text-xs uppercase tracking-wider">Symbol</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider text-right">Price</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider text-right">
+                <SortableHead
+                  className="text-xs uppercase tracking-wider"
+                  sortDir={sort.dirOf("symbol")}
+                  onSort={() => sort.toggle("symbol")}
+                >
+                  Symbol
+                </SortableHead>
+                <SortableHead
+                  align="right"
+                  className="text-xs uppercase tracking-wider"
+                  sortDir={sort.dirOf("price")}
+                  onSort={() => sort.toggle("price")}
+                >
+                  Price
+                </SortableHead>
+                <SortableHead
+                  align="right"
+                  className="text-xs uppercase tracking-wider"
+                  sortDir={sort.dirOf("change")}
+                  onSort={() => sort.toggle("change")}
+                >
                   Change
-                </TableHead>
+                </SortableHead>
                 {onRemoveStock && <TableHead className="w-12"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {stocks.map((s) => {
+              {sort.sorted.map((s) => {
                 const up = s.changePct >= 0;
                 return (
                   <TableRow

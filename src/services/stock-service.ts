@@ -51,6 +51,23 @@ export interface StockMovers {
   losers: TopMover[];
 }
 
+/** One row of today's most-active list (CSE tradeSummary). */
+export interface ActiveStock {
+  symbol: string;
+  name: string;
+  price: number;
+  changePercentage: number;
+  shareVolume: number;
+  tradeVolume: number;
+  turnover: number;
+}
+
+/** Top stocks today by share volume and by turnover (10 each by default). */
+export interface MostActive {
+  byVolume: ActiveStock[];
+  byTurnover: ActiveStock[];
+}
+
 export interface LiveStock {
   symbol: string;
   name: string;
@@ -118,6 +135,11 @@ export const stockService = {
 
   async getMovers(): Promise<StockMovers> {
     const res = await apiClient.get<StockMovers>("/stocks/movers");
+    return res.data;
+  },
+
+  async getMostActive(limit = 10): Promise<MostActive> {
+    const res = await apiClient.get<MostActive>("/stocks/most-active", { params: { limit } });
     return res.data;
   },
 

@@ -1,3 +1,4 @@
+import { MostActivePanel } from "@/components/stocks/most-active";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { z } from "zod";
@@ -239,6 +240,9 @@ function StocksPage() {
                 onSelectStock={handleSelectStock}
               />
             </div>
+
+            {/* Most active by turnover / volume (top 10) */}
+            <MostActivePanel onSelectStock={handleSelectStock} />
 
             {/* CSE Stock News Feed */}
             <div className="pb-6">

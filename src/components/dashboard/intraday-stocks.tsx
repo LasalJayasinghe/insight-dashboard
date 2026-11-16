@@ -6,6 +6,24 @@ import type { IntradayPoint } from "@/services/stock-service";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SkeletonRows } from "@/components/ui/skeleton";
+import { SortBar } from "@/components/ui/sort-bar";
+import { useSort, type SortAccessors } from "@/hooks/use-sort";
+
+type Col = "symbol" | "move" | "change" | "price";
+
+const ACCESSORS: SortAccessors<IntradayPoint, Col> = {
+  symbol: (s) => s.symbol,
+  move: (s) => Math.abs(s.percentage),
+  change: (s) => s.percentage,
+  price: (s) => s.price,
+};
+
+const SORT_OPTIONS: { key: Col; label: string }[] = [
+  { key: "move", label: "Biggest move" },
+  { key: "change", label: "Change %" },
+  { key: "price", label: "Price" },
+  { key: "symbol", label: "Symbol" },
+];
 
 interface IntradayStocksProps {
   items: IntradayPoint[];
@@ -45,6 +63,12 @@ function IntradayCardHeader() {
 }
 
 export function IntradayStocks({ items, loading = false, onSelectStock }: IntradayStocksProps) {
+  const sort = useSort(items, ACCESSORS, {
+    initialKey: "move",
+    initialDir: "desc",
+    storageKey: "intraday",
+  });
+
   if (loading) {
     return (
       <Card className="gradient-card border-border shadow-card h-105">
@@ -67,15 +91,19 @@ export function IntradayStocks({ items, loading = false, onSelectStock }: Intrad
     );
   }
 
-  const sortedItems = [...items].sort((a, b) => Math.abs(b.percentage) - Math.abs(a.percentage));
-
   return (
     <Card className="gradient-card border-border shadow-card h-105 flex flex-col">
       <IntradayCardHeader />
       <CardContent className="p-0 flex-1 min-h-0">
-        <ScrollArea className="h-85 px-6 pb-6">
+        <SortBar
+          className="px-6 pb-2"
+          options={SORT_OPTIONS}
+          dirOf={sort.dirOf}
+          onSort={sort.toggle}
+        />
+        <ScrollArea className="h-77 px-6 pb-6">
           <div className="space-y-2.5">
-            {sortedItems.map((s) => {
+            {sort.sorted.map((s) => {
               const up = s.percentage >= 0;
               const low = s.low ?? s.price * 0.98;
               const high = s.high ?? s.price * 1.02;
