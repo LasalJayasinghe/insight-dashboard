@@ -21,6 +21,7 @@ import { useAlerts } from "@/hooks/use-alerts";
 import { isAuthenticated } from "@/lib/auth";
 import { Bell, Plus, Search, AlertTriangle, RefreshCw } from "lucide-react";
 import type { StockAlert } from "@/lib/types";
+import { alertSymbolLabel } from "@/lib/market-symbols";
 import { watchlistService, type StockOption } from "@/services/watchlist-service";
 import { toast } from "sonner";
 
@@ -32,8 +33,11 @@ export const Route = createFileRoute("/alerts")({
   },
   head: () => ({
     meta: [
-      { title: "Stock Alerts — AlertMe Trading" },
-      { name: "description", content: "Create, edit and manage your stock price alerts." },
+      { title: "Price Alerts — AlertMe Trading" },
+      {
+        name: "description",
+        content: "Price alerts for CSE stocks, ASPI and S&P SL20, BTC, SOL and USDT/LKR.",
+      },
     ],
   }),
   component: AlertsPage,
@@ -75,7 +79,9 @@ function AlertsPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toUpperCase();
     if (!q) return alerts;
-    return alerts.filter((a) => a.symbol.includes(q));
+    return alerts.filter(
+      (a) => a.symbol.includes(q) || alertSymbolLabel(a.symbol).toUpperCase().includes(q),
+    );
   }, [alerts, query]);
 
   const openCreate = () => {
@@ -106,7 +112,7 @@ function AlertsPage() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Stock Alerts</h1>
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Price Alerts</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Get notified the moment your target prices are hit.
             </p>

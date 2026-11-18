@@ -14,6 +14,8 @@ export interface HoldingDto {
   assetType: string;
   quantity: number;
   averageBuyPrice: number;
+  /** Cost per share incl. the 1.12% buy fee: avg × 1.0112 (stocks only). */
+  costPerShare?: number | null;
   /** Break-even selling price after CSE selling charges (stocks only). */
   breakEvenPrice?: number | null;
   currentPrice: number;

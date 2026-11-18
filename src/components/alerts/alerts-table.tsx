@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
 import { SortableHead } from "@/components/ui/sortable-head";
 import { useSort, type SortAccessors } from "@/hooks/use-sort";
-import { formatRs, formatPct } from "@/lib/format";
+import { formatPct } from "@/lib/format";
+import { alertSymbolLabel, formatAlertPrice, marketSymbolOf } from "@/lib/market-symbols";
 import type { StockAlert } from "@/lib/types";
 
 interface Props {
@@ -33,8 +34,6 @@ const ACCESSORS: SortAccessors<StockAlert, SortField> = {
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-
-const formatPrice = (n: number) => formatRs(n);
 
 export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
   const sort = useSort(alerts, ACCESSORS, { storageKey: "alerts" });
@@ -83,7 +82,14 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
             return (
               <TableRow key={a.id}>
                 <TableCell>
-                  <span className="font-semibold tracking-wide font-mono">{a.symbol}</span>
+                  <span className="font-semibold tracking-wide font-mono">
+                    {alertSymbolLabel(a.symbol)}
+                  </span>
+                  {marketSymbolOf(a.symbol) && (
+                    <span className="ml-2 rounded border border-border px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
+                      {marketSymbolOf(a.symbol)!.kind}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <span
@@ -94,7 +100,7 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
                   </span>
                 </TableCell>
                 <TableCell className="text-right font-mono font-semibold">
-                  {formatPrice(a.targetPrice)}
+                  {formatAlertPrice(a.symbol, a.targetPrice)}
                 </TableCell>
                 <TableCell className="text-right font-mono">
                   {current == null ? (
@@ -102,7 +108,7 @@ export function AlertsTable({ alerts, onEdit, onDelete }: Props) {
                   ) : (
                     <div className="flex flex-col items-end leading-tight">
                       <span className={`font-semibold ${targetReached ? "text-success" : ""}`}>
-                        {formatPrice(current)}
+                        {formatAlertPrice(a.symbol, current)}
                       </span>
                       {gapPct != null && (
                         <span className="font-sans text-xs text-muted-foreground">

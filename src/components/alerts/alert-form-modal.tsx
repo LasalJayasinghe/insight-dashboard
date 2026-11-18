@@ -1,4 +1,4 @@
-// Reusable modal for creating or editing a stock alert.
+// Reusable modal for creating or editing a price alert (CSE stocks, indices, crypto, USDT/LKR).
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -31,6 +31,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { MARKET_SYMBOLS, alertSymbolLabel } from "@/lib/market-symbols";
 import type { StockOption } from "@/services/watchlist-service";
 import type { AlertInput, AlertType, StockAlert } from "@/lib/types";
 
@@ -119,13 +120,13 @@ export function AlertFormModal({
           <DialogDescription>
             {isEdit
               ? "Update this alert's parameters."
-              : "Get notified when a stock hits your target price."}
+              : "Get notified when a stock, index, crypto or USDT/LKR hits your target."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="symbol">Stock symbol</Label>
+            <Label htmlFor="symbol">Symbol</Label>
             <Popover open={symbolPickerOpen} onOpenChange={setSymbolPickerOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -138,7 +139,7 @@ export function AlertFormModal({
                   disabled={isEdit}
                 >
                   {form.symbol
-                    ? form.symbol
+                    ? alertSymbolLabel(form.symbol)
                     : stockOptionsLoading
                       ? "Loading stocks..."
                       : "Select symbol"}
@@ -147,12 +148,41 @@ export function AlertFormModal({
               </PopoverTrigger>
               <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
                 <Command>
-                  <CommandInput placeholder="Search stock name..." />
+                  <CommandInput placeholder="Search stock, index or crypto..." />
                   <CommandList>
                     <CommandEmpty>
-                      {stockOptionsLoading ? "Loading stocks..." : "No stock found."}
+                      {stockOptionsLoading ? "Loading stocks..." : "No symbol found."}
                     </CommandEmpty>
-                    <CommandGroup>
+                    <CommandGroup heading="Indices, crypto & FX">
+                      {MARKET_SYMBOLS.map((m) => (
+                        <CommandItem
+                          key={m.symbol}
+                          value={`${m.symbol} ${m.label}`}
+                          onSelect={() => {
+                            setForm((f) => ({ ...f, symbol: m.symbol }));
+                            setSymbolPickerOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              form.symbol === m.symbol ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          <div className="flex flex-col">
+                            <span>{m.label}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {m.kind === "Index"
+                                ? "CSE index (points)"
+                                : m.kind === "Crypto"
+                                  ? "Binance, price in USDT"
+                                  : "Binance P2P rate, Rs per USDT"}
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                    <CommandGroup heading="CSE stocks">
                       {stockOptions.map((option) => (
                         <CommandItem
                           key={option.symbol}
@@ -209,7 +239,7 @@ export function AlertFormModal({
               <Input
                 id="price"
                 type="number"
-                step="0.01"
+                step="any"
                 min="0"
                 placeholder="0.00"
                 value={form.targetPrice}
