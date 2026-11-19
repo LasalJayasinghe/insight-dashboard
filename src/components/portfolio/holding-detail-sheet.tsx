@@ -91,6 +91,12 @@ export function HoldingDetailSheet({ holding, currency, isStock, signals, onOpen
                 <Stat label="Avg buy" value={fmtPrice(h.averageBuyPrice, currency)} />
                 {isStock && (
                   <Stat
+                    label="Cost/share"
+                    value={h.costPerShare != null ? fmtPrice(h.costPerShare, currency) : "—"}
+                  />
+                )}
+                {isStock && (
+                  <Stat
                     label="BES"
                     value={h.breakEvenPrice != null ? fmtPrice(h.breakEvenPrice, currency) : "—"}
                   />

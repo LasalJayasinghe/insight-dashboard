@@ -19,6 +19,7 @@ type Col =
   | "symbol"
   | "quantity"
   | "avg"
+  | "cost"
   | "bes"
   | "price"
   | "today"
@@ -32,6 +33,7 @@ const ACCESSORS: SortAccessors<HoldingDto, Col> = {
   symbol: (h) => h.symbol,
   quantity: (h) => h.quantity,
   avg: (h) => h.averageBuyPrice,
+  cost: (h) => h.costPerShare ?? null,
   bes: (h) => h.breakEvenPrice ?? null,
   price: (h) => h.currentPrice,
   today: (h) => h.dayChangePercent,
@@ -85,7 +87,7 @@ export function HoldingsTable({
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border/50">
-      <Table className="min-w-[1100px]">
+      <Table className="min-w-[1180px]">
         <TableHeader className="sticky top-0 z-10 bg-card">
           <TableRow className="bg-muted/30 hover:bg-muted/30">
             {head("symbol", "Symbol", "left")}
@@ -93,10 +95,17 @@ export function HoldingsTable({
             {head("avg", "Avg buy")}
             {isStock &&
               head(
+                "cost",
+                "Cost/sh",
+                "right",
+                "Cost per share = avg buy × 1.0112 (what you paid incl. the 1.12% buy fee). Selling at this price still loses the 1.12% sell fee.",
+              )}
+            {isStock &&
+              head(
                 "bes",
                 "BES",
                 "right",
-                "Break-even selling price (ATrad): (buy value + 1.12% buy fees) ÷ (qty × (1 − 1.12% sell fees))",
+                "Break-even selling price = avg × 1.0112 ÷ 0.9888: covers the buy AND sell fees, so P/L is exactly 0 here.",
               )}
             {head("price", "Price")}
             {head("today", "Today")}
@@ -142,6 +151,11 @@ export function HoldingsTable({
                 <TableCell className="px-3 text-right tabular text-sm">
                   {fmtPrice(h.averageBuyPrice, currency)}
                 </TableCell>
+                {isStock && (
+                  <TableCell className="px-3 text-right tabular text-sm text-muted-foreground">
+                    {h.costPerShare != null ? fmtPrice(h.costPerShare, currency) : "—"}
+                  </TableCell>
+                )}
                 {isStock && (
                   <TableCell className="px-3 text-right tabular text-sm">
                     {h.breakEvenPrice != null ? fmtPrice(h.breakEvenPrice, currency) : "—"}

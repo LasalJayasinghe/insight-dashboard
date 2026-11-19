@@ -6,6 +6,9 @@ export interface WatchlistStock {
   changePct: number;
   name: string;
   volume: number;
+  /** Today's high / low (0 or undefined when the stock hasn't traded yet). */
+  high?: number;
+  low?: number;
 }
 
 export interface StockOption {
@@ -17,6 +20,8 @@ type ApiWatchlistStock = {
   symbol: string;
   price: number;
   changePct: number;
+  high?: number;
+  low?: number;
 };
 
 type ApiStockOption = {
@@ -31,6 +36,8 @@ function toStock(item: ApiWatchlistStock): WatchlistStock {
     price: Number(item.price),
     changePct: Number(item.changePct),
     volume: 0,
+    high: item.high != null ? Number(item.high) : undefined,
+    low: item.low != null ? Number(item.low) : undefined,
   };
 }
 

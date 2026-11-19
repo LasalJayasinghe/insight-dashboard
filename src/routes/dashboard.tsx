@@ -262,6 +262,7 @@ function DashboardPage() {
                         />
                         <Link
                           to="/portfolios"
+                          search={{ id: p.id }}
                           className="min-w-0 flex-1 truncate text-sm font-medium hover:underline underline-offset-4"
                         >
                           {p.name}
@@ -328,7 +329,17 @@ function DashboardPage() {
             ) : (
               <>
                 <div className="mt-3 truncate font-display text-lg font-bold">
-                  {best?.name ?? "—"}
+                  {best ? (
+                    <Link
+                      to="/portfolios"
+                      search={{ id: best.id }}
+                      className="hover:underline underline-offset-4"
+                    >
+                      {best.name}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
                 </div>
                 <div className="mt-2">
                   {best ? <Delta value={best.totalProfitLossPercent} /> : <span>—</span>}
@@ -344,7 +355,17 @@ function DashboardPage() {
             ) : (
               <>
                 <div className="mt-3 truncate font-display text-lg font-bold">
-                  {worst?.name ?? "—"}
+                  {worst ? (
+                    <Link
+                      to="/portfolios"
+                      search={{ id: worst.id }}
+                      className="hover:underline underline-offset-4"
+                    >
+                      {worst.name}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
                 </div>
                 <div className="mt-2">
                   {worst ? <Delta value={worst.totalProfitLossPercent} /> : <span>—</span>}

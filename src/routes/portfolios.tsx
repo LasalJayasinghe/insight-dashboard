@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { z } from "zod";
 import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
@@ -65,7 +66,13 @@ import { PnlBadge } from "@/components/portfolio/pnl-badge";
 import { PortfolioStats } from "@/components/portfolio/portfolio-stats";
 import { fmt, signed, toneOf } from "@/components/portfolio/format";
 
+/** `/portfolios?id=12` opens portfolio 12 (used by the dashboard links). */
+const portfoliosSearchSchema = z.object({
+  id: z.coerce.number().int().positive().optional().catch(undefined),
+});
+
 export const Route = createFileRoute("/portfolios")({
+  validateSearch: (search) => portfoliosSearchSchema.parse(search),
   beforeLoad: () => {
     if (typeof window !== "undefined" && !isAuthenticated()) {
       throw redirect({ to: "/login" });
@@ -342,19 +349,33 @@ function PortfolioPanel({
 function PortfolioCard({
   p,
   defaultExpanded = false,
+  focus = false,
   onDelete,
   onRefresh,
 }: {
   p: PortfolioSummaryDto;
   defaultExpanded?: boolean;
+  /** Scroll this card into view on load (deep link from the dashboard). */
+  focus?: boolean;
   onDelete: (id: number) => void;
   onRefresh: () => void;
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const isStock = p.type === "Stocks";
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (focus) cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [focus]);
 
   return (
-    <Card className="gradient-card border-border shadow-card overflow-hidden">
+    <Card
+      ref={cardRef}
+      className={cn(
+        "gradient-card border-border shadow-card overflow-hidden scroll-mt-4",
+        focus && "ring-2 ring-primary/40",
+      )}
+    >
       {/* Header */}
       <div
         className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-muted/10 transition-colors select-none"
@@ -437,6 +458,7 @@ function PortfolioCard({
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 function PortfoliosPage() {
+  const { id: focusId } = Route.useSearch();
   const [portfolios, setPortfolios] = useState<PortfolioSummaryDto[]>([]);
   const [netWorth, setNetWorth] = useState<NetWorthOverviewDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -690,7 +712,8 @@ function PortfoliosPage() {
               <PortfolioCard
                 key={p.id}
                 p={p}
-                defaultExpanded={i === 0}
+                defaultExpanded={focusId ? p.id === focusId : i === 0}
+                focus={focusId === p.id}
                 onDelete={setDeleteId}
                 onRefresh={load}
               />

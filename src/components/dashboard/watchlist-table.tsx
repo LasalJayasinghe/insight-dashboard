@@ -21,14 +21,18 @@ export interface Stock {
   price: number;
   changePct: number;
   volume: number;
+  high?: number;
+  low?: number;
 }
 
-type Col = "symbol" | "price" | "change";
+type Col = "symbol" | "price" | "change" | "low" | "high";
 
 const ACCESSORS: SortAccessors<Stock, Col> = {
   symbol: (s) => s.symbol,
   price: (s) => s.price,
   change: (s) => s.changePct,
+  low: (s) => (s.low ? s.low : null),
+  high: (s) => (s.high ? s.high : null),
 };
 
 interface WatchlistTableProps {
@@ -107,6 +111,22 @@ export function WatchlistTable({
                 <SortableHead
                   align="right"
                   className="text-xs uppercase tracking-wider"
+                  sortDir={sort.dirOf("low")}
+                  onSort={() => sort.toggle("low")}
+                >
+                  Day Low
+                </SortableHead>
+                <SortableHead
+                  align="right"
+                  className="text-xs uppercase tracking-wider"
+                  sortDir={sort.dirOf("high")}
+                  onSort={() => sort.toggle("high")}
+                >
+                  Day High
+                </SortableHead>
+                <SortableHead
+                  align="right"
+                  className="text-xs uppercase tracking-wider"
                   sortDir={sort.dirOf("change")}
                   onSort={() => sort.toggle("change")}
                 >
@@ -144,6 +164,25 @@ export function WatchlistTable({
                     </TableCell>
                     <TableCell className="text-right tabular font-mono font-bold text-xs">
                       {formatRs(s.price)}
+                      {s.high && s.low && s.high > s.low ? (
+                        <div
+                          className="mt-1 ml-auto h-1 w-16 rounded-full bg-muted overflow-hidden"
+                          title="Where the price sits in today's low–high range"
+                        >
+                          <div
+                            className="h-full bg-primary/70"
+                            style={{
+                              width: `${Math.min(100, Math.max(0, ((s.price - s.low) / (s.high - s.low)) * 100))}%`,
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </TableCell>
+                    <TableCell className="text-right tabular font-mono text-xs text-red-400">
+                      {s.low ? formatRs(s.low) : "—"}
+                    </TableCell>
+                    <TableCell className="text-right tabular font-mono text-xs text-emerald-400">
+                      {s.high ? formatRs(s.high) : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       <span
