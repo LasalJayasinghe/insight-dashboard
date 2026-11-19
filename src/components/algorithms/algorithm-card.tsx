@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Algorithm } from "@/lib/algorithm-types";
-import { formatPct, formatRelative, formatUsd } from "@/lib/format";
+import { formatCalendarDate, formatPct, formatRelative, formatUsd } from "@/lib/format";
 
 interface Props {
   algorithm: Algorithm;
@@ -113,6 +113,8 @@ export function AlgorithmCard({ algorithm }: Props) {
           />
         </div>
 
+        <BtcBenchmark algorithm={algorithm} />
+
         <div className="mt-5 pt-4 border-t border-border flex items-center justify-between text-xs">
           <span className="text-muted-foreground">
             Updated {formatRelative(algorithm.lastUpdated)}
@@ -152,6 +154,44 @@ function Stat({
         {value}
       </p>
       {sub && <div className="mt-0.5 text-[11px] text-muted-foreground tabular">{sub}</div>}
+    </div>
+  );
+}
+
+/** The algorithm's value now vs the same starting balance bought into BTC at its start and held. */
+function BtcBenchmark({ algorithm }: { algorithm: Algorithm }) {
+  const hold = algorithm.btcHoldValue;
+  const diff = algorithm.vsBtc;
+  if (hold == null || diff == null || algorithm.equity == null) return null;
+
+  const beat = diff >= 0;
+  const since = algorithm.startedAt
+    ? formatCalendarDate(algorithm.startedAt, { day: "2-digit", month: "short", year: "numeric" })
+    : null;
+
+  return (
+    <div className="mt-5 rounded-lg border border-border bg-muted/30 p-3">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+        vs holding BTC{since ? ` since ${since}` : ""}
+      </p>
+      <div className="mt-2 grid grid-cols-3 gap-4">
+        <Stat
+          label="Algo value"
+          value={formatUsd(algorithm.equity)}
+          sub={formatPct(algorithm.totalPnlPct)}
+        />
+        <Stat
+          label="If held BTC"
+          value={formatUsd(hold)}
+          sub={algorithm.btcHoldPnlPct != null ? formatPct(algorithm.btcHoldPnlPct) : undefined}
+        />
+        <Stat
+          label={beat ? "Beating BTC" : "Behind BTC"}
+          value={`${beat ? "+" : ""}${formatUsd(diff)}`}
+          sub={algorithm.vsBtcPct != null ? `${formatPct(algorithm.vsBtcPct)} pts` : undefined}
+          tone={beat ? "success" : "destructive"}
+        />
+      </div>
     </div>
   );
 }
