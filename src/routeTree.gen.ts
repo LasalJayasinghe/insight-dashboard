@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as CryptoRouteImport } from './routes/crypto'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as HeatmapRouteImport } from './routes/heatmap'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PortfoliosRouteImport } from './routes/portfolios'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -40,6 +41,11 @@ const CryptoRoute = CryptoRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HeatmapRoute = HeatmapRouteImport.update({
+  id: '/heatmap',
+  path: '/heatmap',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AlertsRoute
   '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
+  '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/portfolios': typeof PortfoliosRoute
   '/profile': typeof ProfileRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/alerts': typeof AlertsRoute
   '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
+  '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/portfolios': typeof PortfoliosRoute
   '/profile': typeof ProfileRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/alerts': typeof AlertsRoute
   '/crypto': typeof CryptoRoute
   '/dashboard': typeof DashboardRoute
+  '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/portfolios': typeof PortfoliosRoute
   '/profile': typeof ProfileRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/crypto'
     | '/dashboard'
+    | '/heatmap'
     | '/login'
     | '/portfolios'
     | '/profile'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/crypto'
     | '/dashboard'
+    | '/heatmap'
     | '/login'
     | '/portfolios'
     | '/profile'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/crypto'
     | '/dashboard'
+    | '/heatmap'
     | '/login'
     | '/portfolios'
     | '/profile'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AlertsRoute: typeof AlertsRoute
   CryptoRoute: typeof CryptoRoute
   DashboardRoute: typeof DashboardRoute
+  HeatmapRoute: typeof HeatmapRoute
   LoginRoute: typeof LoginRoute
   PortfoliosRoute: typeof PortfoliosRoute
   ProfileRoute: typeof ProfileRoute
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/heatmap': {
+      id: '/heatmap'
+      path: '/heatmap'
+      fullPath: '/heatmap'
+      preLoaderRoute: typeof HeatmapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -280,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlertsRoute: AlertsRoute,
   CryptoRoute: CryptoRoute,
   DashboardRoute: DashboardRoute,
+  HeatmapRoute: HeatmapRoute,
   LoginRoute: LoginRoute,
   PortfoliosRoute: PortfoliosRoute,
   ProfileRoute: ProfileRoute,

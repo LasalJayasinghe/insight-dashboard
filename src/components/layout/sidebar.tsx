@@ -29,6 +29,7 @@ const navGroups = [
     group: "Account",
     items: [
       { to: "/portfolios", label: "Portfolios" },
+      { to: "/heatmap", label: "Holdings Heatmap" },
       { to: "/profile", label: "User Profile" },
       { to: "/settings", label: "Preferences" },
     ],
