@@ -8,7 +8,7 @@ export const getRouter = () => {
     context: {},
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
-    defaultErrorComponent: DefaultErrorComponent,
+    defaultErrorComponent: (props) => <DefaultErrorComponent error={props.error} reset={props.reset} />,
   });
 
   return router;
