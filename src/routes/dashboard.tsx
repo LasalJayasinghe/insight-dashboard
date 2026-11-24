@@ -20,6 +20,7 @@ import {
 } from "@/services/stock-service";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 import { NetWorthChart } from "@/components/dashboard/net-worth-chart";
+import { WorldMarkets } from "@/components/dashboard/world-markets";
 import { MoversTable } from "@/components/stocks/movers-table";
 import { MostActivePanel } from "@/components/stocks/most-active";
 
@@ -288,6 +289,9 @@ function DashboardPage() {
             </div>
           </Cell>
         </div>
+
+        {/* ── World markets: US / Asia / commodities — the pre-CSE-open glance ── */}
+        <WorldMarkets />
 
         {/* ── SECTION 2: Net Worth Over Time ─────────────────────────────── */}
         <NetWorthChart />
