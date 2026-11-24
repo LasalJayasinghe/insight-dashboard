@@ -9,6 +9,7 @@ import { watchlistService } from "@/services/watchlist-service";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { StockDividendPanel } from "./stock-dividend-panel";
 import { StockTechnicalSummary } from "./stock-technical-summary";
+import { StockFundamentalsPanel } from "./stock-fundamentals";
 import { MarketNewsFeed } from "@/components/dashboard/market-news-feed";
 
 interface StockDetailViewProps {
@@ -103,6 +104,9 @@ export function StockDetailView({ stock, allStocks, onBack, onSelectStock }: Sto
 
       {/* Interactive Candlestick Chart */}
       <StockChart stock={stock} />
+
+      {/* NAV, P/BV, EPS, P/E, ROE, yield, float, beta — from the latest interim report */}
+      <StockFundamentalsPanel symbol={stock.symbol} />
 
       {/* Dividend Panel */}
       <StockDividendPanel symbol={stock.symbol} />
