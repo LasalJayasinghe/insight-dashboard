@@ -28,7 +28,10 @@ function StatTile({
   );
 }
 
-/** Portfolio header numbers: value, cost, total and today's P/L, holdings, expected dividends. */
+/**
+ * Portfolio header numbers: value (holdings + cash), cash, realised P/L, cost, total and today's P/L,
+ * holdings, expected dividends.
+ */
 export function PortfolioStats({
   detail,
   expectedDividends,
@@ -39,8 +42,24 @@ export function PortfolioStats({
   const c = detail.baseCurrency;
   const isStock = detail.type === "Stocks";
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2.5">
-      <StatTile label="Value" value={`${c} ${fmt(detail.totalValue)}`} />
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5">
+      <StatTile
+        label="Value"
+        value={`${c} ${fmt(detail.totalValue)}`}
+        sub={`holdings ${fmt(detail.holdingsValue)} + cash`}
+        hint="Current value of holdings plus uninvested cash"
+      />
+      <StatTile
+        label={isStock ? "Cash (buying power)" : "Cash (USDT)"}
+        value={`${c} ${fmt(detail.cashBalance)}`}
+        hint="Uninvested cash. Buys take from it, sells add to it."
+      />
+      <StatTile
+        label="Realised P/L"
+        value={signed(detail.realizedProfitLoss)}
+        tone={toneOf(detail.realizedProfitLoss)}
+        hint="Profit / loss locked in by recorded sells, after fees"
+      />
       <StatTile
         label="Cost"
         value={`${c} ${fmt(detail.totalCost)}`}

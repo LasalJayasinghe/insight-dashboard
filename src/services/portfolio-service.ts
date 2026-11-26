@@ -44,7 +44,11 @@ export interface PortfolioSummaryDto {
   type: PortfolioType;
   baseCurrency: string;
   description?: string;
+  /** Holdings + cash, in the base currency. */
   totalValue: number;
+  holdingsValue: number;
+  /** Uninvested cash: CSE buying power (LKR) or idle USDT. */
+  cashBalance: number;
   totalProfitLoss: number;
   totalProfitLossPercent: number;
   todayProfitLoss: number;
@@ -59,7 +63,12 @@ export interface PortfolioDetailDto {
   type: PortfolioType;
   baseCurrency: string;
   description?: string;
+  /** Holdings + cash. */
   totalValue: number;
+  holdingsValue: number;
+  cashBalance: number;
+  /** Sum of realised P/L from recorded sells. */
+  realizedProfitLoss: number;
   totalCost: number;
   totalProfitLoss: number;
   totalProfitLossPercent: number;
@@ -115,6 +124,8 @@ export interface NetWorthOverviewDto {
   totalNetWorthUsdt: number;
   totalProfitLossLkr: number;
   totalProfitLossUsdt: number;
+  /** Uninvested cash across all portfolios, in LKR. */
+  totalCashLkr: number;
   usdtToLkrRate: number;
   lkrToUsdtRate: number;
   portfolios: PortfolioSummaryDto[];
@@ -152,6 +163,59 @@ export interface CreatePortfolioRequest {
 export interface UpdatePortfolioRequest {
   name?: string;
   description?: string;
+}
+
+export type TradeSide = "Buy" | "Sell";
+
+export interface TradeRequest {
+  side: TradeSide;
+  symbol: string;
+  quantity: number;
+  /** Per unit, before fees. */
+  price: number;
+  /** Crypto only (USDT); defaults to 0.1% server-side. CSE always uses the 1.12% charges. */
+  fees?: number;
+  /** Buy: pay from cash (false = record a position you already had). Sell: add proceeds to cash. */
+  useCash: boolean;
+  notes?: string;
+}
+
+export type CashAction = "Deposit" | "Withdraw" | "Set";
+
+export interface CashRequest {
+  action: CashAction;
+  amount: number;
+  notes?: string;
+}
+
+export interface UpdateHoldingRequest {
+  quantity: number;
+  averageBuyPrice: number;
+  notes?: string;
+}
+
+export type TransactionType =
+  | "Opening"
+  | "Buy"
+  | "Sell"
+  | "Deposit"
+  | "Withdrawal"
+  | "CashAdjustment"
+  | "HoldingAdjustment";
+
+export interface PortfolioTransactionDto {
+  id: number;
+  type: TransactionType;
+  symbol?: string | null;
+  quantity?: number | null;
+  price?: number | null;
+  fees: number;
+  /** Signed effect on cash. */
+  cashChange: number;
+  cashBalanceAfter: number;
+  realizedProfitLoss?: number | null;
+  notes?: string | null;
+  executedAt: string;
 }
 
 export interface AddHoldingRequest {
@@ -227,6 +291,40 @@ export const portfolioService = {
   },
 
   /** Remove a specific holding from a portfolio */
+  /** Buy or sell; returns the updated portfolio. */
+  async trade(portfolioId: number, req: TradeRequest): Promise<PortfolioDetailDto> {
+    const res = await apiClient.post<PortfolioDetailDto>(`/portfolios/${portfolioId}/trades`, req);
+    return res.data;
+  },
+
+  /** Deposit / withdraw / set the cash balance; returns the updated portfolio. */
+  async changeCash(portfolioId: number, req: CashRequest): Promise<PortfolioDetailDto> {
+    const res = await apiClient.post<PortfolioDetailDto>(`/portfolios/${portfolioId}/cash`, req);
+    return res.data;
+  },
+
+  /** Correct a holding's quantity / average price (no cash moves). */
+  async updateHolding(
+    portfolioId: number,
+    holdingId: number,
+    req: UpdateHoldingRequest,
+  ): Promise<PortfolioDetailDto> {
+    const res = await apiClient.put<PortfolioDetailDto>(
+      `/portfolios/${portfolioId}/holdings/${holdingId}`,
+      req,
+    );
+    return res.data;
+  },
+
+  /** The portfolio's ledger, newest first. */
+  async getTransactions(portfolioId: number, limit = 100): Promise<PortfolioTransactionDto[]> {
+    const res = await apiClient.get<PortfolioTransactionDto[]>(
+      `/portfolios/${portfolioId}/transactions`,
+      { params: { limit } },
+    );
+    return res.data;
+  },
+
   async deleteHolding(portfolioId: number, holdingId: number): Promise<void> {
     await apiClient.delete(`/portfolios/${portfolioId}/holdings/${holdingId}`);
   },

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Plus,
+  ArrowLeftRight,
   Trash2,
   ChevronDown,
   ChevronRight,
@@ -55,10 +56,15 @@ import {
   type PortfolioDetailDto,
   type PortfolioInsightsDto,
   type PortfolioSummaryDto,
+  type CashAction,
+  type TradeSide,
 } from "@/services/portfolio-service";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { NetWorthChart } from "@/components/dashboard/net-worth-chart";
-import { AddHoldingDialog } from "@/components/portfolio/add-holding-dialog";
+import { TradeDialog } from "@/components/portfolio/trade-dialog";
+import { CashDialog } from "@/components/portfolio/cash-dialog";
+import { EditHoldingDialog } from "@/components/portfolio/edit-holding-dialog";
+import { TransactionsList } from "@/components/portfolio/transactions-list";
 import { HoldingDetailSheet } from "@/components/portfolio/holding-detail-sheet";
 import { HoldingDividends } from "@/components/portfolio/holding-dividends";
 import { HoldingsTable } from "@/components/portfolio/holdings-table";
@@ -114,7 +120,11 @@ function PortfolioPanel({
   const [insights, setInsights] = useState<PortfolioInsightsDto | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
-  const [addOpen, setAddOpen] = useState(false);
+  const [trade, setTrade] = useState<{ side: TradeSide; symbol?: string } | null>(null);
+  const [cashAction, setCashAction] = useState<CashAction | null>(null);
+  const [editHolding, setEditHolding] = useState<HoldingDto | null>(null);
+  /** Bumped after any change so the transaction history reloads. */
+  const [ledgerVersion, setLedgerVersion] = useState(0);
   const [deleteHoldingId, setDeleteHoldingId] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -171,6 +181,16 @@ function PortfolioPanel({
   const refreshAll = () => {
     void load(true);
     if (isStock) void loadInsights();
+    setLedgerVersion((v) => v + 1);
+    onChanged();
+  };
+
+  /** Trades, cash changes and edits return the updated portfolio — show it, then refresh the rest. */
+  const applyUpdate = (updated: PortfolioDetailDto) => {
+    setDetail(updated);
+    setUpdatedAt(new Date());
+    if (isStock) void loadInsights();
+    setLedgerVersion((v) => v + 1);
     onChanged();
   };
 
@@ -251,17 +271,49 @@ function PortfolioPanel({
       )}
       <Button
         size="sm"
-        onClick={() => setAddOpen(true)}
+        onClick={() => setTrade({ side: "Buy" })}
         className="gradient-primary text-primary-foreground shadow-elegant"
       >
-        <Plus className="size-4 mr-1" /> Add Holding
+        <ArrowLeftRight className="size-4 mr-1" /> Trade
       </Button>
+    </div>
+  );
+
+  const cashStrip = (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border/60 bg-muted/20 px-4 py-2.5">
+      <div className="flex items-baseline gap-2">
+        <Wallet className="size-4 self-center text-muted-foreground" />
+        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+          {isStock ? "Buying power" : "USDT balance"}
+        </span>
+        <span className="text-sm font-semibold tabular">
+          {detail.baseCurrency} {fmt(detail.cashBalance)}
+        </span>
+      </div>
+      <div className="ml-auto flex items-center gap-1.5">
+        <Button size="sm" variant="outline" onClick={() => setCashAction("Deposit")}>
+          Deposit
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setCashAction("Withdraw")}
+          disabled={detail.cashBalance <= 0}
+        >
+          Withdraw
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => setCashAction("Set")}>
+          Set balance
+        </Button>
+      </div>
     </div>
   );
 
   return (
     <div className="space-y-4 p-4">
       <PortfolioStats detail={detail} expectedDividends={insights?.expectedDividendIncome} />
+
+      {cashStrip}
 
       {detail.holdings.length === 0 ? (
         <div className="py-6 text-center space-y-3">
@@ -285,6 +337,8 @@ function PortfolioPanel({
             signalsLoading={insightsLoading && !insights}
             onSelect={(h) => setSelectedId(h.id)}
             onDelete={setDeleteHoldingId}
+            onEdit={setEditHolding}
+            onSell={(h) => setTrade({ side: "Sell", symbol: h.symbol })}
           />
         </>
       )}
@@ -300,13 +354,34 @@ function PortfolioPanel({
         <NetWorthChart portfolioId={portfolioId} />
       </div>
 
-      <AddHoldingDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
+      <TransactionsList
         portfolioId={portfolioId}
-        isStock={isStock}
         currency={detail.baseCurrency}
-        onSaved={refreshAll}
+        refreshKey={ledgerVersion}
+      />
+
+      <TradeDialog
+        open={trade != null}
+        onOpenChange={(open) => !open && setTrade(null)}
+        detail={detail}
+        initialSide={trade?.side ?? "Buy"}
+        initialSymbol={trade?.symbol}
+        onSaved={applyUpdate}
+      />
+
+      <CashDialog
+        open={cashAction != null}
+        onOpenChange={(open) => !open && setCashAction(null)}
+        detail={detail}
+        initialAction={cashAction ?? "Deposit"}
+        onSaved={applyUpdate}
+      />
+
+      <EditHoldingDialog
+        holding={editHolding}
+        detail={detail}
+        onOpenChange={(open) => !open && setEditHolding(null)}
+        onSaved={applyUpdate}
       />
 
       <HoldingDetailSheet

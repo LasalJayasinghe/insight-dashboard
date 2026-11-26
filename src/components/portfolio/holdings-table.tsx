@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -52,6 +52,10 @@ interface Props {
   signalsLoading: boolean;
   onSelect: (h: HoldingDto) => void;
   onDelete: (id: number) => void;
+  /** Correct quantity / average price (no cash moves). */
+  onEdit?: (h: HoldingDto) => void;
+  /** Open the trade dialog on Sell for this holding. */
+  onSell?: (h: HoldingDto) => void;
 }
 
 /**
@@ -66,6 +70,8 @@ export function HoldingsTable({
   signalsLoading,
   onSelect,
   onDelete,
+  onEdit,
+  onSell,
 }: Props) {
   const sort = useSort(holdings, ACCESSORS, {
     initialKey: "value",
@@ -213,7 +219,33 @@ export function HoldingsTable({
                     )}
                   </TableCell>
                 )}
-                <TableCell className="px-2 text-right">
+                <TableCell className="px-2 text-right whitespace-nowrap">
+                  {onSell && (
+                    <button
+                      type="button"
+                      aria-label={`Sell ${h.symbol}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSell(h);
+                      }}
+                      className="mr-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity rounded border border-destructive/30 px-1.5 py-0.5 text-[10px] font-semibold text-destructive hover:bg-destructive/10 cursor-pointer"
+                    >
+                      Sell
+                    </button>
+                  )}
+                  {onEdit && (
+                    <button
+                      type="button"
+                      aria-label={`Edit ${h.symbol}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(h);
+                      }}
+                      className="mr-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
+                  )}
                   <button
                     type="button"
                     aria-label={`Remove ${h.symbol}`}
