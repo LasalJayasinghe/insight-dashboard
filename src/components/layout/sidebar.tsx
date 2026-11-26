@@ -13,6 +13,7 @@ const navGroups = [
     group: "Markets",
     items: [
       { to: "/dashboard", label: "Dashboard" },
+      { to: "/desk", label: "Trading Desk" },
       { to: "/stocks", label: "Stocks Market" },
       { to: "/watchlist", label: "Watchlist" },
       { to: "/alerts", label: "Price Alerts" },
